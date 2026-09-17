@@ -1,0 +1,6 @@
+{
+  "name": "Virtual IoT Lab",
+  "description": "Professional 3D engineering workspace and interactive virtual electronics laboratory with physical pin wiring, breadboards, and circuit persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

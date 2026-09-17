@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+:root {
+  /* Backgrounds */
+  --bg-app: #f8fafc;
+  --bg-panel: #ffffff;
+  --bg-panel-elevated: #f1f5f9;
+  --bg-canvas: #f8fafc;
+
+  /* Borders / separators */
+  --border-subtle: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
+  --text-disabled: #cbd5e1;
+
+  /* Accent */
+  --accent-500: #2563eb;
+  --accent-400: #3b82f6;
+  --accent-600: #1d4ed8;
+  --accent-a10: rgba(37, 99, 235, 0.08);
+
+  /* Semantic */
+  --state-success: #16a34a;
+  --state-warning: #ca8a04;
+  --state-error: #dc2626;
+  --state-info: #0284c7;
+
+  /* Pin colors */
+  --pin-digital: #2563eb;
+  --pin-analog: #7c3aed;
+  --pin-power: #dc2626;
+  --pin-ground: #475569;
+  --pin-pwm: #d97706;
+  --pin-comm: #059669;
+
+  /* Selection / highlight */
+  --selection-outline: #2563eb;
+  --selection-glow: rgba(37, 99, 235, 0.25);
+  --hover-outline: #60a5fa;
+
+  /* Grid */
+  --grid-line-major: #cbd5e1;
+  --grid-line-minor: #e2e8f0;
+  --grid-origin: #94a3b8;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  user-select: none;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
