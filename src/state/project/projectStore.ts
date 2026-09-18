@@ -58,16 +58,43 @@ export const projectStore = {
   },
 
   updateComponentTransform(id: string, transformUpdate: Partial<ComponentTransform>) {
+    const comp = state.components.find((c) => c.id === id);
+    if (!comp) return;
+
+    const newPos = transformUpdate.position
+      ? { ...comp.transform.position, ...transformUpdate.position }
+      : comp.transform.position;
+    const newRot = transformUpdate.rotation
+      ? { ...comp.transform.rotation, ...transformUpdate.rotation }
+      : comp.transform.rotation;
+    const newScale = transformUpdate.scale
+      ? { ...comp.transform.scale, ...transformUpdate.scale }
+      : comp.transform.scale;
+
+    if (
+      comp.transform.position.x === newPos.x &&
+      comp.transform.position.y === newPos.y &&
+      comp.transform.position.z === newPos.z &&
+      comp.transform.rotation.x === newRot.x &&
+      comp.transform.rotation.y === newRot.y &&
+      comp.transform.rotation.z === newRot.z &&
+      comp.transform.scale.x === newScale.x &&
+      comp.transform.scale.y === newScale.y &&
+      comp.transform.scale.z === newScale.z
+    ) {
+      return;
+    }
+
     state = {
       ...state,
-      components: state.components.map((comp) => {
-        if (comp.id !== id) return comp;
+      components: state.components.map((c) => {
+        if (c.id !== id) return c;
         return {
-          ...comp,
+          ...c,
           transform: {
-            position: transformUpdate.position ? { ...transformUpdate.position } : comp.transform.position,
-            rotation: transformUpdate.rotation ? { ...transformUpdate.rotation } : comp.transform.rotation,
-            scale: transformUpdate.scale ? { ...transformUpdate.scale } : comp.transform.scale,
+            position: newPos,
+            rotation: newRot,
+            scale: newScale,
           },
         };
       }),

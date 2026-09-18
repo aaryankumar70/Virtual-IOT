@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { TransformControls } from '@react-three/drei';
 import type { TransformControls as TransformControlsType } from 'three-stdlib';
 import * as THREE from 'three';
@@ -18,25 +18,29 @@ export const TransformGizmo: React.FC<Props> = ({ targetObject, componentId }) =
   const projectState = useProject();
 
   const prevTransformRef = useRef<ComponentTransform | null>(null);
+  const isDraggingRef = useRef(false);
 
   const comp = componentId
     ? projectState.components.find((c) => c.id === componentId)
     : null;
 
-  if (!targetObject || !componentId || !comp) return null;
-
   const handleMouseDown = () => {
+    isDraggingRef.current = true;
     viewStore.setIsTransforming(true);
-    prevTransformRef.current = {
-      position: { ...comp.transform.position },
-      rotation: { ...comp.transform.rotation },
-      scale: { ...comp.transform.scale },
-    };
+    if (comp) {
+      prevTransformRef.current = {
+        position: { ...comp.transform.position },
+        rotation: { ...comp.transform.rotation },
+        scale: { ...comp.transform.scale },
+      };
+    }
   };
 
   const handleMouseUp = () => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
     viewStore.setIsTransforming(false);
-    if (prevTransformRef.current && targetObject) {
+    if (comp && prevTransformRef.current && targetObject) {
       let posX = targetObject.position.x;
       let posY = Math.max(0, targetObject.position.y); // keep resting above table
       let posZ = targetObject.position.z;
@@ -77,8 +81,9 @@ export const TransformGizmo: React.FC<Props> = ({ targetObject, componentId }) =
   };
 
   const handleChange = () => {
-    if (targetObject) {
-      // Continuously sync live transform so wires and pins recompute every frame!
+    if (!isDraggingRef.current) return;
+    if (targetObject && comp) {
+      // Continuously sync live transform so wires and pins recompute while actively dragging
       projectStore.updateComponentTransform(comp.id, {
         position: {
           x: targetObject.position.x,
@@ -98,6 +103,26 @@ export const TransformGizmo: React.FC<Props> = ({ targetObject, componentId }) =
       });
     }
   };
+
+  useEffect(() => {
+    const controls = transformRef.current;
+    if (!controls) return;
+
+    const onDraggingChanged = (e: any) => {
+      if (e.value) {
+        handleMouseDown();
+      } else {
+        handleMouseUp();
+      }
+    };
+
+    (controls as any).addEventListener('dragging-changed', onDraggingChanged);
+    return () => {
+      (controls as any).removeEventListener('dragging-changed', onDraggingChanged);
+    };
+  }, [targetObject, comp]);
+
+  if (!targetObject || !componentId || !comp) return null;
 
   return (
     // @ts-ignore

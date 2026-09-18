@@ -32,9 +32,14 @@ export const CameraController: React.FC = () => {
     }
   }, [viewState.isTransforming, viewState.isFreeMoving]);
 
+  const lastTriggerTimestamp = useRef<number>(0);
+
   // Handle camera trigger commands (reset, frameAll, focusSelected)
   useEffect(() => {
     if (!viewState.cameraTrigger) return;
+    if (viewState.cameraTrigger.timestamp === lastTriggerTimestamp.current) return;
+    lastTriggerTimestamp.current = viewState.cameraTrigger.timestamp;
+
     const { action } = viewState.cameraTrigger;
 
     if (action === 'reset') {

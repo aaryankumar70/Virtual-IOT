@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useRef } from 'react';
 import * as THREE from 'three';
 import { useThree, useFrame } from '@react-three/fiber';
 import { ContactShadows } from '@react-three/drei';
@@ -6,11 +6,9 @@ import { InfiniteGrid } from '../Grid/InfiniteGrid';
 import { CameraController } from '../Camera/CameraController';
 import { ComponentObject } from './ComponentObject';
 import { WireRenderer } from './WireRenderer';
-import { TransformGizmo } from '../Transform/TransformGizmo';
 import { FreeMoveController } from './FreeMoveController';
 import { useProject, projectStore } from '../../state/project/projectStore';
 import { useView, viewStore, DragPreviewState } from '../../state/view/viewStore';
-import { VirtualComponent } from '../../core/components/VirtualComponent';
 import { ComponentRegistry } from '../../core/registry/ComponentRegistry';
 import { THEME } from '../../utils/theme';
 
@@ -48,20 +46,7 @@ const DragGhostPreview: React.FC<{ preview: DragPreviewState }> = ({ preview }) 
 export const LabScene: React.FC = () => {
   const projectState = useProject();
   const viewState = useView();
-  const { raycaster, camera, gl } = useThree();
-
-  const [selectedTargetObj, setSelectedTargetObj] = useState<THREE.Object3D | null>(null);
-
-  const selectedPrimaryId = viewState.selectedComponentIds[0] || null;
-
-  const handleSelectObject = useCallback(
-    (comp: VirtualComponent, obj: THREE.Object3D) => {
-      if (comp.id === selectedPrimaryId) {
-        setSelectedTargetObj(obj);
-      }
-    },
-    [selectedPrimaryId]
-  );
+  const { raycaster } = useThree();
 
   // Raycasting on workbench plane for live wire dragging and background clicks
   const groundPlaneRef = useRef<THREE.Mesh>(null);
@@ -107,7 +92,6 @@ export const LabScene: React.FC = () => {
       } else if (!viewState.isFreeMoving) {
         viewStore.clearSelection();
       }
-      setSelectedTargetObj(null);
     }
   };
 
@@ -203,20 +187,11 @@ export const LabScene: React.FC = () => {
         <ComponentObject
           key={component.id}
           component={component}
-          onSelectObject={handleSelectObject}
         />
       ))}
 
       {/* Dynamic Catenary Wires */}
       <WireRenderer />
-
-      {/* 3D Transform Gizmo */}
-      {selectedPrimaryId && !viewState.isFreeMoving && (
-        <TransformGizmo
-          targetObject={selectedTargetObj}
-          componentId={selectedPrimaryId}
-        />
-      )}
 
       {/* Camera Controls & Navigation */}
       <CameraController />

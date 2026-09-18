@@ -197,6 +197,15 @@ export const viewStore = {
 
   updateWiringPreview(worldPos: { x: number; y: number; z: number }) {
     if (!state.activeWiring) return;
+    const cur = state.activeWiring.currentWorldPos;
+    if (
+      cur &&
+      Math.abs(cur.x - worldPos.x) < 0.002 &&
+      Math.abs(cur.y - worldPos.y) < 0.002 &&
+      Math.abs(cur.z - worldPos.z) < 0.002
+    ) {
+      return;
+    }
     state = {
       ...state,
       activeWiring: {
