@@ -43,6 +43,29 @@ export function deserializeProject(jsonStr: string): ProjectData {
   if (!Array.isArray(data.components) || !Array.isArray(data.connections)) {
     throw new Error('Invalid project file: missing components or connections array');
   }
+  const normalizedConnections: Connection[] = data.connections.map((c: any) => {
+    const srcInterface = c.source.interfaceId || c.source.pinId || '';
+    const tgtInterface = c.target.interfaceId || c.target.pinId || '';
+    return {
+      id: c.id,
+      type: c.type || 'wire',
+      source: {
+        componentId: c.source.componentId,
+        interfaceId: srcInterface,
+        type: c.source.type || 'pin',
+        pinId: c.source.pinId || srcInterface,
+      },
+      target: {
+        componentId: c.target.componentId,
+        interfaceId: tgtInterface,
+        type: c.target.type || 'pin',
+        pinId: c.target.pinId || tgtInterface,
+      },
+      color: c.color,
+      metadata: c.metadata || {},
+    };
+  });
+
   return {
     version: data.version || 1,
     metadata: {
@@ -52,6 +75,6 @@ export function deserializeProject(jsonStr: string): ProjectData {
       modified: data.metadata?.modified,
     },
     components: data.components,
-    connections: data.connections,
+    connections: normalizedConnections,
   };
 }

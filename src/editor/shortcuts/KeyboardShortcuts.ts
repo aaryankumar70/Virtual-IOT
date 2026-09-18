@@ -81,6 +81,8 @@ export function useKeyboardShortcuts() {
       if (e.key === 'Escape') {
         if (viewState.isFreeMoving) {
           viewStore.setIsFreeMoving(false);
+        } else if (viewState.activeConnectorWiring) {
+          viewStore.cancelConnectorWiring();
         } else if (viewState.activeWiring || viewState.wireModeActive) {
           viewStore.cancelWiring();
         } else {

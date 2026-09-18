@@ -1,6 +1,12 @@
 import { projectStore } from '../../state/project/projectStore';
 import { VirtualComponent, ComponentTransform } from '../../core/components/VirtualComponent';
-import { Connection, PinEndpoint } from '../../core/connections/Connection';
+import {
+  Connection,
+  ConnectionEndpoint,
+  ConnectionType,
+  ConnectionMetadata,
+  PinEndpoint,
+} from '../../core/connections/Connection';
 
 export interface Command {
   name: string;
@@ -87,12 +93,24 @@ export const Commands = {
     };
   },
 
-  addConnection(source: PinEndpoint, target: PinEndpoint, color?: string): Command {
+  addConnection(
+    source: ConnectionEndpoint,
+    target: ConnectionEndpoint,
+    typeOrColor?: ConnectionType | string,
+    colorOrMetadata?: string | ConnectionMetadata,
+    metadata?: ConnectionMetadata
+  ): Command {
     let createdConnId: string | null = null;
     return {
-      name: 'Add Wire',
+      name: 'Add Connection',
       execute: () => {
-        const conn = projectStore.addConnection(source, target, color);
+        const conn = projectStore.addConnection(
+          source,
+          target,
+          typeOrColor,
+          colorOrMetadata,
+          metadata
+        );
         createdConnId = conn.id;
       },
       undo: () => {
@@ -105,10 +123,16 @@ export const Commands = {
 
   deleteConnection(connection: Connection): Command {
     return {
-      name: 'Delete Wire',
+      name: 'Delete Connection',
       execute: () => projectStore.removeConnection(connection.id),
       undo: () => {
-        projectStore.addConnection(connection.source, connection.target, connection.color);
+        projectStore.addConnection(
+          connection.source,
+          connection.target,
+          connection.type,
+          connection.color,
+          connection.metadata
+        );
       },
     };
   },

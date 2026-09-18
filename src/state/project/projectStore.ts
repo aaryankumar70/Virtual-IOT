@@ -1,9 +1,17 @@
 import { useSyncExternalStore } from 'react';
+import * as THREE from 'three';
 import { VirtualComponent, ComponentTransform } from '../../core/components/VirtualComponent';
-import { Connection, PinEndpoint } from '../../core/connections/Connection';
+import {
+  Connection,
+  ConnectionEndpoint,
+  ConnectionType,
+  ConnectionMetadata,
+  PinEndpoint,
+} from '../../core/connections/Connection';
 import { createComponent, generateId } from '../../core/factories/componentFactory';
 import { ProjectData } from '../../project/serialization/projectSchema';
 import { calculatePinWorldPosition } from '../../core/pins/pinPosition';
+import { calculateEndpointWorldPosition } from '../../core/connections/endpointPosition';
 
 export interface ProjectState {
   metadata: {
@@ -138,27 +146,102 @@ export const projectStore = {
     return copy;
   },
 
-  addConnection(source: PinEndpoint, target: PinEndpoint, color?: string): Connection {
-    // Check if connection already exists between these exact pins
+  addConnection(
+    source: ConnectionEndpoint,
+    target: ConnectionEndpoint,
+    arg3?: ConnectionType | string,
+    arg4?: string | ConnectionMetadata,
+    arg5?: ConnectionMetadata
+  ): Connection {
+    const srcInterface = source.interfaceId || source.pinId || '';
+    const tgtInterface = target.interfaceId || target.pinId || '';
+
+    // Determine type, color, metadata from flexible arguments
+    let connType: ConnectionType = 'wire';
+    let connColor = '#3b82f6';
+    let connMetadata: ConnectionMetadata | undefined = undefined;
+
+    if (
+      arg3 &&
+      ['wire', 'direct', 'header', 'plug-socket', 'usb', 'dc-power', 'breadboard'].includes(
+        arg3 as string
+      )
+    ) {
+      connType = arg3 as ConnectionType;
+      if (typeof arg4 === 'string') {
+        connColor = arg4;
+        connMetadata = arg5;
+      } else if (typeof arg4 === 'object') {
+        connMetadata = arg4;
+      }
+    } else if (typeof arg3 === 'string') {
+      connColor = arg3;
+      if (typeof arg4 === 'object') {
+        connMetadata = arg4 as ConnectionMetadata;
+      }
+    }
+
+    // Auto-detect type if not explicitly set
+    if (connType === 'wire') {
+      if (
+        source.type === 'connector' ||
+        target.type === 'connector' ||
+        source.type === 'socket' ||
+        target.type === 'socket' ||
+        source.type === 'port' ||
+        target.type === 'port'
+      ) {
+        // Detect USB vs DC vs Header based on metadata or interface name
+        const lowerSrc = srcInterface.toLowerCase();
+        const lowerTgt = tgtInterface.toLowerCase();
+        if (lowerSrc.includes('usb') || lowerTgt.includes('usb')) {
+          connType = 'usb';
+        } else if (lowerSrc.includes('dc') || lowerTgt.includes('dc') || lowerSrc.includes('barrel') || lowerTgt.includes('barrel')) {
+          connType = 'dc-power';
+        } else if (lowerSrc.includes('header') || lowerTgt.includes('header')) {
+          connType = 'header';
+        } else {
+          connType = 'plug-socket';
+        }
+      } else if (source.type === 'breadboard-hole' || target.type === 'breadboard-hole') {
+        if (source.type === 'pin' || target.type === 'pin') {
+          connType = 'breadboard';
+        }
+      }
+    }
+
+    // Check if connection already exists between these exact interfaces
     const existing = state.connections.find(
       (c) =>
         (c.source.componentId === source.componentId &&
-          c.source.pinId === source.pinId &&
+          (c.source.interfaceId === srcInterface || c.source.pinId === srcInterface) &&
           c.target.componentId === target.componentId &&
-          c.target.pinId === target.pinId) ||
+          (c.target.interfaceId === tgtInterface || c.target.pinId === tgtInterface)) ||
         (c.source.componentId === target.componentId &&
-          c.source.pinId === target.pinId &&
+          (c.source.interfaceId === tgtInterface || c.source.pinId === tgtInterface) &&
           c.target.componentId === source.componentId &&
-          c.target.pinId === source.pinId)
+          (c.target.interfaceId === srcInterface || c.target.pinId === srcInterface))
     );
 
     if (existing) return existing;
 
     const newConnection: Connection = {
-      id: generateId('wire'),
-      source: { ...source },
-      target: { ...target },
-      color: color || '#3b82f6',
+      id: generateId(connType),
+      type: connType,
+      source: {
+        componentId: source.componentId,
+        interfaceId: srcInterface,
+        type: source.type || 'pin',
+        pinId: source.pinId || srcInterface,
+      },
+      target: {
+        componentId: target.componentId,
+        interfaceId: tgtInterface,
+        type: target.type || 'pin',
+        pinId: target.pinId || tgtInterface,
+      },
+      color: connColor,
+      metadata: connMetadata || {},
     };
 
     state = {
@@ -177,16 +260,26 @@ export const projectStore = {
     notify();
   },
 
-  disconnectPin(componentId: string, pinId: string) {
+  disconnectEndpoint(componentId: string, interfaceId: string) {
     state = {
       ...state,
       connections: state.connections.filter(
         (c) =>
-          !(c.source.componentId === componentId && c.source.pinId === pinId) &&
-          !(c.target.componentId === componentId && c.target.pinId === pinId)
+          !(
+            c.source.componentId === componentId &&
+            (c.source.interfaceId === interfaceId || c.source.pinId === interfaceId)
+          ) &&
+          !(
+            c.target.componentId === componentId &&
+            (c.target.interfaceId === interfaceId || c.target.pinId === interfaceId)
+          )
       ),
     };
     notify();
+  },
+
+  disconnectPin(componentId: string, pinId: string) {
+    this.disconnectEndpoint(componentId, pinId);
   },
 
   loadProject(projectData: ProjectData) {
@@ -261,6 +354,17 @@ export const projectStore = {
     const comp = state.components.find((c) => c.id === componentId);
     if (!comp) return null;
     return calculatePinWorldPosition(comp, pinId);
+  },
+
+  getEndpointWorldPosition(componentId: string, interfaceId: string): THREE.Vector3 | null {
+    const comp = state.components.find((c) => c.id === componentId);
+    if (!comp) return null;
+    return calculateEndpointWorldPosition(comp, {
+      componentId,
+      interfaceId,
+      type: 'pin',
+      pinId: interfaceId,
+    });
   },
 };
 

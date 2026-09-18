@@ -51,7 +51,7 @@ export const LabScene: React.FC = () => {
   // Raycasting on workbench plane for live wire dragging and background clicks
   const groundPlaneRef = useRef<THREE.Mesh>(null);
 
-  // Live wire dragging preview follows cursor and snaps to hovered pins
+  // Live wire & connector cable dragging preview follows cursor and snaps to hovered targets
   useFrame(() => {
     if (viewState.activeWiring) {
       if (viewState.hoveredPin) {
@@ -82,6 +82,35 @@ export const LabScene: React.FC = () => {
         });
       }
     }
+
+    if (viewState.activeConnectorWiring) {
+      if (viewState.hoveredConnector) {
+        const connPos = projectStore.getEndpointWorldPosition(
+          viewState.hoveredConnector.componentId,
+          viewState.hoveredConnector.connectorId
+        );
+        if (connPos) {
+          viewStore.updateConnectorWiring({
+            x: connPos.x,
+            y: connPos.y,
+            z: connPos.z,
+          });
+          return;
+        }
+      }
+
+      const planeY = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.4);
+      const intersectionPoint = new THREE.Vector3();
+      raycaster.ray.intersectPlane(planeY, intersectionPoint);
+
+      if (intersectionPoint) {
+        viewStore.updateConnectorWiring({
+          x: intersectionPoint.x,
+          y: Math.max(0.35, intersectionPoint.y),
+          z: intersectionPoint.z,
+        });
+      }
+    }
   });
 
   const handleGroundPointerDown = (e: any) => {
@@ -89,6 +118,8 @@ export const LabScene: React.FC = () => {
     if (e.button === 0) {
       if (viewState.activeWiring) {
         viewStore.cancelWiring();
+      } else if (viewState.activeConnectorWiring) {
+        viewStore.cancelConnectorWiring();
       } else if (!viewState.isFreeMoving) {
         viewStore.clearSelection();
       }

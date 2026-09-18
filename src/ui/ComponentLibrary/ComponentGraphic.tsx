@@ -281,6 +281,83 @@ export const ComponentGraphic: React.FC<Props> = ({ type, className = 'w-full h-
         </svg>
       );
 
+    case 'computer-host':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* PC Tower */}
+          <rect x="46" y="16" width="68" height="88" rx="4" fill="#1e293b" stroke="#0f172a" strokeWidth="2" />
+          {/* Front Bezel Faceplate */}
+          <rect x="52" y="22" width="56" height="76" rx="2" fill="#0f172a" />
+          {/* Power Button */}
+          <circle cx="64" cy="34" r="4" fill="#38bdf8" />
+          <circle cx="64" cy="34" r="2" fill="#0284c7" />
+          {/* USB 3.0 Port */}
+          <rect x="76" y="31" width="16" height="6" rx="1" fill="#0284c7" stroke="#38bdf8" strokeWidth="1" />
+          {/* Vents */}
+          <line x1="60" y1="50" x2="100" y2="50" stroke="#334155" strokeWidth="2" />
+          <line x1="60" y1="58" x2="100" y2="58" stroke="#334155" strokeWidth="2" />
+          <line x1="60" y1="66" x2="100" y2="66" stroke="#334155" strokeWidth="2" />
+          <line x1="60" y1="74" x2="100" y2="74" stroke="#334155" strokeWidth="2" />
+          <line x1="60" y1="82" x2="100" y2="82" stroke="#334155" strokeWidth="2" />
+          <text x="80" y="94" fill="#64748b" fontSize="6" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">PC HOST</text>
+        </svg>
+      );
+
+    case 'dc-power-supply':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Wall Adapter Brick */}
+          <rect x="25" y="28" width="55" height="64" rx="4" fill="#18181b" stroke="#09090b" strokeWidth="2" />
+          {/* Wall Prongs */}
+          <rect x="15" y="42" width="10" height="6" fill="#94a3b8" />
+          <rect x="15" y="72" width="10" height="6" fill="#94a3b8" />
+          {/* Green LED */}
+          <circle cx="65" cy="38" r="2.5" fill="#22c55e" />
+          {/* Cable */}
+          <path d="M80 60 C98 60, 105 75, 115 75" stroke="#27272a" strokeWidth="4" strokeLinecap="round" />
+          {/* DC Barrel Plug */}
+          <rect x="115" y="71" width="16" height="8" rx="2" fill="#18181b" stroke="#09090b" strokeWidth="1" />
+          <rect x="131" y="73" width="12" height="4" fill="#94a3b8" stroke="#64748b" strokeWidth="0.5" />
+          <text x="52" y="66" fill="#71717a" fontSize="6" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">9V DC</text>
+        </svg>
+      );
+
+    case 'dht11-sensor':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Blue Body */}
+          <rect x="50" y="20" width="60" height="60" rx="3" fill="#0284c7" stroke="#0369a1" strokeWidth="2" />
+          {/* Humidity Slits */}
+          <line x1="58" y1="34" x2="102" y2="34" stroke="#0369a1" strokeWidth="2.5" strokeLinecap="round" />
+          <line x1="58" y1="44" x2="102" y2="44" stroke="#0369a1" strokeWidth="2.5" strokeLinecap="round" />
+          <line x1="58" y1="54" x2="102" y2="54" stroke="#0369a1" strokeWidth="2.5" strokeLinecap="round" />
+          <line x1="58" y1="64" x2="102" y2="64" stroke="#0369a1" strokeWidth="2.5" strokeLinecap="round" />
+          {/* PCB Breakout Base */}
+          <rect x="45" y="78" width="70" height="16" rx="2" fill="#15803d" stroke="#166534" strokeWidth="1.5" />
+          {/* 4 Header Pins */}
+          <line x1="58" y1="94" x2="58" y2="108" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+          <line x1="72" y1="94" x2="72" y2="108" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+          <line x1="86" y1="94" x2="86" y2="108" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+          <line x1="100" y1="94" x2="100" y2="108" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+          <text x="80" y="28" fill="#ffffff" fontSize="6" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">DHT11</text>
+        </svg>
+      );
+
+    case 'usb-cable':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Curving Cable */}
+          <path d="M36 60 C60 40, 100 80, 124 60" stroke="#1e293b" strokeWidth="5" strokeLinecap="round" />
+          {/* USB-A Plug (Left) */}
+          <rect x="22" y="53" width="16" height="14" rx="2" fill="#334155" stroke="#1e293b" strokeWidth="1" />
+          <rect x="12" y="55" width="10" height="10" rx="1" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1" />
+          {/* USB-B Plug (Right) */}
+          <rect x="122" y="53" width="16" height="14" rx="2" fill="#334155" stroke="#1e293b" strokeWidth="1" />
+          <rect x="138" y="54" width="10" height="12" rx="1" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1" />
+          <text x="80" y="98" fill="#64748b" fontSize="7" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">USB A-to-B CABLE</text>
+        </svg>
+      );
+
     default:
       return (
         <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">

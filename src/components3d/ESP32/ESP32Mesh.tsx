@@ -1,6 +1,7 @@
 import React from 'react';
 import { VirtualComponent } from '../../core/components/VirtualComponent';
 import { PinMesh } from '../../scene/World/PinMesh';
+import { ConnectorMesh } from '../../scene/World/ConnectorMesh';
 
 interface ComponentMeshProps {
   component: VirtualComponent;
@@ -27,12 +28,6 @@ export const ESP32Mesh: React.FC<ComponentMeshProps> = ({ component }) => {
         <meshStandardMaterial color="#b7791f" metalness={0.7} roughness={0.4} />
       </mesh>
 
-      {/* Micro-USB Port */}
-      <mesh position={[0, 0.35, 2.45]} castShadow>
-        <boxGeometry args={[0.9, 0.35, 0.7]} />
-        <meshStandardMaterial color="#a0aec0" metalness={0.9} roughness={0.2} />
-      </mesh>
-
       {/* Left & Right Header Blocks */}
       <mesh position={[-1.3, 0.3, 0]} castShadow>
         <boxGeometry args={[0.35, 0.3, 4.4]} />
@@ -42,6 +37,16 @@ export const ESP32Mesh: React.FC<ComponentMeshProps> = ({ component }) => {
         <boxGeometry args={[0.35, 0.3, 4.4]} />
         <meshStandardMaterial color="#1a202c" roughness={0.8} />
       </mesh>
+
+      {/* Render Physical Connectors (Micro-USB Port) */}
+      {component.connectors?.map((connector) => (
+        <ConnectorMesh
+          key={connector.id}
+          connector={connector}
+          componentId={component.id}
+          componentName={component.name}
+        />
+      ))}
 
       {/* Pins */}
       {component.pins.map((pin) => (

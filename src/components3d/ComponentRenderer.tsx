@@ -7,13 +7,17 @@ import { LEDMesh } from './LED/LEDMesh';
 import { ResistorMesh } from './Resistor/ResistorMesh';
 import { PushButtonMesh } from './PushButton/PushButtonMesh';
 import { BuzzerMesh } from './Buzzer/BuzzerMesh';
+import { RaspberryPiMesh } from './RaspberryPi/RaspberryPiMesh';
+import { LEDRGBMesh } from './LEDRGB/LEDRGBMesh';
+import { UltrasonicSensorMesh } from './UltrasonicSensor/UltrasonicSensorMesh';
+import { TemperatureSensorMesh } from './TemperatureSensor/TemperatureSensorMesh';
+import { ServoMotorMesh } from './ServoMotor/ServoMotorMesh';
 import {
-  RaspberryPiMesh,
-  LEDRGBMesh,
-  UltrasonicSensorMesh,
-  TemperatureSensorMesh,
-  ServoMotorMesh,
-} from './ExtraMeshes';
+  ComputerHostMesh,
+  DCPowerSupplyMesh,
+  DHT11SensorMesh,
+  USBCableMesh,
+} from './PhysicalAccessories';
 
 interface Props {
   component: VirtualComponent;
@@ -45,6 +49,14 @@ export const ComponentRenderer: React.FC<Props> = ({ component }) => {
       return <TemperatureSensorMesh component={component} />;
     case 'servo-motor':
       return <ServoMotorMesh component={component} />;
+    case 'computer-host':
+      return <ComputerHostMesh component={component} />;
+    case 'dc-power-supply':
+      return <DCPowerSupplyMesh component={component} />;
+    case 'dht11-sensor':
+      return <DHT11SensorMesh component={component} />;
+    case 'usb-cable':
+      return <USBCableMesh component={component} />;
     default:
       return (
         <mesh position={[0, 0.5, 0]}>

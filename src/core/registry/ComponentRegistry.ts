@@ -1,5 +1,6 @@
 import { VirtualComponent } from '../components/VirtualComponent';
 import { VirtualPin } from '../pins/VirtualPin';
+import { VirtualConnector, VirtualPort } from '../connections/VirtualConnector';
 
 export interface ComponentDefinition {
   type: string;
@@ -8,6 +9,8 @@ export interface ComponentDefinition {
   description: string;
   manufacturer?: string;
   pins: VirtualPin[];
+  connectors?: VirtualConnector[];
+  ports?: VirtualPort[];
   defaultState?: Record<string, unknown>;
   dimensions: { width: number; height: number; depth: number };
 }

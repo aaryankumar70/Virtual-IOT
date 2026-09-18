@@ -27,6 +27,28 @@ export function createComponent(
     metadata: p.metadata ? { ...p.metadata } : undefined,
   }));
 
+  const connectors = def.connectors
+    ? def.connectors.map((c) => ({
+        ...c,
+        localPosition: { ...c.localPosition },
+        orientation: c.orientation ? { ...c.orientation } : undefined,
+        compatibleWith: c.compatibleWith ? [...c.compatibleWith] : undefined,
+        pinMapping: c.pinMapping ? { ...c.pinMapping } : undefined,
+        metadata: c.metadata ? { ...c.metadata } : undefined,
+      }))
+    : [];
+
+  const ports = def.ports
+    ? def.ports.map((pt) => ({
+        ...pt,
+        localPosition: { ...pt.localPosition },
+        orientation: pt.orientation ? { ...pt.orientation } : undefined,
+        compatibleWith: pt.compatibleWith ? [...pt.compatibleWith] : undefined,
+        pinMapping: pt.pinMapping ? { ...pt.pinMapping } : undefined,
+        metadata: pt.metadata ? { ...pt.metadata } : undefined,
+      }))
+    : [];
+
   const position: Vector3D = initialPosition
     ? { ...initialPosition }
     : { x: 0, y: 0, z: 0 };
@@ -41,6 +63,8 @@ export function createComponent(
       scale: { x: 1, y: 1, z: 1 },
     },
     pins,
+    connectors,
+    ports,
     metadata: {
       category: def.category,
       manufacturer: def.manufacturer,

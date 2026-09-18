@@ -98,12 +98,27 @@ export const PinMesh: React.FC<PinMeshProps> = React.memo(({ pin, componentId, c
           // Execute with history manager so action is fully undoable
           historyManager.execute(
             Commands.addConnection(
-              { componentId: sourceCompId, pinId: sourcePinId },
-              { componentId, pinId: pin.id },
+              {
+                componentId: sourceCompId,
+                interfaceId: sourcePinId,
+                type: 'pin',
+                pinId: sourcePinId,
+              },
+              {
+                componentId,
+                interfaceId: pin.id,
+                type: 'pin',
+                pinId: pin.id,
+              },
               pinBaseColor
             )
           );
           viewStore.cancelWiring();
+        } else {
+          viewStore.setConnectionFeedback({
+            message: validation.message,
+            severity: validation.severity === 'warning' ? 'warning' : 'error',
+          });
         }
       }
       return;
@@ -138,40 +153,96 @@ export const PinMesh: React.FC<PinMeshProps> = React.memo(({ pin, componentId, c
     (viewState.activeWiring && !isWiringSource) ||
     viewState.wireModeActive;
 
+  const connectorStyle = pin.connectorStyle || 'header-pin';
+  const isInteracting = isHovered || isWiringSource || isConnected;
+
   return (
     <group position={[pin.localPosition.x, pin.localPosition.y, pin.localPosition.z]}>
-      {/* Generous invisible hit target cylinder to ensure effortless clicking */}
+      {/* Generous invisible hit target cylinder to ensure effortless clicking with priority over headers */}
       <mesh
-        position={[0, 0.05, 0]}
+        position={[0, 0.08, 0]}
         onClick={handleClick}
         onPointerDown={(e) => e.stopPropagation()}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       >
-        <cylinderGeometry args={[0.22, 0.22, 0.35, 12]} />
+        <cylinderGeometry args={[0.26, 0.26, 0.42, 12]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      {/* Outer socket metal contact */}
-      <mesh rotation={[0, 0, 0]}>
-        <cylinderGeometry args={[0.075, 0.075, 0.08, 12]} />
-        <meshStandardMaterial color="#2d3748" metalness={0.8} roughness={0.25} />
-      </mesh>
+      {/* 1. Header Pin (Female Socket / Header): metal socket collar + conductive terminal */}
+      {connectorStyle === 'header-pin' && (
+        <>
+          <mesh rotation={[0, 0, 0]}>
+            <cylinderGeometry args={[0.075, 0.075, 0.08, 12]} />
+            <meshStandardMaterial color="#2d3748" metalness={0.8} roughness={0.25} />
+          </mesh>
+          <mesh position={[0, 0.045, 0]} scale={[scale, scale, scale]}>
+            <sphereGeometry args={[0.085, 12, 12]} />
+            <meshStandardMaterial
+              color={color}
+              emissive={emissiveColor}
+              emissiveIntensity={emissiveIntensity}
+              roughness={0.2}
+              metalness={0.6}
+            />
+          </mesh>
+        </>
+      )}
 
-      {/* Inner conductive / colored connection terminal point */}
-      <mesh
-        position={[0, 0.045, 0]}
-        scale={[scale, scale, scale]}
-      >
-        <sphereGeometry args={[0.085, 12, 12]} />
-        <meshStandardMaterial
-          color={color}
-          emissive={emissiveColor}
-          emissiveIntensity={emissiveIntensity}
-          roughness={0.2}
-          metalness={0.6}
-        />
-      </mesh>
+      {/* 2. Breadboard Hole: recessed dark insertion hole with beveled plastic rim */}
+      {connectorStyle === 'breadboard-hole' && (
+        <>
+          {/* Beveled hole pocket rim */}
+          <mesh position={[0, -0.002, 0]}>
+            <boxGeometry args={[0.092, 0.008, 0.092]} />
+            <meshStandardMaterial color="#cbd5e1" roughness={0.6} />
+          </mesh>
+          {/* Deep dark internal spring receptacle contact cavity */}
+          <mesh position={[0, 0.002, 0]}>
+            <boxGeometry args={[0.056, 0.012, 0.056]} />
+            <meshStandardMaterial color="#0f172a" roughness={0.95} metalness={0.2} />
+          </mesh>
+          {/* Active / hover / connected indicator marker */}
+          {isInteracting && (
+            <mesh position={[0, 0.025, 0]} scale={[scale, scale, scale]}>
+              <sphereGeometry args={[0.065, 12, 12]} />
+              <meshStandardMaterial
+                color={color}
+                emissive={emissiveColor}
+                emissiveIntensity={emissiveIntensity}
+                roughness={0.2}
+                metalness={0.6}
+              />
+            </mesh>
+          )}
+        </>
+      )}
+
+      {/* 3. Lead Tip: wire end flush cap in idle, glowing terminal when interacting */}
+      {connectorStyle === 'lead-tip' && (
+        <>
+          {!isInteracting ? (
+            /* Flush wire cap at the tip of the modeled lead with same radius as lead */
+            <mesh position={[0, 0, 0]}>
+              <cylinderGeometry args={[0.038, 0.038, 0.015, 12]} />
+              <meshStandardMaterial color="#94a3b8" metalness={0.85} roughness={0.25} />
+            </mesh>
+          ) : (
+            /* Active / hovered terminal node */
+            <mesh position={[0, 0.02, 0]} scale={[scale, scale, scale]}>
+              <sphereGeometry args={[0.065, 12, 12]} />
+              <meshStandardMaterial
+                color={color}
+                emissive={emissiveColor}
+                emissiveIntensity={emissiveIntensity}
+                roughness={0.2}
+                metalness={0.6}
+              />
+            </mesh>
+          )}
+        </>
+      )}
 
       {/* Pin alignment / target halo ring when hovering or active wiring */}
       {showHighlightRing && (
