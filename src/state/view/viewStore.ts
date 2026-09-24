@@ -79,6 +79,7 @@ export interface ViewState {
   measureMode: boolean;
   cameraMode: 'perspective' | 'orthographic';
   theme: 'light' | 'dark';
+  hardwareDebugMode: boolean;
   connectionFeedback: ConnectionFeedbackState | null;
 }
 
@@ -108,6 +109,7 @@ let state: ViewState = {
   measureMode: false,
   cameraMode: 'perspective',
   theme: 'light',
+  hardwareDebugMode: false,
   connectionFeedback: null,
 };
 
@@ -415,6 +417,16 @@ export const viewStore = {
 
   setCameraMode(mode: 'perspective' | 'orthographic') {
     state = { ...state, cameraMode: mode };
+    notify();
+  },
+
+  toggleHardwareDebugMode() {
+    state = { ...state, hardwareDebugMode: !state.hardwareDebugMode };
+    notify();
+  },
+
+  setHardwareDebugMode(enabled: boolean) {
+    state = { ...state, hardwareDebugMode: enabled };
     notify();
   },
 

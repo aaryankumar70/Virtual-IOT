@@ -1,6 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
+import { LabHeader } from '../components/lab/LabHeader';
+import { EngineeringLabWorkbench } from '../components/lab/EngineeringLabWorkbench';
 import { TopToolbar } from '../ui/Toolbar/TopToolbar';
 import { ComponentLibraryPanel, activeDraggedType, setActiveDraggedType } from '../ui/ComponentLibrary/ComponentLibraryPanel';
 import { ComponentInspectorPanel } from '../ui/Inspector/ComponentInspectorPanel';
@@ -17,14 +19,15 @@ import { historyManager, Commands } from '../editor/history/historyManager';
 import { Sparkles } from 'lucide-react';
 
 export const Workspace: React.FC = () => {
+  const [isBreadboardCAD, setIsBreadboardCAD] = useState(false);
   const viewState = useView();
   const projectState = useProject();
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
-  // Activate global keyboard shortcuts (G, R, S, F, A, Ctrl+D, Ctrl+Z, Del, Esc)
+  // Activate global keyboard shortcuts
   useKeyboardShortcuts();
 
-  // Raycast drag over handling with live active camera for ghost preview
+  // Raycast drag over handling for breadboard mode
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
@@ -116,79 +119,69 @@ export const Workspace: React.FC = () => {
   const isEmpty = projectState.components.length === 0;
 
   return (
-    <div id="virtual-iot-lab-root" className="flex flex-col w-screen h-screen overflow-hidden bg-slate-100">
-      {/* Top CAD Toolbar */}
-      <TopToolbar />
+    <div id="virtual-engineering-lab-root" className="flex flex-col w-screen h-screen overflow-hidden bg-zinc-950">
+      {/* Master Engineering Laboratory Header */}
+      <LabHeader
+        isBreadboardCAD={isBreadboardCAD}
+        onToggleBreadboardCAD={() => setIsBreadboardCAD((b) => !b)}
+      />
 
-      {/* Main Studio Viewport */}
-      <div className="flex-1 flex relative overflow-hidden">
-        {/* Left: Component Library Panel */}
-        {viewState.libraryOpen && <ComponentLibraryPanel />}
+      {/* Primary View: Either Engineering Lab Workbench (Default) OR Breadboard CAD */}
+      {!isBreadboardCAD ? (
+        <EngineeringLabWorkbench />
+      ) : (
+        <div className="flex-1 flex flex-col relative overflow-hidden bg-slate-100">
+          <TopToolbar />
+          <div className="flex-1 flex relative overflow-hidden">
+            {viewState.libraryOpen && <ComponentLibraryPanel />}
+            <div
+              ref={canvasContainerRef}
+              id="canvas-viewport"
+              className="flex-1 h-full relative cursor-default bg-slate-50"
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <Canvas
+                shadows
+                camera={{ position: [0, 10, 14], fov: 45, near: 0.1, far: 1000 }}
+                gl={{ antialias: true, alpha: false }}
+              >
+                <LabScene />
+              </Canvas>
+              <ViewportOverlay />
 
-        {/* Center: 3D Engineering Viewport */}
-        <div
-          ref={canvasContainerRef}
-          id="canvas-viewport"
-          className="flex-1 h-full relative cursor-default bg-slate-50"
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <Canvas
-            shadows
-            camera={{ position: [0, 10, 14], fov: 45, near: 0.1, far: 1000 }}
-            gl={{ antialias: true, alpha: false }}
-          >
-            <LabScene />
-          </Canvas>
-
-          {/* Floating Viewport Overlays (Top controls, Bottom status, Quick nav) */}
-          <ViewportOverlay />
-
-          {/* Empty State Onboarding Hint */}
-          {isEmpty && (
-            <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center p-6 text-center select-none z-10">
-              <div className="max-w-md bg-white/95 border border-slate-200 p-6 rounded-xl shadow-lg backdrop-blur-sm pointer-events-auto flex flex-col items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
-                  <Sparkles size={20} />
+              {isEmpty && (
+                <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center p-6 text-center select-none z-10">
+                  <div className="max-w-md bg-white/95 border border-slate-200 p-6 rounded-xl shadow-lg backdrop-blur-sm pointer-events-auto flex flex-col items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                      <Sparkles size={20} />
+                    </div>
+                    <h3 className="text-sm font-semibold text-slate-800">
+                      Your laboratory is empty
+                    </h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Drag a component from the library on the left into the 3D workspace to begin
+                      building your circuit, or load an example circuit.
+                    </p>
+                    <div className="flex items-center gap-2 pt-2">
+                      <button
+                        onClick={() => projectStore.loadExampleCircuit()}
+                        className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-xs text-white font-medium transition-colors shadow-xs"
+                      >
+                        Load Demo Circuit
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-sm font-semibold text-slate-800">
-                  Your laboratory is empty
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Drag a component from the library on the left into the 3D workspace to begin
-                  building your circuit, or load an example circuit.
-                </p>
-                <div className="flex items-center gap-2 pt-2">
-                  <button
-                    onClick={() => projectStore.loadExampleCircuit()}
-                    className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-xs text-white font-medium transition-colors shadow-xs"
-                  >
-                    Load Demo Circuit
-                  </button>
-                  <button
-                    onClick={() => {
-                      const c = createComponent('arduino-uno', { x: 0, y: 0, z: 0 });
-                      historyManager.execute(Commands.addComponent(c));
-                      viewStore.selectComponent(c.id);
-                    }}
-                    className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-xs text-slate-700 font-medium transition-colors shadow-2xs"
-                  >
-                    Add Arduino Uno
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
-          )}
+            {viewState.inspectorOpen && <ComponentInspectorPanel />}
+          </div>
+          <PinTooltip />
+          <LabContextMenu />
         </div>
-
-        {/* Right: Component / Wire Inspector Panel */}
-        {viewState.inspectorOpen && <ComponentInspectorPanel />}
-      </div>
-
-      {/* Floating Overlays */}
-      <PinTooltip />
-      <LabContextMenu />
+      )}
     </div>
   );
 };

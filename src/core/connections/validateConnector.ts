@@ -74,15 +74,27 @@ export function validateConnectorConnection(
     };
   }
 
-  // 4. Incompatible interface types check (e.g. USB to DC)
-  if (
-    (sourceConnector.interfaceType === 'usb' && targetConnector.interfaceType === 'dc-power') ||
-    (sourceConnector.interfaceType === 'dc-power' && targetConnector.interfaceType === 'usb')
-  ) {
+  // 4. Incompatible interface types check
+  const incompatiblePairs = [
+    ['usb', 'dc-power'],
+    ['usb', 'xt60'],
+    ['dc-power', 'xt60'],
+    ['usb', 'motor-connector'],
+    ['dc-power', 'motor-connector'],
+    ['xt60', 'motor-connector'],
+  ];
+
+  const isIncompatible = incompatiblePairs.some(
+    ([t1, t2]) =>
+      (sourceConnector.interfaceType === t1 && targetConnector.interfaceType === t2) ||
+      (sourceConnector.interfaceType === t2 && targetConnector.interfaceType === t1)
+  );
+
+  if (isIncompatible) {
     return {
       valid: false,
       severity: 'error',
-      message: 'Physical incompatibility: Cannot connect a USB interface to a DC barrel jack.',
+      message: `Physical incompatibility: Cannot connect "${sourceConnector.name}" (${sourceConnector.interfaceType}) to "${targetConnector.name}" (${targetConnector.interfaceType}).`,
     };
   }
 

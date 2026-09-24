@@ -70,6 +70,8 @@ export function createComponent(
       manufacturer: def.manufacturer,
       description: def.description,
     },
+    specification: def.specification ? JSON.parse(JSON.stringify(def.specification)) : undefined,
+    subcomponents: def.subcomponents ? JSON.parse(JSON.stringify(def.subcomponents)) : undefined,
     state: def.defaultState ? JSON.parse(JSON.stringify(def.defaultState)) : {},
   };
 }

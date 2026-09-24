@@ -14,6 +14,7 @@ import {
   BatteryCharging,
   Monitor,
   Boxes,
+  Navigation,
   Sparkles,
   Folder,
 } from 'lucide-react';
@@ -45,6 +46,7 @@ export const ComponentLibraryPanel: React.FC = () => {
     { id: 'sensor', label: 'Sensors', icon: Radar },
     { id: 'passive', label: 'Passive', icon: Zap },
     { id: 'communication', label: 'Communication', icon: Wifi },
+    { id: 'drone', label: 'Drones & UAV', icon: Navigation },
     { id: 'power', label: 'Power', icon: BatteryCharging },
     { id: 'display', label: 'Displays', icon: Monitor },
     { id: 'misc', label: 'Miscellaneous', icon: Boxes },

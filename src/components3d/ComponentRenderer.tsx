@@ -18,6 +18,13 @@ import {
   DHT11SensorMesh,
   USBCableMesh,
 } from './PhysicalAccessories';
+import { DroneMesh } from './Drone/DroneMesh';
+import { LiPoBatteryMesh } from './LiPoBattery/LiPoBatteryMesh';
+import { ArduinoNanoMesh } from './ArduinoNano/ArduinoNanoMesh';
+import { PIRSensorMesh } from './PIRSensor/PIRSensorMesh';
+import { MPU6050Mesh } from './MPU6050/MPU6050Mesh';
+import { DCMotorMesh } from './DCMotor/DCMotorMesh';
+import { RelayModuleMesh } from './RelayModule/RelayModuleMesh';
 
 interface Props {
   component: VirtualComponent;
@@ -57,6 +64,20 @@ export const ComponentRenderer: React.FC<Props> = ({ component }) => {
       return <DHT11SensorMesh component={component} />;
     case 'usb-cable':
       return <USBCableMesh component={component} />;
+    case 'drone-quadcopter':
+      return <DroneMesh component={component} />;
+    case 'lipo-battery':
+      return <LiPoBatteryMesh component={component} />;
+    case 'arduino-nano':
+      return <ArduinoNanoMesh component={component} />;
+    case 'pir-sensor':
+      return <PIRSensorMesh component={component} />;
+    case 'mpu6050-sensor':
+      return <MPU6050Mesh component={component} />;
+    case 'dc-motor':
+      return <DCMotorMesh component={component} />;
+    case 'relay-module':
+      return <RelayModuleMesh component={component} />;
     default:
       return (
         <mesh position={[0, 0.5, 0]}>

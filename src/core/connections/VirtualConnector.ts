@@ -6,7 +6,11 @@ export type ConnectorInterfaceType =
   | 'plug'
   | 'usb'
   | 'dc-power'
-  | 'breadboard-socket';
+  | 'breadboard-socket'
+  | 'jst'
+  | 'xt60'
+  | 'motor-connector'
+  | 'terminal-block';
 
 export type ConnectorGender = 'male' | 'female' | 'none';
 

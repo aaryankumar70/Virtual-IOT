@@ -17,6 +17,7 @@ import {
   ArrowRight,
   CheckCircle2,
   X,
+  Crosshair,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
@@ -316,6 +317,23 @@ export const ViewportOverlay: React.FC = () => {
         >
           <Ruler size={13} className={viewState.measureMode ? 'text-blue-600' : 'text-slate-500'} />
           <span>Measure</span>
+        </button>
+
+        <div className="w-[1px] h-4 bg-slate-200" />
+
+        {/* Hardware Debug Mode */}
+        <button
+          id="btn-toggle-hw-debug"
+          onClick={() => viewStore.toggleHardwareDebugMode()}
+          className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors ${
+            viewState.hardwareDebugMode
+              ? 'bg-cyan-50 text-cyan-700 font-semibold border border-cyan-300'
+              : 'hover:bg-slate-100 text-slate-700'
+          }`}
+          title="Toggle Hardware Debug Mode (Pin & Connector Coordinates HUD)"
+        >
+          <Crosshair size={13} className={viewState.hardwareDebugMode ? 'text-cyan-600 animate-spin' : 'text-slate-500'} />
+          <span>HW Debug</span>
         </button>
 
         {/* View Options */}
@@ -628,6 +646,15 @@ export const ViewportOverlay: React.FC = () => {
           <>
             <span>·</span>
             <span className="text-blue-600 font-medium">Measure Active</span>
+          </>
+        )}
+        {viewState.hardwareDebugMode && (
+          <>
+            <span>·</span>
+            <span className="text-cyan-600 font-semibold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+              HW Debug Mode
+            </span>
           </>
         )}
       </div>

@@ -1,6 +1,17 @@
 import { ComponentRegistry, ComponentDefinition } from '../registry/ComponentRegistry';
 import { VirtualPin } from '../pins/VirtualPin';
 import { VirtualConnector } from '../connections/VirtualConnector';
+import {
+  ArduinoUnoSpecification,
+  ESP32Specification,
+  RaspberryPiSpecification,
+  DronePlatformSpecification,
+  LiPoBatterySpecification,
+  UltrasonicSensorSpecification,
+  SG90ServoSpecification,
+  DCMotorSpecification,
+  BreadboardSpecification,
+} from '../hardware/specificationsData';
 
 // 1. ARDUINO UNO
 const arduinoConnectors: VirtualConnector[] = [
@@ -11,6 +22,7 @@ const arduinoConnectors: VirtualConnector[] = [
     interfaceType: 'usb',
     gender: 'female',
     localPosition: { x: -2.8, y: 0.55, z: -1.6 },
+    direction: { x: -1, y: 0, z: 0 },
     compatibleWith: ['usb-b-plug', 'usb-cable-b'],
     metadata: { label: 'USB 2.0 Client Port' },
   },
@@ -21,6 +33,7 @@ const arduinoConnectors: VirtualConnector[] = [
     interfaceType: 'dc-power',
     gender: 'female',
     localPosition: { x: -2.6, y: 0.55, z: 1.6 },
+    direction: { x: -1, y: 0, z: 0 },
     compatibleWith: ['dc-barrel-plug'],
     metadata: { label: '7-12V Power Input' },
   },
@@ -90,6 +103,8 @@ export const ArduinoUnoDefinition: ComponentDefinition = {
   manufacturer: 'Arduino',
   pins: arduinoPins,
   connectors: arduinoConnectors,
+  specification: ArduinoUnoSpecification,
+  subcomponents: ArduinoUnoSpecification.subcomponents,
   defaultState: { powered: false, led13: false },
   dimensions: { width: 6.86, height: 0.4, depth: 5.34 },
 };
@@ -216,6 +231,8 @@ export const BreadboardDefinition: ComponentDefinition = {
   category: 'prototyping',
   description: 'Solderless breadboard with dual power distribution buses and center divider for DIP ICs.',
   pins: generateBreadboardPins(),
+  specification: BreadboardSpecification,
+  subcomponents: BreadboardSpecification.subcomponents,
   dimensions: { width: 7.5, height: 0.6, depth: 4.2 },
 };
 
@@ -251,7 +268,8 @@ const esp32Connectors: VirtualConnector[] = [
     connectorType: 'micro-usb',
     interfaceType: 'usb',
     gender: 'female',
-    localPosition: { x: 0.0, y: 0.48, z: -2.3 },
+    localPosition: { x: 0.0, y: 0.32, z: 2.5 },
+    direction: { x: 0, y: 0, z: 1 },
     compatibleWith: ['micro-usb-plug', 'usb-cable-micro'],
     metadata: { label: '5V Power & UART Programming' },
   },
@@ -265,6 +283,8 @@ export const ESP32Definition: ComponentDefinition = {
   manufacturer: 'Espressif',
   pins: esp32Pins,
   connectors: esp32Connectors,
+  specification: ESP32Specification,
+  subcomponents: ESP32Specification.subcomponents,
   defaultState: { powered: false },
   dimensions: { width: 3.2, height: 0.4, depth: 5.2 },
 };
@@ -322,7 +342,7 @@ const rpiConnectors: VirtualConnector[] = [
     connectorType: 'usb-c-power',
     interfaceType: 'usb',
     gender: 'female',
-    localPosition: { x: -3.5, y: 0.6, z: 2.3 },
+    localPosition: { x: -3.5, y: 0.42, z: 2.8 },
     direction: { x: 0, y: 0, z: 1 },
     compatibleWith: ['usb-c-plug'],
     metadata: { label: '5V 3A Power Input' },
@@ -359,6 +379,8 @@ export const RaspberryPiDefinition: ComponentDefinition = {
   manufacturer: 'Raspberry Pi Foundation',
   pins: rpiPins,
   connectors: rpiConnectors,
+  specification: RaspberryPiSpecification,
+  subcomponents: RaspberryPiSpecification.subcomponents,
   defaultState: { powered: false },
   dimensions: { width: 8.5, height: 1.2, depth: 5.6 },
 };
@@ -395,6 +417,8 @@ export const UltrasonicSensorDefinition: ComponentDefinition = {
   category: 'sensor',
   description: 'HC-SR04 ultrasonic distance sensor with 40kHz sonar transmitter and receiver transducers.',
   pins: ultrasonicPins,
+  specification: UltrasonicSensorSpecification,
+  subcomponents: UltrasonicSensorSpecification.subcomponents,
   defaultState: { distanceCm: 42 },
   dimensions: { width: 4.5, height: 2.0, depth: 1.5 },
 };
@@ -429,6 +453,8 @@ export const ServoMotorDefinition: ComponentDefinition = {
   category: 'output',
   description: 'Micro 9g SG90 positional actuator servo with rotational control between 0° and 180°.',
   pins: servoPins,
+  specification: SG90ServoSpecification,
+  subcomponents: SG90ServoSpecification.subcomponents,
   defaultState: { angle: 90 },
   dimensions: { width: 2.3, height: 2.9, depth: 1.2 },
 };
@@ -552,6 +578,270 @@ export const USBCableDefinition: ComponentDefinition = {
   dimensions: { width: 3.2, height: 0.6, depth: 1.2 },
 };
 
+// 17. QUADCOPTER DRONE
+const droneConnectors: VirtualConnector[] = [
+  {
+    id: 'battery_xt60',
+    name: 'Main Battery Port (XT60 Female)',
+    connectorType: 'xt60-female',
+    interfaceType: 'xt60',
+    gender: 'female',
+    localPosition: { x: 0.0, y: 0.55, z: 1.75 },
+    direction: { x: 0, y: 0, z: 1 },
+    compatibleWith: ['xt60-male'],
+    metadata: { label: '11.1V - 14.8V (3S-4S LiPo)' },
+  },
+  {
+    id: 'fc_telemetry_usb',
+    name: 'FC Micro-USB Port',
+    connectorType: 'micro-usb',
+    interfaceType: 'usb',
+    gender: 'female',
+    localPosition: { x: -0.6, y: 0.85, z: 0.0 },
+    direction: { x: -1, y: 0, z: 0 },
+    compatibleWith: ['micro-usb-plug', 'usb-c-plug'],
+    metadata: { label: 'Betaflight / INAV Config' },
+  },
+  {
+    id: 'motor_1_port',
+    name: 'Motor 1 Port (Front Right)',
+    connectorType: 'motor-connector',
+    interfaceType: 'motor-connector',
+    gender: 'female',
+    localPosition: { x: 2.3, y: 0.45, z: -2.3 },
+    compatibleWith: ['motor-plug', 'motor-connector'],
+  },
+  {
+    id: 'motor_2_port',
+    name: 'Motor 2 Port (Front Left)',
+    connectorType: 'motor-connector',
+    interfaceType: 'motor-connector',
+    gender: 'female',
+    localPosition: { x: -2.3, y: 0.45, z: -2.3 },
+    compatibleWith: ['motor-plug', 'motor-connector'],
+  },
+  {
+    id: 'motor_3_port',
+    name: 'Motor 3 Port (Rear Left)',
+    connectorType: 'motor-connector',
+    interfaceType: 'motor-connector',
+    gender: 'female',
+    localPosition: { x: -2.3, y: 0.45, z: 2.3 },
+    compatibleWith: ['motor-plug', 'motor-connector'],
+  },
+  {
+    id: 'motor_4_port',
+    name: 'Motor 4 Port (Rear Right)',
+    connectorType: 'motor-connector',
+    interfaceType: 'motor-connector',
+    gender: 'female',
+    localPosition: { x: 2.3, y: 0.45, z: 2.3 },
+    compatibleWith: ['motor-plug', 'motor-connector'],
+  },
+];
+
+const dronePins: VirtualPin[] = [
+  { id: 'fc_sbus', name: 'SBUS (Radio In)', type: 'digital', direction: 'input', localPosition: { x: 0.45, y: 0.92, z: 0.35 }, connectorStyle: 'header-pin' },
+  { id: 'fc_5v', name: 'FC 5V BEC', type: 'power', direction: 'output', localPosition: { x: 0.45, y: 0.92, z: 0.15 }, connectorStyle: 'header-pin' },
+  { id: 'fc_gnd', name: 'FC GND', type: 'ground', direction: 'power', localPosition: { x: 0.45, y: 0.92, z: -0.05 }, connectorStyle: 'header-pin' },
+  { id: 'fc_tx', name: 'UART TX', type: 'digital', direction: 'output', localPosition: { x: 0.45, y: 0.92, z: -0.25 }, connectorStyle: 'header-pin' },
+  { id: 'fc_rx', name: 'UART RX', type: 'digital', direction: 'input', localPosition: { x: 0.45, y: 0.92, z: -0.45 }, connectorStyle: 'header-pin' },
+];
+
+export const DroneQuadDefinition: ComponentDefinition = {
+  type: 'drone-quadcopter',
+  displayName: 'Quadcopter Drone FPV',
+  category: 'drone',
+  description: '5-inch carbon fiber racing quadcopter with 4 brushless motors, 4-in-1 ESC, Flight Controller, and XT60 battery socket.',
+  pins: dronePins,
+  connectors: droneConnectors,
+  specification: DronePlatformSpecification,
+  subcomponents: DronePlatformSpecification.subcomponents,
+  defaultState: { powered: false, armed: false, throttle: 0 },
+  dimensions: { width: 6.8, height: 1.8, depth: 6.8 },
+};
+
+// 18. 3S LIPO BATTERY
+const lipoConnectors: VirtualConnector[] = [
+  {
+    id: 'xt60_male_plug',
+    name: 'Main XT60 Male Discharge Plug',
+    connectorType: 'xt60-male',
+    interfaceType: 'xt60',
+    gender: 'male',
+    localPosition: { x: 0.0, y: 0.5, z: 2.15 },
+    direction: { x: 0, y: 0, z: 1 },
+    compatibleWith: ['xt60-female'],
+    metadata: { label: '11.1V Max 60A Discharge' },
+  },
+  {
+    id: 'balance_jst_plug',
+    name: 'JST-XH 4-Pin Balance Connector',
+    connectorType: 'jst-xh-4',
+    interfaceType: 'jst',
+    gender: 'male',
+    localPosition: { x: -0.6, y: 0.3, z: 2.0 },
+    direction: { x: 0, y: 0, z: 1 },
+    metadata: { label: '3S Balance Lead' },
+  },
+];
+
+const lipoPins: VirtualPin[] = [
+  { id: 'lipo_pos', name: '+11.1V (VCC)', type: 'power', direction: 'output', localPosition: { x: -0.18, y: 0.5, z: 2.3 }, connectorStyle: 'lead-tip' },
+  { id: 'lipo_gnd', name: 'GND (0V)', type: 'ground', direction: 'power', localPosition: { x: 0.18, y: 0.5, z: 2.3 }, connectorStyle: 'lead-tip' },
+];
+
+export const LiPoBatteryDefinition: ComponentDefinition = {
+  type: 'lipo-battery',
+  displayName: '3S LiPo Battery (2200mAh)',
+  category: 'power',
+  description: '11.1V 3-cell 45C LiPo pack with heavy silicone leads, male XT60 connector, and balance lead.',
+  pins: lipoPins,
+  connectors: lipoConnectors,
+  specification: LiPoBatterySpecification,
+  subcomponents: LiPoBatterySpecification.subcomponents,
+  defaultState: { voltage: 11.1, capacity: 2200, percent: 98 },
+  dimensions: { width: 2.0, height: 1.0, depth: 3.6 },
+};
+
+// 19. ARDUINO NANO
+const nanoConnectors: VirtualConnector[] = [
+  {
+    id: 'mini_usb_port',
+    name: 'Mini-USB Port',
+    connectorType: 'mini-usb',
+    interfaceType: 'usb',
+    gender: 'female',
+    localPosition: { x: -2.0, y: 0.22, z: 0.0 },
+    direction: { x: -1, y: 0, z: 0 },
+    compatibleWith: ['usb-a-plug', 'usb-cable-b'],
+    metadata: { label: 'USB 2.0 Serial' },
+  },
+];
+
+const nanoPins: VirtualPin[] = [
+  // Left 15 pins (Z = -0.75)
+  ...['d1', 'd0', 'rst1', 'gnd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'd9', 'd10', 'd11', 'd12'].map((name, i) => ({
+    id: name,
+    name: name.toUpperCase(),
+    type: (name.startsWith('d3') || name.startsWith('d5') || name.startsWith('d6') || name.startsWith('d9') || name.startsWith('d10') || name.startsWith('d11') ? 'pwm' : name.startsWith('gnd') ? 'ground' : 'digital') as any,
+    direction: (name.startsWith('gnd') ? 'power' : 'bidirectional') as any,
+    localPosition: { x: -1.75 + i * 0.25, y: 0.25, z: -0.75 },
+    connectorStyle: 'header-pin' as const,
+  })),
+  // Right 15 pins (Z = +0.75)
+  ...['d13', '3v3', 'ref', 'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', '5v', 'rst2', 'gnd2', 'vin'].map((name, i) => ({
+    id: name,
+    name: name.toUpperCase(),
+    type: (name.startsWith('a') ? 'analog' : name === '5v' || name === '3v3' || name === 'vin' ? 'power' : name.startsWith('gnd') ? 'ground' : 'digital') as any,
+    direction: (name === '5v' || name === '3v3' || name === 'vin' || name.startsWith('gnd') ? 'power' : 'bidirectional') as any,
+    localPosition: { x: -1.75 + i * 0.25, y: 0.25, z: 0.75 },
+    connectorStyle: 'header-pin' as const,
+  })),
+];
+
+export const ArduinoNanoDefinition: ComponentDefinition = {
+  type: 'arduino-nano',
+  displayName: 'Arduino Nano V3',
+  category: 'microcontroller',
+  description: 'Compact ATmega328P microcontroller board with 30 header pins and Mini-USB.',
+  pins: nanoPins,
+  connectors: nanoConnectors,
+  dimensions: { width: 4.5, height: 0.8, depth: 1.8 },
+};
+
+// 20. PIR MOTION SENSOR HC-SR501
+const pirPins: VirtualPin[] = [
+  { id: 'vcc', name: 'VCC (5V)', type: 'power', direction: 'input', localPosition: { x: -0.25, y: 0.25, z: 1.15 }, connectorStyle: 'header-pin' },
+  { id: 'out', name: 'OUT (Digital 3.3V)', type: 'digital', direction: 'output', localPosition: { x: 0.0, y: 0.25, z: 1.15 }, connectorStyle: 'header-pin' },
+  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: 0.25, y: 0.25, z: 1.15 }, connectorStyle: 'header-pin' },
+];
+
+export const PIRSensorDefinition: ComponentDefinition = {
+  type: 'pir-sensor',
+  displayName: 'PIR Motion Sensor HC-SR501',
+  category: 'sensor',
+  description: 'Pyroelectric infrared passive motion sensor with Fresnel dome lens.',
+  pins: pirPins,
+  connectors: [],
+  defaultState: { motionDetected: false },
+  dimensions: { width: 3.2, height: 2.0, depth: 2.4 },
+};
+
+// 21. MPU-6050 6-DOF IMU
+const mpuPins: VirtualPin[] = [
+  { id: 'vcc', name: 'VCC (3.3V-5V)', type: 'power', direction: 'input', localPosition: { x: -0.7, y: 0.25, z: 0.65 }, connectorStyle: 'header-pin' },
+  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: -0.5, y: 0.25, z: 0.65 }, connectorStyle: 'header-pin' },
+  { id: 'scl', name: 'SCL (I2C Clock)', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.3, y: 0.25, z: 0.65 }, connectorStyle: 'header-pin' },
+  { id: 'sda', name: 'SDA (I2C Data)', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.1, y: 0.25, z: 0.65 }, connectorStyle: 'header-pin' },
+  { id: 'xda', name: 'XDA (Aux I2C Data)', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.1, y: 0.25, z: 0.65 }, connectorStyle: 'header-pin' },
+  { id: 'xcl', name: 'XCL (Aux I2C Clock)', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.3, y: 0.25, z: 0.65 }, connectorStyle: 'header-pin' },
+  { id: 'ad0', name: 'AD0 (I2C Address)', type: 'digital', direction: 'input', localPosition: { x: 0.5, y: 0.25, z: 0.65 }, connectorStyle: 'header-pin' },
+  { id: 'int', name: 'INT (Interrupt)', type: 'digital', direction: 'output', localPosition: { x: 0.7, y: 0.25, z: 0.65 }, connectorStyle: 'header-pin' },
+];
+
+export const MPU6050Definition: ComponentDefinition = {
+  type: 'mpu6050-sensor',
+  displayName: 'MPU-6050 6-DOF IMU',
+  category: 'sensor',
+  description: 'Integrated 3-axis accelerometer and 3-axis gyroscope with standard 8-pin I2C header.',
+  pins: mpuPins,
+  connectors: [],
+  defaultState: { accelX: 0, accelY: 0, accelZ: 1.0, gyroX: 0, gyroY: 0, gyroZ: 0 },
+  dimensions: { width: 2.1, height: 0.6, depth: 1.6 },
+};
+
+// 22. DC MOTOR 130
+const dcMotorPins: VirtualPin[] = [
+  { id: 'term_pos', name: '+ Positive (VCC)', type: 'power', direction: 'input', localPosition: { x: -0.42, y: 0.7, z: 1.05 }, connectorStyle: 'lead-tip' },
+  { id: 'term_neg', name: '- Negative (GND)', type: 'ground', direction: 'power', localPosition: { x: 0.42, y: 0.7, z: 1.05 }, connectorStyle: 'lead-tip' },
+];
+
+export const DCMotorDefinition: ComponentDefinition = {
+  type: 'dc-motor',
+  displayName: 'DC Motor 130 Hobby',
+  category: 'output',
+  description: 'Standard 3V-6V hobby DC motor with spinning shaft and dual solder terminals.',
+  pins: dcMotorPins,
+  connectors: [],
+  specification: DCMotorSpecification,
+  subcomponents: DCMotorSpecification.subcomponents,
+  defaultState: { speed: 0 },
+  dimensions: { width: 1.4, height: 1.4, depth: 2.5 },
+};
+
+// 23. RELAY MODULE 5V
+const relayConnectors: VirtualConnector[] = [
+  {
+    id: 'screw_terminals',
+    name: 'Relay Output Screw Terminals (NO / COM / NC)',
+    connectorType: 'terminal-block-3',
+    interfaceType: 'terminal-block',
+    gender: 'female',
+    contactCount: 3,
+    localPosition: { x: -1.8, y: 0.35, z: 0.0 },
+    direction: { x: -1, y: 0, z: 0 },
+    metadata: { label: '10A 250VAC Switching' },
+  },
+];
+
+const relayPins: VirtualPin[] = [
+  { id: 'vcc', name: 'VCC (5V Power)', type: 'power', direction: 'input', localPosition: { x: 1.7, y: 0.25, z: 0.5 }, connectorStyle: 'header-pin' },
+  { id: 'gnd', name: 'GND (Ground)', type: 'ground', direction: 'power', localPosition: { x: 1.7, y: 0.25, z: 0.8 }, connectorStyle: 'header-pin' },
+  { id: 'in', name: 'IN (Trigger Signal)', type: 'digital', direction: 'input', localPosition: { x: 1.7, y: 0.25, z: 1.1 }, connectorStyle: 'header-pin' },
+];
+
+export const RelayModuleDefinition: ComponentDefinition = {
+  type: 'relay-module',
+  displayName: '5V Relay Module',
+  category: 'output',
+  description: 'Opto-isolated 5V electromechanical relay with NO/COM/NC terminal block.',
+  pins: relayPins,
+  connectors: relayConnectors,
+  defaultState: { triggered: false, powered: true },
+  dimensions: { width: 4.2, height: 1.8, depth: 2.6 },
+};
+
 // Register all definitions into ComponentRegistry
 export function registerAllComponents() {
   ComponentRegistry.register(ArduinoUnoDefinition);
@@ -570,6 +860,13 @@ export function registerAllComponents() {
   ComponentRegistry.register(DCPowerSupplyDefinition);
   ComponentRegistry.register(DHT11SensorDefinition);
   ComponentRegistry.register(USBCableDefinition);
+  ComponentRegistry.register(DroneQuadDefinition);
+  ComponentRegistry.register(LiPoBatteryDefinition);
+  ComponentRegistry.register(ArduinoNanoDefinition);
+  ComponentRegistry.register(PIRSensorDefinition);
+  ComponentRegistry.register(MPU6050Definition);
+  ComponentRegistry.register(DCMotorDefinition);
+  ComponentRegistry.register(RelayModuleDefinition);
 }
 
 // Call on startup

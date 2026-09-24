@@ -5,6 +5,7 @@ import { ComponentRenderer } from '../../components3d/ComponentRenderer';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { THEME } from '../../utils/theme';
 import { TransformGizmo } from '../Transform/TransformGizmo';
+import { HardwareDebugOverlay } from './HardwareDebugOverlay';
 
 interface Props {
   component: VirtualComponent;
@@ -72,6 +73,11 @@ export const ComponentObject: React.FC<Props> = ({ component }) => {
       >
         {/* Component 3D hardware model & pins */}
         <ComponentRenderer component={component} />
+
+        {/* Visual Hardware Debug Mode: Pin & Connector Coordinates Overlay */}
+        {viewState.hardwareDebugMode && (isSelected || viewState.selectedComponentIds.length === 0) && (
+          <HardwareDebugOverlay component={component} />
+        )}
 
         {/* Selected Ground Contact Glow / Outline Ring */}
         {isSelected && (

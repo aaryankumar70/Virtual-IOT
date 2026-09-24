@@ -1,5 +1,6 @@
 import { VirtualPin, Vector3D, Euler3D } from '../pins/VirtualPin';
 import { VirtualConnector, VirtualPort } from '../connections/VirtualConnector';
+import { HardwareSpecification, HardwareSubcomponent } from '../hardware/HardwareSpecification';
 
 export interface ComponentTransform {
   position: Vector3D;
@@ -23,5 +24,7 @@ export interface VirtualComponent {
   connectors?: VirtualConnector[];
   ports?: VirtualPort[];
   metadata: ComponentMetadata;
+  specification?: HardwareSpecification;
+  subcomponents?: HardwareSubcomponent[];
   state: Record<string, unknown>;
 }

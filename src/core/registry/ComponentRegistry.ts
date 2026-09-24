@@ -1,16 +1,19 @@
 import { VirtualComponent } from '../components/VirtualComponent';
 import { VirtualPin } from '../pins/VirtualPin';
 import { VirtualConnector, VirtualPort } from '../connections/VirtualConnector';
+import { HardwareSpecification, HardwareSubcomponent } from '../hardware/HardwareSpecification';
 
 export interface ComponentDefinition {
   type: string;
   displayName: string;
-  category: 'microcontroller' | 'board' | 'prototyping' | 'output' | 'input' | 'sensor' | 'passive' | 'communication' | 'power' | 'display' | 'misc';
+  category: 'microcontroller' | 'board' | 'prototyping' | 'output' | 'input' | 'sensor' | 'passive' | 'communication' | 'power' | 'display' | 'drone' | 'misc';
   description: string;
   manufacturer?: string;
   pins: VirtualPin[];
   connectors?: VirtualConnector[];
   ports?: VirtualPort[];
+  specification?: HardwareSpecification;
+  subcomponents?: HardwareSubcomponent[];
   defaultState?: Record<string, unknown>;
   dimensions: { width: number; height: number; depth: number };
 }

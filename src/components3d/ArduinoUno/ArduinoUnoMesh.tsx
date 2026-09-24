@@ -168,6 +168,87 @@ export const ArduinoUnoMesh: React.FC<ComponentMeshProps> = ({ component }) => {
         </mesh>
       </group>
 
+      {/* 4 Plated M3 Mounting Holes */}
+      {[
+        [-3.1, -1.9],
+        [1.9, -2.4],
+        [1.9, 2.4],
+        [-2.9, 2.4],
+      ].map(([x, z], i) => (
+        <group key={i} position={[x, 0.28, z]}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.16, 0.28, 16]} />
+            <meshStandardMaterial color="#b7791f" metalness={0.85} roughness={0.25} />
+          </mesh>
+          <mesh position={[0, -0.15, 0]}>
+            <cylinderGeometry args={[0.15, 0.15, 0.3, 16]} />
+            <meshStandardMaterial color="#09090b" roughness={0.9} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* 2x 100uF Aluminum Electrolytic Capacitors (Near DC Jack and Regulator) */}
+      <group position={[-1.8, 0.48, 1.4]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.3, 0.3, 0.65, 18]} />
+          <meshStandardMaterial color="#cbd5e1" metalness={0.9} roughness={0.2} />
+        </mesh>
+        {/* Negative Cathode Strip */}
+        <mesh position={[-0.26, 0, 0]}>
+          <boxGeometry args={[0.08, 0.64, 0.12]} />
+          <meshStandardMaterial color="#09090b" roughness={0.6} />
+        </mesh>
+      </group>
+      <group position={[-1.4, 0.48, 0.5]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.26, 0.26, 0.58, 18]} />
+          <meshStandardMaterial color="#cbd5e1" metalness={0.9} roughness={0.2} />
+        </mesh>
+        <mesh position={[-0.22, 0, 0]}>
+          <boxGeometry args={[0.08, 0.57, 0.1]} />
+          <meshStandardMaterial color="#09090b" roughness={0.6} />
+        </mesh>
+      </group>
+
+      {/* Polyfuse 500mA PTC (Gold square near USB port) */}
+      <mesh position={[-2.1, 0.3, -1.0]}>
+        <boxGeometry args={[0.4, 0.08, 0.35]} />
+        <meshStandardMaterial color="#eab308" metalness={0.7} roughness={0.3} />
+      </mesh>
+
+      {/* 2x ICSP Headers (2x3 Gold Pins) */}
+      {/* ATmega328P ICSP Header */}
+      <group position={[2.9, 0.45, 0.2]}>
+        <mesh position={[0, -0.1, 0]}>
+          <boxGeometry args={[0.55, 0.15, 0.8]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+        {[-0.14, 0.14].map((xOff, xi) =>
+          [-0.25, 0, 0.25].map((zOff, zi) => (
+            <mesh key={`${xi}-${zi}`} position={[xOff, 0.1, zOff]}>
+              <boxGeometry args={[0.06, 0.4, 0.06]} />
+              <meshStandardMaterial color="#fbbf24" metalness={0.95} roughness={0.2} />
+            </mesh>
+          ))
+        )}
+      </group>
+
+      {/* ATmega16U2 ICSP Header */}
+      <group position={[-2.4, 0.45, -0.8]}>
+        <mesh position={[0, -0.1, 0]}>
+          <boxGeometry args={[0.55, 0.15, 0.8]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+        {[-0.14, 0.14].map((xOff, xi) =>
+          [-0.25, 0, 0.25].map((zOff, zi) => (
+            <mesh key={`${xi}-${zi}`} position={[xOff, 0.1, zOff]}>
+              <boxGeometry args={[0.06, 0.4, 0.06]} />
+              <meshStandardMaterial color="#fbbf24" metalness={0.95} roughness={0.2} />
+            </mesh>
+          ))
+        )}
+      </group>
+
       {/* Female Header Strips (Top & Bottom Black Plastic Blocks) */}
       {/* Top Header */}
       <mesh position={[0.4, 0.35, -2.2]} castShadow>

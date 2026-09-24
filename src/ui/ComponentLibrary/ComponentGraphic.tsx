@@ -358,6 +358,128 @@ export const ComponentGraphic: React.FC<Props> = ({ type, className = 'w-full h-
         </svg>
       );
 
+    case 'drone-quadcopter':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Carbon Fiber X-Arms */}
+          <line x1="30" y1="20" x2="130" y2="100" stroke="#27272a" strokeWidth="6" strokeLinecap="round" />
+          <line x1="130" y1="20" x2="30" y2="100" stroke="#27272a" strokeWidth="6" strokeLinecap="round" />
+          {/* 4 Motors with spinning props */}
+          <circle cx="30" cy="20" r="10" fill="#3f3f46" stroke="#dc2626" strokeWidth="1.5" />
+          <ellipse cx="30" cy="20" rx="18" ry="4" fill="#0284c7" opacity="0.7" transform="rotate(30 30 20)" />
+          <circle cx="130" cy="20" r="10" fill="#3f3f46" stroke="#dc2626" strokeWidth="1.5" />
+          <ellipse cx="130" cy="20" rx="18" ry="4" fill="#0284c7" opacity="0.7" transform="rotate(-30 130 20)" />
+          <circle cx="30" cy="100" r="10" fill="#3f3f46" stroke="#dc2626" strokeWidth="1.5" />
+          <ellipse cx="30" cy="100" rx="18" ry="4" fill="#0284c7" opacity="0.7" transform="rotate(-30 30 100)" />
+          <circle cx="130" cy="100" r="10" fill="#3f3f46" stroke="#dc2626" strokeWidth="1.5" />
+          <ellipse cx="130" cy="100" rx="18" ry="4" fill="#0284c7" opacity="0.7" transform="rotate(30 130 100)" />
+          {/* Center Carbon Frame Plate */}
+          <rect x="62" y="42" width="36" height="36" rx="4" fill="#18181b" stroke="#3f3f46" strokeWidth="1.5" />
+          {/* FC Board */}
+          <rect x="68" y="48" width="24" height="24" rx="2" fill="#1e3a8a" />
+          <circle cx="75" cy="55" r="2" fill="#22c55e" />
+          <circle cx="85" cy="55" r="2" fill="#3b82f6" />
+          {/* XT60 connector at rear */}
+          <rect x="74" y="80" width="12" height="8" rx="1" fill="#eab308" />
+          <text x="80" y="116" fill="#64748b" fontSize="7" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">FPV DRONE</text>
+        </svg>
+      );
+
+    case 'lipo-battery':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Yellow Shrinkwrap Pack */}
+          <rect x="42" y="24" width="76" height="52" rx="4" fill="#eab308" stroke="#ca8a04" strokeWidth="1.5" />
+          <rect x="42" y="40" width="76" height="20" fill="#1e3a8a" />
+          <text x="80" y="53" fill="#ffffff" fontSize="7" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">3S 2200mAh</text>
+          <text x="80" y="70" fill="#18181b" fontSize="6" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">11.1V 45C</text>
+          {/* Discharge Leads */}
+          <path d="M72 76 V95 H65" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" />
+          <path d="M88 76 V95 H95" stroke="#18181b" strokeWidth="3" strokeLinecap="round" />
+          {/* XT60 Male Plug */}
+          <rect x="68" y="94" width="24" height="12" rx="2" fill="#eab308" stroke="#ca8a04" strokeWidth="1" />
+          <circle cx="75" cy="100" r="2" fill="#f59e0b" />
+          <circle cx="85" cy="100" r="2" fill="#f59e0b" />
+        </svg>
+      );
+
+    case 'arduino-nano':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="30" y="32" width="100" height="56" rx="4" fill="#008184" stroke="#005d5f" strokeWidth="1.5" />
+          {/* Mini-USB */}
+          <rect x="22" y="48" width="14" height="24" rx="1.5" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1" />
+          {/* ATmega328P Chip */}
+          <rect x="80" y="48" width="22" height="22" rx="2" fill="#18181b" transform="rotate(45 91 59)" />
+          {/* Dual Pin Header Rails */}
+          <rect x="36" y="34" width="88" height="6" fill="#0f172a" />
+          <rect x="36" y="80" width="88" height="6" fill="#0f172a" />
+          <text x="64" y="62" fill="#ffffff" fontSize="7" fontWeight="bold" fontFamily="sans-serif">NANO</text>
+        </svg>
+      );
+
+    case 'pir-sensor':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="40" y="24" width="80" height="72" rx="4" fill="#15803d" stroke="#166534" strokeWidth="1.5" />
+          {/* Fresnel Lens Dome */}
+          <circle cx="80" cy="54" r="24" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1.5" />
+          <circle cx="80" cy="54" r="16" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="3 2" />
+          <circle cx="80" cy="54" r="8" stroke="#cbd5e1" strokeWidth="1" />
+          {/* 3 Pins Bottom */}
+          <rect x="70" y="96" width="20" height="12" rx="1" fill="#0f172a" />
+          <line x1="74" y1="108" x2="74" y2="116" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+          <line x1="80" y1="108" x2="80" y2="116" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+          <line x1="86" y1="108" x2="86" y2="116" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      );
+
+    case 'mpu6050-sensor':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="44" y="30" width="72" height="60" rx="3" fill="#1e40af" stroke="#1e3a8a" strokeWidth="1.5" />
+          <rect x="70" y="46" width="20" height="20" rx="1" fill="#09090b" stroke="#334155" strokeWidth="1" />
+          <circle cx="74" cy="50" r="1.5" fill="#e2e8f0" />
+          {/* 8 Pins Bottom */}
+          <rect x="48" y="82" width="64" height="6" fill="#0f172a" />
+          <text x="80" y="40" fill="#ffffff" fontSize="6" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">MPU-6050</text>
+        </svg>
+      );
+
+    case 'dc-motor':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Motor Body */}
+          <rect x="48" y="32" width="64" height="56" rx="10" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="2" />
+          {/* Brass Output Shaft */}
+          <rect x="77" y="12" width="6" height="20" rx="1" fill="#eab308" />
+          <circle cx="80" cy="12" r="8" fill="#f97316" />
+          {/* Rear Endcap */}
+          <rect x="54" y="88" width="52" height="12" rx="2" fill="#dc2626" />
+          {/* Terminals */}
+          <rect x="62" y="100" width="6" height="8" fill="#fbbf24" />
+          <rect x="92" y="100" width="6" height="8" fill="#fbbf24" />
+        </svg>
+      );
+
+    case 'relay-module':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="34" y="24" width="92" height="72" rx="4" fill="#1e3a8a" stroke="#172554" strokeWidth="1.5" />
+          {/* Blue Songle Cube */}
+          <rect x="40" y="32" width="46" height="42" rx="2" fill="#0284c7" stroke="#0369a1" strokeWidth="1" />
+          <text x="63" y="52" fill="#ffffff" fontSize="6" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">SONGLE</text>
+          <text x="63" y="60" fill="#ffffff" fontSize="5" fontFamily="sans-serif" textAnchor="middle">5V RELAY</text>
+          {/* 3 Screw Terminals Left */}
+          <rect x="24" y="38" width="16" height="30" rx="2" fill="#2563eb" stroke="#1d4ed8" strokeWidth="1" />
+          <circle cx="32" cy="44" r="2.5" fill="#eab308" />
+          <circle cx="32" cy="53" r="2.5" fill="#eab308" />
+          <circle cx="32" cy="62" r="2.5" fill="#eab308" />
+          {/* 3 Header Pins Right */}
+          <rect x="110" y="44" width="8" height="20" fill="#0f172a" />
+        </svg>
+      );
+
     default:
       return (
         <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">

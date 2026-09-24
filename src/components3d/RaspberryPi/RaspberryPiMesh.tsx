@@ -154,6 +154,54 @@ export const RaspberryPiMesh: React.FC<ComponentMeshProps> = ({ component }) => 
         <meshStandardMaterial color="#e2e8f0" roughness={0.6} />
       </mesh>
 
+      {/* USB-C Power Jack Metal Shield (5V 3A Input) */}
+      <group position={[-3.5, 0.38, 2.75]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.9, 0.32, 0.4]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.2} />
+        </mesh>
+        {/* Inner Receptacle Void */}
+        <mesh position={[0, 0, 0.18]}>
+          <boxGeometry args={[0.7, 0.16, 0.05]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.9} />
+        </mesh>
+      </group>
+
+      {/* Dual-band Wi-Fi & Bluetooth RF Shielding Can */}
+      <group position={[-2.2, 0.35, -0.9]}>
+        <mesh castShadow>
+          <boxGeometry args={[1.4, 0.18, 1.2]} />
+          <meshStandardMaterial color="#cbd5e1" metalness={0.88} roughness={0.25} />
+        </mesh>
+        {/* Embossed Raspberry Symbol / RF marking */}
+        <mesh position={[0, 0.1, 0]}>
+          <boxGeometry args={[0.8, 0.02, 0.6]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.7} roughness={0.3} />
+        </mesh>
+      </group>
+
+      {/* PMIC Power Management IC */}
+      <mesh position={[-2.8, 0.3, 1.4]} castShadow>
+        <boxGeometry args={[0.8, 0.12, 0.8]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.6} />
+      </mesh>
+
+      {/* Status LEDs (PWR Red + ACT Green) */}
+      <mesh position={[-3.8, 0.28, 2.4]}>
+        <boxGeometry args={[0.08, 0.06, 0.12]} />
+        <meshStandardMaterial color="#ef4444" emissive="#dc2626" emissiveIntensity={0.8} />
+      </mesh>
+      <mesh position={[-3.8, 0.28, 2.15]}>
+        <boxGeometry args={[0.08, 0.06, 0.12]} />
+        <meshStandardMaterial color="#22c55e" emissive="#16a34a" emissiveIntensity={0.8} />
+      </mesh>
+
+      {/* Micro-SD Slot on Underside */}
+      <mesh position={[-3.9, 0.02, 0]} castShadow>
+        <boxGeometry args={[1.5, 0.12, 1.2]} />
+        <meshStandardMaterial color="#475569" metalness={0.8} roughness={0.3} />
+      </mesh>
+
       {/* Connectors (USB-C Power, USB-A Ports, GPIO Header) */}
       {component.connectors?.map((connector) => (
         <ConnectorMesh

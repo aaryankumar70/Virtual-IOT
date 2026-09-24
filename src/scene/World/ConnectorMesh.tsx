@@ -669,6 +669,131 @@ export const ConnectorMesh: React.FC<ConnectorMeshProps> = React.memo(
         );
       }
 
+      // 6. XT60 HIGH-CURRENT BATTERY CONNECTORS
+      if (type.includes('xt60') || connector.interfaceType === 'xt60') {
+        const isMalePlug = isMale || type.includes('male') || type.includes('plug');
+        return (
+          <group>
+            {/* Authentic Yellow High-Temp Nylon Housing with D-chamfer profile */}
+            <mesh position={[0, 0.22, 0]} castShadow>
+              <boxGeometry args={[0.7, 0.38, 0.6]} />
+              <meshStandardMaterial color="#eab308" roughness={0.4} metalness={0.05} />
+            </mesh>
+            {/* Top Chamfer Lip (Anti-reverse notch) */}
+            <mesh position={[0, 0.38, 0]}>
+              <boxGeometry args={[0.55, 0.08, 0.55]} />
+              <meshStandardMaterial color="#ca8a04" roughness={0.5} />
+            </mesh>
+            {/* Gold Bullet Contacts (2 pins: Positive + Negative) */}
+            {[-0.18, 0.18].map((xOff, idx) => (
+              <group key={idx} position={[xOff, 0.22, 0]}>
+                {isMalePlug ? (
+                  // Male Gold Bullet Contact Pin protruding outwards
+                  <mesh position={[0, 0, 0.2]} rotation={[Math.PI / 2, 0, 0]}>
+                    <cylinderGeometry args={[0.07, 0.07, 0.32, 16]} />
+                    <meshStandardMaterial color="#f59e0b" metalness={0.95} roughness={0.15} />
+                  </mesh>
+                ) : (
+                  // Female Gold Split-Sleeve Recessed Cavity
+                  <mesh position={[0, 0, 0.1]} rotation={[Math.PI / 2, 0, 0]}>
+                    <cylinderGeometry args={[0.09, 0.09, 0.25, 16]} />
+                    <meshStandardMaterial color="#0f172a" roughness={0.9} />
+                  </mesh>
+                )}
+                {/* Polarity Silkscreen (+ / -) Pad */}
+                <mesh position={[0, 0.21, 0]}>
+                  <boxGeometry args={[0.1, 0.01, 0.1]} />
+                  <meshStandardMaterial color={idx === 0 ? '#dc2626' : '#18181b'} />
+                </mesh>
+              </group>
+            ))}
+          </group>
+        );
+      }
+
+      // 7. JST / BALANCE CONNECTORS (White Keyed Nylon)
+      if (type.includes('jst') || connector.interfaceType === 'jst') {
+        const pinCount = connector.contactCount || 4;
+        const width = Math.max(0.45, pinCount * 0.14);
+        return (
+          <group>
+            {/* White Nylon Keyed Body */}
+            <mesh position={[0, 0.16, 0]} castShadow>
+              <boxGeometry args={[width, 0.28, 0.35]} />
+              <meshStandardMaterial color="#f8fafc" roughness={0.35} />
+            </mesh>
+            {/* Top Latch Ridge */}
+            <mesh position={[0, 0.3, 0]}>
+              <boxGeometry args={[width * 0.7, 0.06, 0.15]} />
+              <meshStandardMaterial color="#e2e8f0" roughness={0.4} />
+            </mesh>
+            {/* Contact Cavities */}
+            {Array.from({ length: pinCount }).map((_, idx) => {
+              const xOff = (idx - (pinCount - 1) / 2) * 0.12;
+              return (
+                <mesh key={idx} position={[xOff, 0.16, 0.15]}>
+                  <boxGeometry args={[0.05, 0.14, 0.08]} />
+                  <meshStandardMaterial color="#0f172a" roughness={0.9} />
+                </mesh>
+              );
+            })}
+          </group>
+        );
+      }
+
+      // 8. SCREW TERMINAL BLOCKS (Relays, Motor Drivers, Power distribution)
+      if (type.includes('terminal-block') || connector.interfaceType === 'terminal-block') {
+        const pinCount = connector.contactCount || 3;
+        const width = Math.max(0.6, pinCount * 0.35);
+        return (
+          <group>
+            {/* Blue/Green Heavy Plastic Housing */}
+            <mesh position={[0, 0.32, 0]} castShadow>
+              <boxGeometry args={[width, 0.6, 0.55]} />
+              <meshStandardMaterial color="#2563eb" roughness={0.6} />
+            </mesh>
+            {/* Screw Ports on top & Wire entry slots on front */}
+            {Array.from({ length: pinCount }).map((_, idx) => {
+              const xOff = (idx - (pinCount - 1) / 2) * 0.32;
+              return (
+                <group key={idx} position={[xOff, 0, 0]}>
+                  {/* Brass Screw Head on Top */}
+                  <mesh position={[0, 0.63, 0]}>
+                    <cylinderGeometry args={[0.08, 0.08, 0.04, 14]} />
+                    <meshStandardMaterial color="#eab308" metalness={0.9} roughness={0.2} />
+                  </mesh>
+                  {/* Wire Insertion Hole in Front Face */}
+                  <mesh position={[0, 0.3, 0.28]}>
+                    <boxGeometry args={[0.16, 0.2, 0.06]} />
+                    <meshStandardMaterial color="#09090b" roughness={0.9} />
+                  </mesh>
+                </group>
+              );
+            })}
+          </group>
+        );
+      }
+
+      // 9. MOTOR 3-PIN CONNECTOR
+      if (type.includes('motor-connector') || connector.interfaceType === 'motor-connector') {
+        return (
+          <group>
+            {/* 3-Wire DuPont Female Shroud */}
+            <mesh position={[0, 0.16, 0]} castShadow>
+              <boxGeometry args={[0.75, 0.28, 0.32]} />
+              <meshStandardMaterial color="#1e293b" roughness={0.7} />
+            </mesh>
+            {/* 3 Contact Holes */}
+            {[-0.22, 0, 0.22].map((xOff, idx) => (
+              <mesh key={idx} position={[xOff, 0.16, 0.14]}>
+                <boxGeometry args={[0.08, 0.16, 0.06]} />
+                <meshStandardMaterial color="#0f172a" roughness={0.9} />
+              </mesh>
+            ))}
+          </group>
+        );
+      }
+
       // Default generic connector mesh
       return (
         <mesh position={[0, 0.15, 0]}>

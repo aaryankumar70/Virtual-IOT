@@ -9,6 +9,7 @@ import {
   Layers,
   ArrowRight,
   Plus,
+  Plane,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
@@ -16,6 +17,8 @@ import { historyManager, Commands } from '../../editor/history/historyManager';
 import { ComponentGraphic } from '../ComponentLibrary/ComponentGraphic';
 import { PhysicalConnectionType } from '../../core/connections/Connection';
 import { createComponent } from '../../core/factories/componentFactory';
+import { HardwareSpecificationPanel } from './HardwareSpecificationPanel';
+import { droneSimStore } from '../../core/drone/droneSimStore';
 
 export const ComponentInspectorPanel: React.FC = () => {
   const viewState = useView();
@@ -355,7 +358,52 @@ export const ComponentInspectorPanel: React.FC = () => {
             </div>
           </div>
 
-          {/* Section: Transform */}
+          {viewState.inspectorTab === 'properties' ? (
+            <HardwareSpecificationPanel component={selectedComponent} />
+          ) : (
+            <>
+              {/* Hardware Specs Quick Link Banner */}
+              {selectedComponent.specification && (
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-blue-50/70 border border-blue-200/80 text-[11px]">
+                  <div>
+                    <span className="font-semibold text-blue-900 block">Hardware Specifications</span>
+                    <span className="text-blue-700/80 text-[10px]">
+                      {selectedComponent.subcomponents?.length || selectedComponent.specification.subcomponents?.length || 0} subcomponents •{' '}
+                      {selectedComponent.specification.dimensions.widthMm}×{selectedComponent.specification.dimensions.depthMm}mm
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => viewStore.setInspectorTab('properties')}
+                    className="px-2 py-1 bg-white hover:bg-blue-50 text-blue-700 font-medium border border-blue-200 rounded text-[10px] transition-colors cursor-pointer"
+                  >
+                    Datasheet →
+                  </button>
+                </div>
+              )}
+
+              {/* Drone Flight Simulation Fast Launch Banner */}
+              {selectedComponent.type === 'drone-quad' && (
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px]">
+                  <div>
+                    <span className="font-bold text-emerald-950 flex items-center gap-1">
+                      <Plane size={13} className="text-emerald-600" />
+                      Flight Simulation Lab
+                    </span>
+                    <span className="text-emerald-700/90 text-[10px]">
+                      Aerodynamics, 6-DOF physics, motor thrust & telemetry
+                    </span>
+                  </div>
+                  <button
+                    id="btn-fly-selected-drone"
+                    onClick={() => droneSimStore.enterDroneSim()}
+                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded text-[11px] transition-colors shadow-xs"
+                  >
+                    Enter Flight →
+                  </button>
+                </div>
+              )}
+
+              {/* Section: Transform */}
           <div className="flex flex-col gap-2">
             <span className="font-bold text-xs text-slate-900">Transform</span>
 
@@ -717,6 +765,8 @@ export const ComponentInspectorPanel: React.FC = () => {
               <p className="text-[11px] text-slate-400 py-1">No active connections</p>
             )}
           </div>
+          </>
+          )}
 
           {/* Delete Component Button */}
           <div className="pt-2 mt-auto">

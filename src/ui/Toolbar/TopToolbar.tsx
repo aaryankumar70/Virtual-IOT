@@ -16,11 +16,13 @@ import {
   Moon,
   User,
   Cpu,
+  Plane,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
 import { historyManager, Commands } from '../../editor/history/historyManager';
 import { serializeProject, deserializeProject } from '../../project/serialization/projectSchema';
+import { droneSimStore } from '../../core/drone/droneSimStore';
 
 export const TopToolbar: React.FC = () => {
   const viewState = useView();
@@ -263,6 +265,19 @@ export const TopToolbar: React.FC = () => {
 
       {/* Right: Actions & User */}
       <div className="flex items-center gap-2">
+        {/* Drone Engineering Flight Lab Button */}
+        <button
+          id="btn-launch-drone-lab"
+          onClick={() => droneSimStore.enterDroneSim()}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors shadow-sm"
+          title="Launch Drone Engineering Simulation Lab"
+        >
+          <Plane size={14} className="stroke-[2.2]" />
+          <span>Flight Sim Lab</span>
+        </button>
+
+        <div className="w-[1px] h-5 bg-slate-200 mx-0.5" />
+
         {/* Save button */}
         <button
           id="btn-export-project"
