@@ -10,7 +10,8 @@ export type ConnectorInterfaceType =
   | 'jst'
   | 'xt60'
   | 'motor-connector'
-  | 'terminal-block';
+  | 'terminal-block'
+  | 'rf-sma';
 
 export type ConnectorGender = 'male' | 'female' | 'none';
 

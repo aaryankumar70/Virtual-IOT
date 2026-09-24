@@ -25,6 +25,11 @@ import { PIRSensorMesh } from './PIRSensor/PIRSensorMesh';
 import { MPU6050Mesh } from './MPU6050/MPU6050Mesh';
 import { DCMotorMesh } from './DCMotor/DCMotorMesh';
 import { RelayModuleMesh } from './RelayModule/RelayModuleMesh';
+import { OLEDDisplayMesh } from './Display/OLEDDisplayMesh';
+import { LCD1602Mesh } from './Display/LCD1602Mesh';
+import { TFTScreenMesh } from './Display/TFTScreenMesh';
+import { TM1637SegmentMesh } from './Display/TM1637SegmentMesh';
+import { FPVMonitorMesh } from './Display/FPVMonitorMesh';
 
 interface Props {
   component: VirtualComponent;
@@ -78,6 +83,16 @@ export const ComponentRenderer: React.FC<Props> = ({ component }) => {
       return <DCMotorMesh component={component} />;
     case 'relay-module':
       return <RelayModuleMesh component={component} />;
+    case 'oled-display':
+      return <OLEDDisplayMesh component={component} />;
+    case 'lcd-1602':
+      return <LCD1602Mesh component={component} />;
+    case 'tft-screen':
+      return <TFTScreenMesh component={component} />;
+    case 'tm1637-display':
+      return <TM1637SegmentMesh component={component} />;
+    case 'fpv-monitor':
+      return <FPVMonitorMesh component={component} />;
     default:
       return (
         <mesh position={[0, 0.5, 0]}>

@@ -480,6 +480,106 @@ export const ComponentGraphic: React.FC<Props> = ({ type, className = 'w-full h-
         </svg>
       );
 
+    case 'oled-display':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Blue PCB */}
+          <rect x="36" y="16" width="88" height="88" rx="6" fill="#1e3a8a" stroke="#172554" strokeWidth="1.5" />
+          {/* 4 M2 Corner Holes */}
+          <circle cx="42" cy="22" r="3" fill="#ca8a04" />
+          <circle cx="118" cy="22" r="3" fill="#ca8a04" />
+          <circle cx="42" cy="98" r="3" fill="#ca8a04" />
+          <circle cx="118" cy="98" r="3" fill="#ca8a04" />
+          {/* 4-Pin Top Header */}
+          <rect x="62" y="12" width="36" height="8" rx="1" fill="#0f172a" />
+          <circle cx="68" cy="16" r="1.5" fill="#eab308" />
+          <circle cx="76" cy="16" r="1.5" fill="#eab308" />
+          <circle cx="84" cy="16" r="1.5" fill="#eab308" />
+          <circle cx="92" cy="16" r="1.5" fill="#eab308" />
+          {/* OLED Glass Screen Frame */}
+          <rect x="42" y="30" width="76" height="58" rx="3" fill="#05070c" stroke="#334155" strokeWidth="1" />
+          {/* OLED Glowing Cyan Text & Wave */}
+          <text x="50" y="44" fill="#38bdf8" fontSize="7" fontWeight="bold" fontFamily="monospace">SSD1306 OLED</text>
+          <text x="50" y="55" fill="#38bdf8" fontSize="6" fontFamily="monospace">TEMP: 24.8°C</text>
+          <text x="50" y="65" fill="#38bdf8" fontSize="6" fontFamily="monospace">BATT: 98% OK</text>
+          <path d="M48 76 Q60 68 72 76 T96 76 T112 76" stroke="#38bdf8" strokeWidth="1.5" fill="none" />
+        </svg>
+      );
+
+    case 'lcd-1602':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Green Motherboard PCB */}
+          <rect x="18" y="32" width="124" height="56" rx="4" fill="#15803d" stroke="#166534" strokeWidth="1.5" />
+          {/* 16 Pin Header Top */}
+          <rect x="26" y="34" width="70" height="4" fill="#cbd5e1" />
+          {/* Black Metal Bezel */}
+          <rect x="28" y="42" width="104" height="38" rx="2" fill="#0f172a" stroke="#334155" strokeWidth="1" />
+          {/* Blue Glowing LCD Face */}
+          <rect x="34" y="46" width="92" height="30" rx="1" fill="#1d4ed8" />
+          {/* Dot Matrix Text White */}
+          <text x="40" y="58" fill="#ffffff" fontSize="7.5" fontWeight="bold" fontFamily="monospace">VIRTUAL IOT LAB </text>
+          <text x="40" y="70" fill="#ffffff" fontSize="7.5" fontWeight="bold" fontFamily="monospace">SYS OK  24.5C  </text>
+        </svg>
+      );
+
+    case 'tft-screen':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Red PCB */}
+          <rect x="36" y="16" width="88" height="88" rx="4" fill="#b91c1c" stroke="#991b1b" strokeWidth="1.5" />
+          {/* 8-Pin Header at Bottom */}
+          <rect x="46" y="94" width="68" height="6" rx="1" fill="#0f172a" />
+          {/* Black IPS Screen Frame */}
+          <rect x="44" y="24" width="72" height="66" rx="2" fill="#020617" stroke="#334155" strokeWidth="1" />
+          {/* Colorful Gauge / Dashboard UI */}
+          <circle cx="80" cy="54" r="20" stroke="#334155" strokeWidth="4" fill="none" />
+          <path d="M66 68 A20 20 0 1 1 94 68" stroke="#06b6d4" strokeWidth="4" fill="none" strokeLinecap="round" />
+          <text x="80" y="56" fill="#f8fafc" fontSize="8" fontWeight="bold" fontFamily="monospace" textAnchor="middle">75%</text>
+          <text x="80" y="64" fill="#94a3b8" fontSize="5" fontFamily="sans-serif" textAnchor="middle">SPEED</text>
+          {/* Status Bar */}
+          <rect x="48" y="78" width="64" height="6" rx="2" fill="#1e293b" />
+          <rect x="48" y="78" width="44" height="6" rx="2" fill="#10b981" />
+        </svg>
+      );
+
+    case 'tm1637-display':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Red PCB */}
+          <rect x="28" y="32" width="104" height="56" rx="4" fill="#991b1b" stroke="#7f1d1d" strokeWidth="1.5" />
+          {/* 4 Header Pins Right */}
+          <rect x="122" y="44" width="6" height="32" rx="1" fill="#0f172a" />
+          {/* Black Acrylic LED Shell */}
+          <rect x="36" y="38" width="80" height="44" rx="3" fill="#0a0a0f" stroke="#18181b" strokeWidth="1" />
+          {/* Glowing Red 7-Segment Digits */}
+          <text x="44" y="70" fill="#ef4444" fontSize="26" fontWeight="bold" fontFamily="monospace" letterSpacing="2">12:34</text>
+        </svg>
+      );
+
+    case 'fpv-monitor':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Matte Black Chassis */}
+          <rect x="22" y="24" width="116" height="72" rx="5" fill="#18181b" stroke="#27272a" strokeWidth="2" />
+          {/* Sunshade Top & Sides */}
+          <polygon points="26,24 134,24 126,14 34,14" fill="#09090b" opacity="0.9" />
+          {/* Rubber Duck Antenna Left */}
+          <rect x="30" y="8" width="5" height="16" rx="2" fill="#27272a" />
+          {/* Active Screen Area with Horizon HUD */}
+          <rect x="32" y="30" width="96" height="56" rx="2" fill="#1e3a8a" />
+          {/* Sky / Ground Horizon */}
+          <rect x="32" y="56" width="96" height="30" fill="#14532d" />
+          <line x1="32" y1="56" x2="128" y2="56" stroke="#ffffff" strokeWidth="1" />
+          {/* OSD Crosshair & Telemetry */}
+          <circle cx="80" cy="56" r="4" stroke="#ffffff" strokeWidth="1" fill="none" />
+          <text x="36" y="38" fill="#ffffff" fontSize="5" fontFamily="monospace">R4 5800M</text>
+          <text x="96" y="38" fill="#ffffff" fontSize="5" fontFamily="monospace">RSSI 99%</text>
+          <text x="36" y="82" fill="#ffffff" fontSize="5" fontFamily="monospace">15.4V 4S</text>
+          <text x="96" y="82" fill="#ffffff" fontSize="5" fontFamily="monospace">ACRO</text>
+        </svg>
+      );
+
     default:
       return (
         <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">

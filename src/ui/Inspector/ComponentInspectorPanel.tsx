@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Plus,
   Plane,
+  Monitor,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
@@ -400,6 +401,380 @@ export const ComponentInspectorPanel: React.FC = () => {
                   >
                     Enter Flight →
                   </button>
+                </div>
+              )}
+
+              {/* Display Screen Interactive Controls */}
+              {['oled-display', 'lcd-1602', 'tft-screen', 'tm1637-display', 'fpv-monitor'].includes(selectedComponent.type) && (
+                <div className="flex flex-col gap-3 p-3 rounded-lg bg-blue-50/60 border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-blue-950 flex items-center gap-1.5">
+                      <Monitor size={14} className="text-blue-600" />
+                      <span>Display Screen Controls</span>
+                    </span>
+                    <button
+                      onClick={() => {
+                        const currentPowered = selectedComponent.state?.powered !== false;
+                        projectStore.updateComponentState(selectedComponent.id, {
+                          powered: !currentPowered,
+                        });
+                      }}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors cursor-pointer ${
+                        selectedComponent.state?.powered !== false
+                          ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                          : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                      }`}
+                    >
+                      {selectedComponent.state?.powered !== false ? 'SCREEN ON' : 'SCREEN OFF'}
+                    </button>
+                  </div>
+
+                  {/* OLED 0.96" Controls */}
+                  {selectedComponent.type === 'oled-display' && (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600 font-medium">Display Mode</span>
+                        <select
+                          value={(selectedComponent.state?.displayMode as string) || 'telemetry'}
+                          onChange={(e) =>
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              displayMode: e.target.value,
+                            })
+                          }
+                          className="bg-white border border-slate-200 rounded px-2 py-1 text-[11px] text-slate-800 outline-none"
+                        >
+                          <option value="telemetry">Sensor Telemetry</option>
+                          <option value="wave">Oscilloscope Wave</option>
+                          <option value="logo">Lab Welcome Banner</option>
+                          <option value="custom">Custom Text Lines</option>
+                        </select>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[10px] text-slate-500 font-medium">Screen Text Lines:</span>
+                        <input
+                          type="text"
+                          value={(selectedComponent.state?.textLine1 as string) || ''}
+                          placeholder="Line 1 (e.g. VIRTUAL LAB)"
+                          onChange={(e) =>
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              textLine1: e.target.value,
+                            })
+                          }
+                          className="bg-white border border-slate-200 rounded px-2 py-1 font-mono text-[11px] text-slate-800 outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={(selectedComponent.state?.textLine2 as string) || ''}
+                          placeholder="Line 2 (e.g. TEMP: 24.8 C)"
+                          onChange={(e) =>
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              textLine2: e.target.value,
+                            })
+                          }
+                          className="bg-white border border-slate-200 rounded px-2 py-1 font-mono text-[11px] text-slate-800 outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={(selectedComponent.state?.textLine3 as string) || ''}
+                          placeholder="Line 3 (e.g. HUMI: 54.2 %)"
+                          onChange={(e) =>
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              textLine3: e.target.value,
+                            })
+                          }
+                          className="bg-white border border-slate-200 rounded px-2 py-1 font-mono text-[11px] text-slate-800 outline-none"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[11px] text-slate-600">OLED Color</span>
+                        <div className="flex items-center gap-1.5">
+                          {[
+                            { label: 'Cyan', color: '#38bdf8' },
+                            { label: 'White', color: '#f8fafc' },
+                            { label: 'Green', color: '#4ade80' },
+                            { label: 'Amber', color: '#fbbf24' },
+                          ].map((th) => (
+                            <button
+                              key={th.color}
+                              onClick={() =>
+                                projectStore.updateComponentState(selectedComponent.id, {
+                                  color: th.color,
+                                })
+                              }
+                              style={{ backgroundColor: th.color }}
+                              className={`w-5 h-5 rounded-full border cursor-pointer ${
+                                (selectedComponent.state?.color || '#38bdf8') === th.color
+                                  ? 'ring-2 ring-blue-500 border-white'
+                                  : 'border-slate-300'
+                              }`}
+                              title={th.label}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* LCD 1602 Controls */}
+                  {selectedComponent.type === 'lcd-1602' && (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600">LED Backlight</span>
+                        <button
+                          onClick={() => {
+                            const bl = selectedComponent.state?.backlight !== false;
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              backlight: !bl,
+                            });
+                          }}
+                          className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer ${
+                            selectedComponent.state?.backlight !== false
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-slate-200 text-slate-600'
+                          }`}
+                        >
+                          {selectedComponent.state?.backlight !== false ? 'Backlight ON' : 'Backlight OFF'}
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600">Theme</span>
+                        <select
+                          value={(selectedComponent.state?.theme as string) || 'blue'}
+                          onChange={(e) =>
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              theme: e.target.value,
+                            })
+                          }
+                          className="bg-white border border-slate-200 rounded px-2 py-1 text-[11px] text-slate-800 outline-none"
+                        >
+                          <option value="blue">Blue Backlight / White Text</option>
+                          <option value="green">Yellow-Green / Dark Text</option>
+                          <option value="amber">Amber / White Text</option>
+                        </select>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[10px] text-slate-500 font-medium">Row 1 (16 chars):</span>
+                        <input
+                          type="text"
+                          maxLength={16}
+                          value={(selectedComponent.state?.line1 as string) || ''}
+                          placeholder="VIRTUAL IOT LAB "
+                          onChange={(e) =>
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              line1: e.target.value,
+                            })
+                          }
+                          className="bg-white border border-slate-200 rounded px-2 py-1 font-mono text-[11px] text-slate-800 outline-none"
+                        />
+                        <span className="text-[10px] text-slate-500 font-medium">Row 2 (16 chars):</span>
+                        <input
+                          type="text"
+                          maxLength={16}
+                          value={(selectedComponent.state?.line2 as string) || ''}
+                          placeholder="SYSTEM READY OK "
+                          onChange={(e) =>
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              line2: e.target.value,
+                            })
+                          }
+                          className="bg-white border border-slate-200 rounded px-2 py-1 font-mono text-[11px] text-slate-800 outline-none"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TFT Color Screen Controls */}
+                  {selectedComponent.type === 'tft-screen' && (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600">Gauge Value</span>
+                        <span className="font-mono text-[11px] text-slate-800 font-semibold">
+                          {String(selectedComponent.state?.gaugeValue ?? 72)}%
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={Number(selectedComponent.state?.gaugeValue ?? 72)}
+                        onChange={(e) =>
+                          projectStore.updateComponentState(selectedComponent.id, {
+                            gaugeValue: parseInt(e.target.value, 10),
+                          })
+                        }
+                        className="w-full accent-blue-600"
+                      />
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600">Display Preset</span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() =>
+                              projectStore.updateComponentState(selectedComponent.id, {
+                                gaugeValue: 25,
+                              })
+                            }
+                            className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] text-slate-700 hover:bg-slate-50 cursor-pointer"
+                          >
+                            25%
+                          </button>
+                          <button
+                            onClick={() =>
+                              projectStore.updateComponentState(selectedComponent.id, {
+                                gaugeValue: 65,
+                              })
+                            }
+                            className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] text-slate-700 hover:bg-slate-50 cursor-pointer"
+                          >
+                            65%
+                          </button>
+                          <button
+                            onClick={() =>
+                              projectStore.updateComponentState(selectedComponent.id, {
+                                gaugeValue: 95,
+                              })
+                            }
+                            className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] text-slate-700 hover:bg-slate-50 cursor-pointer"
+                          >
+                            95%
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TM1637 7-Segment Controls */}
+                  {selectedComponent.type === 'tm1637-display' && (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600">Digits Displayed</span>
+                        <input
+                          type="text"
+                          maxLength={5}
+                          value={(selectedComponent.state?.digits as string) || '12:34'}
+                          placeholder="12:34"
+                          onChange={(e) =>
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              digits: e.target.value,
+                            })
+                          }
+                          className="w-24 text-center bg-white border border-slate-200 rounded px-2 py-1 font-mono text-[12px] font-bold text-red-600 outline-none"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600">Blinking Colon (:)</span>
+                        <button
+                          onClick={() => {
+                            const c = selectedComponent.state?.colon !== false;
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              colon: !c,
+                            });
+                          }}
+                          className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer ${
+                            selectedComponent.state?.colon !== false
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-slate-200 text-slate-600'
+                          }`}
+                        >
+                          {selectedComponent.state?.colon !== false ? 'Colon ON' : 'Colon OFF'}
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600">LED Color</span>
+                        <div className="flex items-center gap-1.5">
+                          {[
+                            { label: 'Red', color: 'red', hex: '#ef4444' },
+                            { label: 'Green', color: 'green', hex: '#22c55e' },
+                            { label: 'Blue', color: 'blue', hex: '#38bdf8' },
+                            { label: 'Amber', color: 'amber', hex: '#f59e0b' },
+                          ].map((c) => (
+                            <button
+                              key={c.color}
+                              onClick={() =>
+                                projectStore.updateComponentState(selectedComponent.id, {
+                                  color: c.color,
+                                })
+                              }
+                              style={{ backgroundColor: c.hex }}
+                              className={`w-5 h-5 rounded-full border cursor-pointer ${
+                                (selectedComponent.state?.color || 'red') === c.color
+                                  ? 'ring-2 ring-blue-500 border-white'
+                                  : 'border-slate-300'
+                              }`}
+                              title={c.label}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 pt-1">
+                        <span className="text-[10px] text-slate-400">Presets:</span>
+                        {['12:34', '24.5', '9999', 'LO-b'].map((pre) => (
+                          <button
+                            key={pre}
+                            onClick={() =>
+                              projectStore.updateComponentState(selectedComponent.id, {
+                                digits: pre,
+                              })
+                            }
+                            className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono text-slate-700 hover:bg-slate-50 cursor-pointer"
+                          >
+                            {pre}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* FPV Monitor Controls */}
+                  {selectedComponent.type === 'fpv-monitor' && (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600">RF Channel</span>
+                        <select
+                          value={(selectedComponent.state?.channel as string) || 'R4 (5800 MHz)'}
+                          onChange={(e) =>
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              channel: e.target.value,
+                            })
+                          }
+                          className="bg-white border border-slate-200 rounded px-2 py-1 text-[11px] text-slate-800 outline-none"
+                        >
+                          <option value="R4 (5800 MHz)">Raceband 4 (5800 MHz)</option>
+                          <option value="R1 (5658 MHz)">Raceband 1 (5658 MHz)</option>
+                          <option value="R8 (5917 MHz)">Raceband 8 (5917 MHz)</option>
+                          <option value="A1 (5865 MHz)">Band A 1 (5865 MHz)</option>
+                          <option value="B1 (5733 MHz)">Band B 1 (5733 MHz)</option>
+                          <option value="F4 (5800 MHz)">Fatshark 4 (5800 MHz)</option>
+                        </select>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600">Betaflight OSD HUD</span>
+                        <button
+                          onClick={() => {
+                            const osd = selectedComponent.state?.osdEnabled !== false;
+                            projectStore.updateComponentState(selectedComponent.id, {
+                              osdEnabled: !osd,
+                            });
+                          }}
+                          className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer ${
+                            selectedComponent.state?.osdEnabled !== false
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-slate-200 text-slate-600'
+                          }`}
+                        >
+                          {selectedComponent.state?.osdEnabled !== false ? 'OSD ON' : 'OSD OFF'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

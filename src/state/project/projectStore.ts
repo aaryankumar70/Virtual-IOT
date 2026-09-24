@@ -118,6 +118,16 @@ export const projectStore = {
     notify();
   },
 
+  updateComponentState(id: string, stateUpdate: Record<string, unknown>) {
+    state = {
+      ...state,
+      components: state.components.map((comp) =>
+        comp.id === id ? { ...comp, state: { ...comp.state, ...stateUpdate } } : comp
+      ),
+    };
+    notify();
+  },
+
   removeComponent(id: string) {
     state = {
       ...state,
@@ -347,6 +357,35 @@ export const projectStore = {
       { componentId: led.id, pinId: 'cathode' },
       { componentId: arduino.id, pinId: 'gnd_top' },
       '#60a5fa'
+    );
+
+    // 4. OLED 0.96" I2C Screen
+    const oled = createComponent('oled-display', { x: 1.2, y: 0, z: 2.2 });
+    this.addComponent(oled);
+
+    // Arduino A4 (SDA) -> OLED SDA (cyan wire)
+    this.addConnection(
+      { componentId: arduino.id, pinId: 'a4' },
+      { componentId: oled.id, pinId: 'sda' },
+      '#06b6d4'
+    );
+    // Arduino A5 (SCL) -> OLED SCL (yellow wire)
+    this.addConnection(
+      { componentId: arduino.id, pinId: 'a5' },
+      { componentId: oled.id, pinId: 'scl' },
+      '#eab308'
+    );
+    // Arduino 5V -> OLED VCC (red wire)
+    this.addConnection(
+      { componentId: arduino.id, pinId: '5v' },
+      { componentId: oled.id, pinId: 'vcc' },
+      '#ef4444'
+    );
+    // Arduino GND -> OLED GND (black wire)
+    this.addConnection(
+      { componentId: arduino.id, pinId: 'gnd_1' },
+      { componentId: oled.id, pinId: 'gnd' },
+      '#1e293b'
     );
   },
 

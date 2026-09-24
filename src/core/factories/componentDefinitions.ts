@@ -11,6 +11,11 @@ import {
   SG90ServoSpecification,
   DCMotorSpecification,
   BreadboardSpecification,
+  OLED096Specification,
+  LCD1602Specification,
+  TFTColorScreenSpecification,
+  TM1637DisplaySpecification,
+  FPVMonitorSpecification,
 } from '../hardware/specificationsData';
 
 // 1. ARDUINO UNO
@@ -842,6 +847,172 @@ export const RelayModuleDefinition: ComponentDefinition = {
   dimensions: { width: 4.2, height: 1.8, depth: 2.6 },
 };
 
+// 24. OLED 0.96" SSD1306 DISPLAY
+const oledPins: VirtualPin[] = [
+  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: -0.38, y: 0.25, z: -1.05 }, connectorStyle: 'header-pin' },
+  { id: 'vcc', name: 'VCC (3.3V-5V)', type: 'power', direction: 'input', localPosition: { x: -0.13, y: 0.25, z: -1.05 }, connectorStyle: 'header-pin' },
+  { id: 'scl', name: 'SCL (I2C Clock)', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.13, y: 0.25, z: -1.05 }, connectorStyle: 'header-pin' },
+  { id: 'sda', name: 'SDA (I2C Data)', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.38, y: 0.25, z: -1.05 }, connectorStyle: 'header-pin' },
+];
+
+export const OLEDDisplayDefinition: ComponentDefinition = {
+  type: 'oled-display',
+  displayName: 'OLED Display 0.96" SSD1306',
+  category: 'display',
+  description: '128x64 pixel self-illuminating monochrome I2C OLED display with high contrast and wide viewing angle.',
+  pins: oledPins,
+  connectors: [],
+  specification: OLED096Specification,
+  subcomponents: OLED096Specification.subcomponents,
+  defaultState: {
+    powered: true,
+    displayMode: 'telemetry',
+    textLine1: 'VIRTUAL LAB',
+    textLine2: 'TEMP: 24.8 C',
+    textLine3: 'HUMI: 54.2 %',
+    contrast: 255,
+    i2cAddress: '0x3C',
+    color: '#38bdf8',
+  },
+  dimensions: { width: 2.7, height: 0.5, depth: 2.7 },
+};
+
+// 25. LCD 1602 WITH I2C BACKPACK
+const lcdPins: VirtualPin[] = [
+  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: 4.15, y: -0.15, z: -0.7 }, connectorStyle: 'header-pin' },
+  { id: 'vcc', name: 'VCC (5V)', type: 'power', direction: 'input', localPosition: { x: 4.15, y: -0.15, z: -0.5 }, connectorStyle: 'header-pin' },
+  { id: 'sda', name: 'SDA (I2C Data)', type: 'digital', direction: 'bidirectional', localPosition: { x: 4.15, y: -0.15, z: -0.3 }, connectorStyle: 'header-pin' },
+  { id: 'scl', name: 'SCL (I2C Clock)', type: 'digital', direction: 'bidirectional', localPosition: { x: 4.15, y: -0.15, z: -0.1 }, connectorStyle: 'header-pin' },
+];
+
+export const LCD1602Definition: ComponentDefinition = {
+  type: 'lcd-1602',
+  displayName: 'LCD 1602 Character Screen',
+  category: 'display',
+  description: '16x2 alphanumeric liquid crystal character display with blue LED backlight and I2C PCF8574 backpack.',
+  pins: lcdPins,
+  connectors: [],
+  specification: LCD1602Specification,
+  subcomponents: LCD1602Specification.subcomponents,
+  defaultState: {
+    powered: true,
+    backlight: true,
+    line1: 'VIRTUAL IOT LAB ',
+    line2: 'SYSTEM READY OK ',
+    theme: 'blue',
+    i2cAddress: '0x27',
+  },
+  dimensions: { width: 8.0, height: 1.2, depth: 3.6 },
+};
+
+// 26. TFT COLOR SCREEN ST7789 SPI
+const tftPins: VirtualPin[] = [
+  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: -0.88, y: 0.25, z: 1.15 }, connectorStyle: 'header-pin' },
+  { id: 'vcc', name: 'VCC (3.3V/5V)', type: 'power', direction: 'input', localPosition: { x: -0.63, y: 0.25, z: 1.15 }, connectorStyle: 'header-pin' },
+  { id: 'scl', name: 'SCL (SPI SCK)', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.38, y: 0.25, z: 1.15 }, connectorStyle: 'header-pin' },
+  { id: 'sda', name: 'SDA (SPI MOSI)', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.13, y: 0.25, z: 1.15 }, connectorStyle: 'header-pin' },
+  { id: 'res', name: 'RES (Hardware Reset)', type: 'digital', direction: 'input', localPosition: { x: 0.13, y: 0.25, z: 1.15 }, connectorStyle: 'header-pin' },
+  { id: 'dc', name: 'DC (Data/Command)', type: 'digital', direction: 'input', localPosition: { x: 0.38, y: 0.25, z: 1.15 }, connectorStyle: 'header-pin' },
+  { id: 'cs', name: 'CS (Chip Select)', type: 'digital', direction: 'input', localPosition: { x: 0.63, y: 0.25, z: 1.15 }, connectorStyle: 'header-pin' },
+  { id: 'blk', name: 'BLK (Backlight PWM)', type: 'pwm', direction: 'input', localPosition: { x: 0.88, y: 0.25, z: 1.15 }, connectorStyle: 'header-pin' },
+];
+
+export const TFTScreenDefinition: ComponentDefinition = {
+  type: 'tft-screen',
+  displayName: 'TFT Color Display 1.3" ST7789',
+  category: 'display',
+  description: '240x240 high-resolution IPS full-color SPI LCD display with wide viewing angles and fast refresh.',
+  pins: tftPins,
+  connectors: [],
+  specification: TFTColorScreenSpecification,
+  subcomponents: TFTColorScreenSpecification.subcomponents,
+  defaultState: {
+    powered: true,
+    brightness: 100,
+    displayMode: 'dashboard',
+    gaugeValue: 72,
+  },
+  dimensions: { width: 3.9, height: 0.4, depth: 2.8 },
+};
+
+// 27. TM1637 4-DIGIT 7-SEGMENT DISPLAY
+const tm1637Pins: VirtualPin[] = [
+  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: 1.85, y: 0.25, z: -0.38 }, connectorStyle: 'header-pin' },
+  { id: 'vcc', name: 'VCC (5V)', type: 'power', direction: 'input', localPosition: { x: 1.85, y: 0.25, z: -0.13 }, connectorStyle: 'header-pin' },
+  { id: 'dio', name: 'DIO (Data I/O)', type: 'digital', direction: 'bidirectional', localPosition: { x: 1.85, y: 0.25, z: 0.13 }, connectorStyle: 'header-pin' },
+  { id: 'clk', name: 'CLK (Clock)', type: 'digital', direction: 'bidirectional', localPosition: { x: 1.85, y: 0.25, z: 0.38 }, connectorStyle: 'header-pin' },
+];
+
+export const TM1637DisplayDefinition: ComponentDefinition = {
+  type: 'tm1637-display',
+  displayName: '7-Segment 4-Digit Screen TM1637',
+  category: 'display',
+  description: '4-digit 0.36" LED numeric 7-segment display with center colon and 2-wire serial driver.',
+  pins: tm1637Pins,
+  connectors: [],
+  specification: TM1637DisplaySpecification,
+  subcomponents: TM1637DisplaySpecification.subcomponents,
+  defaultState: {
+    powered: true,
+    digits: '12:34',
+    colon: true,
+    color: 'red',
+    brightness: 7,
+  },
+  dimensions: { width: 4.2, height: 1.1, depth: 2.4 },
+};
+
+// 28. 5.8GHz FPV FIELD MONITOR & OSD SCREEN
+const fpvPins: VirtualPin[] = [
+  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: 5.7, y: 0.45, z: -1.5 }, connectorStyle: 'lead-tip' },
+  { id: 'vin_12v', name: '12V DC IN (2S-4S)', type: 'power', direction: 'input', localPosition: { x: 5.7, y: 0.45, z: -0.8 }, connectorStyle: 'lead-tip' },
+  { id: 'video_in', name: 'Video IN (Composite)', type: 'analog', direction: 'input', localPosition: { x: 5.7, y: 0.45, z: 0.2 }, connectorStyle: 'lead-tip' },
+  { id: 'audio_in', name: 'Audio IN', type: 'analog', direction: 'input', localPosition: { x: 5.7, y: 0.45, z: 0.9 }, connectorStyle: 'lead-tip' },
+];
+
+const fpvConnectors: VirtualConnector[] = [
+  {
+    id: 'sma_antenna',
+    name: '5.8GHz SMA Antenna Connector',
+    connectorType: 'sma',
+    interfaceType: 'rf-sma',
+    gender: 'female',
+    localPosition: { x: -4.6, y: 0.7, z: -3.85 },
+    direction: { x: 0, y: 1, z: 0 },
+    compatibleWith: ['sma-male', 'antenna-58ghz'],
+    metadata: { label: '5.8GHz 48CH Diversity RF' },
+  },
+  {
+    id: 'dc_power_jack',
+    name: '12V DC Power Jack',
+    connectorType: 'dc-barrel-jack',
+    interfaceType: 'dc-power',
+    gender: 'female',
+    localPosition: { x: 5.75, y: 0.45, z: -1.0 },
+    direction: { x: 1, y: 0, z: 0 },
+    compatibleWith: ['dc-barrel-plug'],
+    metadata: { label: '7-16V LiPo / DC Adapter' },
+  },
+];
+
+export const FPVMonitorDefinition: ComponentDefinition = {
+  type: 'fpv-monitor',
+  displayName: 'FPV 5.8GHz Field Monitor & OSD',
+  category: 'display',
+  description: '4.3" high-brightness sunlight-readable field monitor with 5.8GHz receiver, folding sun hood, and Betaflight OSD.',
+  pins: fpvPins,
+  connectors: fpvConnectors,
+  specification: FPVMonitorSpecification,
+  subcomponents: FPVMonitorSpecification.subcomponents,
+  defaultState: {
+    powered: true,
+    channel: 'R4 (5800 MHz)',
+    osdEnabled: true,
+    droneTelemetry: true,
+  },
+  dimensions: { width: 11.5, height: 3.5, depth: 7.5 },
+};
+
 // Register all definitions into ComponentRegistry
 export function registerAllComponents() {
   ComponentRegistry.register(ArduinoUnoDefinition);
@@ -867,6 +1038,13 @@ export function registerAllComponents() {
   ComponentRegistry.register(MPU6050Definition);
   ComponentRegistry.register(DCMotorDefinition);
   ComponentRegistry.register(RelayModuleDefinition);
+
+  // Screen & Display Components
+  ComponentRegistry.register(OLEDDisplayDefinition);
+  ComponentRegistry.register(LCD1602Definition);
+  ComponentRegistry.register(TFTScreenDefinition);
+  ComponentRegistry.register(TM1637DisplayDefinition);
+  ComponentRegistry.register(FPVMonitorDefinition);
 }
 
 // Call on startup
