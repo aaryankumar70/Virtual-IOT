@@ -15,7 +15,7 @@ import { experimentEngine } from './experimentEngine/ExperimentEngine';
 import { HARDWARE_DATABASE } from './hardwareEngine/hardwareDatabase';
 import { HardwareEntity } from './hardwareEngine/HardwareEntity';
 
-export type LabWorkflowMode = 'build' | 'connect' | 'code' | 'simulate' | 'measure' | 'experiment';
+export type LabWorkflowMode = 'build' | 'connect' | 'code' | 'simulate' | 'measure' | 'fly' | 'experiment';
 
 export interface LabState {
   currentMode: LabWorkflowMode;
@@ -105,6 +105,11 @@ export const labStore = {
   setFlightMode(mode: 'angle' | 'acro' | 'alt_hold') {
     state = { ...state, flightMode: mode };
     simulationEngine.inputs.flightMode = mode;
+    notify();
+  },
+
+  setDshotProtocol(proto: 'DShot600' | 'DShot300' | 'PWM') {
+    state = { ...state, dshotProtocol: proto };
     notify();
   },
 

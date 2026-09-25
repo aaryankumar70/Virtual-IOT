@@ -7,6 +7,8 @@
 
 import { assemblyGraph } from '../assemblyEngine/AssemblyGraph';
 import { connectionGraph } from '../connectionEngine/ConnectionGraph';
+import { environmentEngine } from '../environmentEngine/EnvironmentEngine';
+import { virtualMcu } from '../firmwareEngine/VirtualMCU';
 
 export interface FlightControlInputs {
   throttle: number; // 0.0 to 1.0
@@ -172,6 +174,11 @@ export class SimulationEngine {
     const { Ixx, Iyy, Izz } = physicalProps.momentOfInertia;
     const com = physicalProps.centerOfMass;
 
+    // Environmental conditions from EnvironmentEngine
+    const curAirDensity = environmentEngine.airDensityKgM3;
+    const curGravity = environmentEngine.gravityMps2;
+    const instWind = environmentEngine.getInstantaneousWind(this.simTimeSec);
+
     // 2. Electrical Domain: Battery State & Circuit Continuity
     const isBatConnected = connectionGraph.isBatteryPowered();
     const cellCount = 6; // CNHL 6S LiPo
@@ -281,12 +288,12 @@ export class SimulationEngine {
         const ct = 0.108;
         const cp = 0.046;
 
-        let thrustN = ct * this.env.airDensityKgM3 * nRevPerSec ** 2 * diamM ** 4;
+        let thrustN = ct * curAirDensity * nRevPerSec ** 2 * diamM ** 4;
         if (this.failures.chippedProp[i]) {
           thrustN *= 0.55; // 45% loss from damaged blade
         }
 
-        const aeroPowerW = cp * this.env.airDensityKgM3 * nRevPerSec ** 3 * diamM ** 5;
+        const aeroPowerW = cp * curAirDensity * nRevPerSec ** 3 * diamM ** 5;
         const motorCurrent = (aeroPowerW / (Math.max(8, this.batteryLoadedVoltage) * 0.86)) + 0.45;
 
         this.motorThrustN[i] = thrustN;
@@ -296,7 +303,7 @@ export class SimulationEngine {
         netThrustN += thrustN;
 
         // Reaction torque
-        const reactionTorqueNm = (cp * this.env.airDensityKgM3 * nRevPerSec ** 2 * diamM ** 5) / (2 * Math.PI);
+        const reactionTorqueNm = (cp * curAirDensity * nRevPerSec ** 2 * diamM ** 5) / (2 * Math.PI);
 
         // Arm moment arms relative to dynamic center of mass
         const relArmX = (i === 0 || i === 3 ? armX : -armX) - com.x;
@@ -349,19 +356,19 @@ export class SimulationEngine {
     const upY = cosR * cosP;
     const upZ = -sinR * cosY + cosR * sinP * sinY;
 
-    // Environmental Wind
-    const windRad = (this.env.windDirectionDeg * Math.PI) / 180;
-    const windX = Math.sin(windRad) * this.env.windSpeedMps;
-    const windZ = Math.cos(windRad) * this.env.windSpeedMps;
+    // Environmental Wind from EnvironmentEngine
+    const windX = instWind.x;
+    const windY = instWind.y;
+    const windZ = instWind.z;
 
     const relVelX = this.velX - windX;
-    const relVelY = this.velY;
+    const relVelY = this.velY - windY;
     const relVelZ = this.velZ - windZ;
     const relSpeed = Math.hypot(relVelX, relVelY, relVelZ);
 
     // Aerodynamic quadratic body drag
     const cdArea = 0.018; // Equivalent flat plate area
-    const dragForce = 0.5 * this.env.airDensityKgM3 * cdArea * relSpeed ** 2;
+    const dragForce = 0.5 * curAirDensity * cdArea * relSpeed ** 2;
     const dragX = relSpeed > 0.01 ? (-relVelX / relSpeed) * dragForce : 0;
     const dragY = relSpeed > 0.01 ? (-relVelY / relSpeed) * dragForce : 0;
     const dragZ = relSpeed > 0.01 ? (-relVelZ / relSpeed) * dragForce : 0;
@@ -371,11 +378,25 @@ export class SimulationEngine {
     const worldThrustY = upY * netThrustN;
     const worldThrustZ = upZ * netThrustN;
 
-    const gravityForceY = -massKg * this.env.gravityMps2;
+    const gravityForceY = -massKg * curGravity;
 
     let accX = (worldThrustX + dragX) / massKg;
     let accY = (worldThrustY + gravityForceY + dragY) / massKg;
     let accZ = (worldThrustZ + dragZ) / massKg;
+
+    // Step Virtual MCU firmware execution with live voltages, currents & rates
+    virtualMcu.step(effectiveDt, {
+      voltage: this.batteryLoadedVoltage,
+      current: totalSimCurrentA,
+      rates: { roll: this.omegaRoll, pitch: this.omegaPitch, yaw: this.omegaYaw },
+      inputs: {
+        throttle: this.inputs.throttle,
+        roll: this.inputs.roll,
+        pitch: this.inputs.pitch,
+        yaw: this.inputs.yaw,
+        armed: this.inputs.armSwitch,
+      },
+    });
 
     // Ground contact constraint
     const groundLevel = 0.08;
