@@ -13,7 +13,6 @@ import {
   Cpu,
   Gauge,
   Activity,
-  Navigation,
   FlaskConical,
   Layers,
   ChevronRight,
@@ -63,12 +62,6 @@ export const LabHeader: React.FC<LabHeaderProps> = ({ onToggleBreadboardCAD, isB
       label: 'Measure',
       subtitle: 'DMM & Scope',
       icon: <Activity className="w-4 h-4" />,
-    },
-    {
-      id: 'fly',
-      label: 'Fly',
-      subtitle: 'Flight Arena',
-      icon: <Navigation className="w-4 h-4" />,
     },
     {
       id: 'experiment',

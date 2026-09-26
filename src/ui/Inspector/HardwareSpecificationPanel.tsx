@@ -12,11 +12,9 @@ import {
   ShieldCheck,
   Scale,
   Ruler,
-  Plane,
 } from 'lucide-react';
 import { VirtualComponent } from '../../core/components/VirtualComponent';
 import { HardwareSubcomponent } from '../../core/hardware/HardwareSpecification';
-import { droneSimStore } from '../../core/drone/droneSimStore';
 
 interface Props {
   component: VirtualComponent;
@@ -55,27 +53,6 @@ export const HardwareSpecificationPanel: React.FC<Props> = ({ component }) => {
 
   return (
     <div className="flex flex-col gap-4 text-xs">
-      {/* Drone Direct Flight Simulator Launch Banner */}
-      {component.type === 'drone-quad' && (
-        <div className="bg-emerald-50 border border-emerald-300/80 rounded-lg p-3 flex items-center justify-between shadow-2xs">
-          <div>
-            <span className="font-bold text-emerald-950 flex items-center gap-1.5 text-xs">
-              <Plane size={14} className="text-emerald-600" />
-              Flight Dynamics Environment
-            </span>
-            <span className="text-[11px] text-emerald-700 block mt-0.5">
-              Launch into full 6-DOF aerodynamic simulation with live telemetry & subcomponent testing.
-            </span>
-          </div>
-          <button
-            onClick={() => droneSimStore.enterDroneSim()}
-            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-md text-xs transition-colors shadow-xs shrink-0 ml-2"
-          >
-            Fly Platform →
-          </button>
-        </div>
-      )}
-
       {/* 1. Hardware Identification Card */}
       <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex flex-col gap-2.5">
         <div className="flex items-center justify-between">

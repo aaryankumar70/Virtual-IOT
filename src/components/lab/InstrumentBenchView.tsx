@@ -139,7 +139,7 @@ export const InstrumentBenchView: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `drone_flight_blackbox_${Date.now()}.csv`);
+    link.setAttribute('download', `system_telemetry_blackbox_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -335,7 +335,7 @@ export const InstrumentBenchView: React.FC = () => {
         <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-sky-400" />
-            <h2 className="text-base font-semibold text-zinc-100">Blackbox Flight Telemetry Logger</h2>
+            <h2 className="text-base font-semibold text-zinc-100">Blackbox System Telemetry Logger</h2>
           </div>
           <button
             onClick={() => {
@@ -358,7 +358,7 @@ export const InstrumentBenchView: React.FC = () => {
             {instrumentEngine.logRecords.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-zinc-400 text-center p-4">
                 <Clock className="w-6 h-6 text-zinc-400 mb-1" />
-                Click "Start Logging" to capture real-time aerodynamic and electrical flight records.
+                Click "Start Logging" to capture real-time electromechanical and electrical telemetry records.
               </div>
             ) : (
               <table className="w-full text-left text-zinc-300">

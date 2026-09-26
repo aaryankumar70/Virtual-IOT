@@ -15,7 +15,7 @@ import { experimentEngine } from './experimentEngine/ExperimentEngine';
 import { HARDWARE_DATABASE } from './hardwareEngine/hardwareDatabase';
 import { HardwareEntity } from './hardwareEngine/HardwareEntity';
 
-export type LabWorkflowMode = 'build' | 'connect' | 'code' | 'simulate' | 'measure' | 'fly' | 'experiment';
+export type LabWorkflowMode = 'build' | 'connect' | 'code' | 'simulate' | 'measure' | 'experiment';
 
 export interface LabState {
   currentMode: LabWorkflowMode;

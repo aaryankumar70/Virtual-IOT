@@ -2,7 +2,7 @@
  * Virtual IoT Lab — Engineering Laboratory Master Workbench
  *
  * Mounts the appropriate active workflow view:
- * BUILD | CONNECT | CODE | SIMULATE | MEASURE | FLY | EXPERIMENT
+ * BUILD | CONNECT | CODE | SIMULATE | MEASURE | EXPERIMENT
  */
 
 import React from 'react';
@@ -12,7 +12,6 @@ import { ConnectionsView } from './ConnectionsView';
 import { FirmwareLabView } from './FirmwareLabView';
 import { HardwareSimWorkbenchView } from './HardwareSimWorkbenchView';
 import { InstrumentBenchView } from './InstrumentBenchView';
-import { FlightArenaView } from './FlightArenaView';
 import { ExperimentLabView } from './ExperimentLabView';
 
 export const EngineeringLabWorkbench: React.FC = () => {
@@ -25,7 +24,6 @@ export const EngineeringLabWorkbench: React.FC = () => {
       {currentMode === 'code' && <FirmwareLabView />}
       {currentMode === 'simulate' && <HardwareSimWorkbenchView />}
       {currentMode === 'measure' && <InstrumentBenchView />}
-      {currentMode === 'fly' && <FlightArenaView />}
       {currentMode === 'experiment' && <ExperimentLabView />}
     </div>
   );

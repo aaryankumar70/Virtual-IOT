@@ -9,7 +9,6 @@ import {
   Layers,
   ArrowRight,
   Plus,
-  Plane,
   Monitor,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
@@ -19,7 +18,6 @@ import { ComponentGraphic } from '../ComponentLibrary/ComponentGraphic';
 import { PhysicalConnectionType } from '../../core/connections/Connection';
 import { createComponent } from '../../core/factories/componentFactory';
 import { HardwareSpecificationPanel } from './HardwareSpecificationPanel';
-import { droneSimStore } from '../../core/drone/droneSimStore';
 
 export const ComponentInspectorPanel: React.FC = () => {
   const viewState = useView();
@@ -378,28 +376,6 @@ export const ComponentInspectorPanel: React.FC = () => {
                     className="px-2 py-1 bg-white hover:bg-blue-50 text-blue-700 font-medium border border-blue-200 rounded text-[10px] transition-colors cursor-pointer"
                   >
                     Datasheet →
-                  </button>
-                </div>
-              )}
-
-              {/* Drone Flight Simulation Fast Launch Banner */}
-              {selectedComponent.type === 'drone-quad' && (
-                <div className="flex items-center justify-between p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px]">
-                  <div>
-                    <span className="font-bold text-emerald-950 flex items-center gap-1">
-                      <Plane size={13} className="text-emerald-600" />
-                      Flight Simulation Lab
-                    </span>
-                    <span className="text-emerald-700/90 text-[10px]">
-                      Aerodynamics, 6-DOF physics, motor thrust & telemetry
-                    </span>
-                  </div>
-                  <button
-                    id="btn-fly-selected-drone"
-                    onClick={() => droneSimStore.enterDroneSim()}
-                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded text-[11px] transition-colors shadow-xs"
-                  >
-                    Enter Flight →
                   </button>
                 </div>
               )}
