@@ -7,6 +7,7 @@ import { CameraController } from '../Camera/CameraController';
 import { ComponentObject } from './ComponentObject';
 import { WireRenderer } from './WireRenderer';
 import { FreeMoveController } from './FreeMoveController';
+import { WiringInteractionController } from './WiringInteractionController';
 import { useProject, projectStore } from '../../state/project/projectStore';
 import { useView, viewStore, DragPreviewState } from '../../state/view/viewStore';
 import { ComponentRegistry } from '../../core/registry/ComponentRegistry';
@@ -51,38 +52,8 @@ export const LabScene: React.FC = () => {
   // Raycasting on workbench plane for live wire dragging and background clicks
   const groundPlaneRef = useRef<THREE.Mesh>(null);
 
-  // Live wire & connector cable dragging preview follows cursor and snaps to hovered targets
+  // Live connector cable dragging preview follows cursor and snaps to hovered targets
   useFrame(() => {
-    if (viewState.activeWiring) {
-      if (viewState.hoveredPin) {
-        const pinPos = projectStore.getPinWorldPosition(
-          viewState.hoveredPin.componentId,
-          viewState.hoveredPin.pinId
-        );
-        if (pinPos) {
-          viewStore.updateWiringPreview({
-            x: pinPos.x,
-            y: pinPos.y,
-            z: pinPos.z,
-          });
-          return;
-        }
-      }
-
-      // Find intersection on workbench y = 0.4 plane
-      const planeY = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.4);
-      const intersectionPoint = new THREE.Vector3();
-      raycaster.ray.intersectPlane(planeY, intersectionPoint);
-
-      if (intersectionPoint) {
-        viewStore.updateWiringPreview({
-          x: intersectionPoint.x,
-          y: Math.max(0.35, intersectionPoint.y),
-          z: intersectionPoint.z,
-        });
-      }
-    }
-
     if (viewState.activeConnectorWiring) {
       if (viewState.hoveredConnector) {
         const connPos = projectStore.getEndpointWorldPosition(
@@ -212,6 +183,9 @@ export const LabScene: React.FC = () => {
 
       {/* Free Move Object with Cursor Controller (Shift + move) */}
       <FreeMoveController />
+
+      {/* Click-and-Drag Magnetic Wiring System */}
+      <WiringInteractionController />
 
       {/* All Circuit Hardware Components */}
       {projectState.components.map((component) => (

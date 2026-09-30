@@ -251,32 +251,83 @@ const ActiveWirePreview: React.FC = () => {
 
   if (!active || !p1) return null;
 
-  const previewColor = isConnector ? '#38bdf8' : THEME.accent.hover;
+  const previewColor = isConnector
+    ? '#38bdf8'
+    : activeWiring?.wireColor || THEME.accent.hover;
+
+  const isSnapped = !!activeWiring?.snappedTarget;
 
   return (
     <group>
+      {/* Starting terminal collar */}
+      <mesh position={[p1.x, p1.y, p1.z]}>
+        <sphereGeometry args={[0.065, 12, 12]} />
+        <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.3} />
+      </mesh>
+
+      {/* Live Arched Wire Tube */}
       {curveGeometry && (
         <mesh geometry={curveGeometry}>
           <meshStandardMaterial
             color={previewColor}
             emissive={previewColor}
-            emissiveIntensity={0.65}
-            roughness={0.2}
+            emissiveIntensity={0.55}
+            roughness={0.25}
+            metalness={0.15}
             transparent
-            opacity={0.92}
+            opacity={0.96}
           />
         </mesh>
       )}
-      {/* End pointer sphere / beacon */}
-      <mesh
+
+      {/* Tip: DuPont Jumper Pin Probe & Housing */}
+      <group
         position={[
           active.currentWorldPos.x,
           active.currentWorldPos.y,
           active.currentWorldPos.z,
         ]}
       >
-        <sphereGeometry args={[0.08, 12, 12]} />
-        <meshStandardMaterial color={previewColor} emissive={previewColor} />
+        {/* Terminal probe collar */}
+        <mesh position={[0, 0.08, 0]}>
+          <boxGeometry args={[0.09, 0.16, 0.09]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.6} />
+        </mesh>
+        {/* Gold plated contact needle */}
+        <mesh position={[0, 0.01, 0]}>
+          <cylinderGeometry args={[0.022, 0.022, 0.08, 8]} />
+          <meshStandardMaterial color="#fbbf24" metalness={0.9} roughness={0.2} />
+        </mesh>
+        {/* End glowing beacon sphere */}
+        <mesh position={[0, 0.06, 0]}>
+          <sphereGeometry args={[0.045, 8, 8]} />
+          <meshStandardMaterial
+            color={isSnapped ? '#22c55e' : previewColor}
+            emissive={isSnapped ? '#22c55e' : previewColor}
+            emissiveIntensity={0.9}
+          />
+        </mesh>
+
+        {/* Snapped Target Ring */}
+        {isSnapped && (
+          <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.14, 0.22, 24]} />
+            <meshBasicMaterial color="#22c55e" transparent opacity={0.85} side={THREE.DoubleSide} />
+          </mesh>
+        )}
+      </group>
+
+      {/* Ground / Breadboard shadow beacon under active endpoint for 3D depth perception */}
+      <mesh
+        position={[
+          active.currentWorldPos.x,
+          Math.min(active.currentWorldPos.y - 0.02, 0.01),
+          active.currentWorldPos.z,
+        ]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
+        <circleGeometry args={[0.12, 16]} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.25} />
       </mesh>
     </group>
   );

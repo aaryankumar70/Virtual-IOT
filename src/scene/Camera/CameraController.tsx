@@ -25,12 +25,16 @@ export const CameraController: React.FC = () => {
   const targetCamPos = useRef<THREE.Vector3>(new THREE.Vector3(0, 10, 14));
   const isTransitioning = useRef<boolean>(false);
 
-  // When user is actively manipulating transform gizmo or free moving with Shift, disable orbit controls to avoid fighting
+  // When user is actively manipulating transform gizmo, free moving with Shift, or dragging wires, disable orbit controls to avoid fighting
   useEffect(() => {
     if (controlsRef.current) {
-      controlsRef.current.enabled = !viewState.isTransforming && !viewState.isFreeMoving;
+      const isWiring = !!viewState.activeWiring || !!viewState.activeConnectorWiring;
+      controlsRef.current.enabled =
+        !viewState.isTransforming &&
+        !viewState.isFreeMoving &&
+        !isWiring;
     }
-  }, [viewState.isTransforming, viewState.isFreeMoving]);
+  }, [viewState.isTransforming, viewState.isFreeMoving, viewState.activeWiring, viewState.activeConnectorWiring]);
 
   const lastTriggerTimestamp = useRef<number>(0);
 

@@ -107,7 +107,7 @@ export const PinTooltip: React.FC = () => {
         <div className="px-3.5 py-1.5 rounded-full bg-white/95 border border-blue-200 shadow-lg text-xs flex items-center gap-2 backdrop-blur-md">
           <Zap size={13} className="text-blue-600 animate-pulse" />
           <span className="text-slate-800">
-            Wiring active: <strong className="text-blue-600 font-mono">click target pin</strong> to connect
+            Wiring active: <strong className="text-blue-600 font-mono">drag or click</strong> to target pin
           </span>
           <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-mono">
             Esc to cancel

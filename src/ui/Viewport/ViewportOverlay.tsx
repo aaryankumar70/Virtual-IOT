@@ -351,16 +351,50 @@ export const ViewportOverlay: React.FC = () => {
       {(viewState.wireModeActive || viewState.activeWiring || viewState.activeConnectorWiring) && (
         <div
           id="wire-mode-banner"
-          className="absolute top-13 left-1/2 -translate-x-1/2 z-10 select-none pointer-events-auto flex items-center gap-2 bg-white/95 backdrop-blur-sm border border-blue-200/90 shadow-xs px-3.5 py-1.5 rounded-full text-xs text-slate-800"
+          className="absolute top-13 left-1/2 -translate-x-1/2 z-10 select-none pointer-events-auto flex items-center gap-3 bg-white/95 backdrop-blur-sm border border-blue-200/90 shadow-md px-4 py-1.5 rounded-full text-xs text-slate-800"
         >
           <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 animate-pulse" />
           <span className="font-medium text-[11.5px]">
             {viewState.activeConnectorWiring
-              ? `Connecting ${connectorName} — click a compatible port to finish (Esc to cancel)`
+              ? `Connecting ${connectorName} — click compatible port to finish`
               : viewState.activeWiring
-              ? 'Wiring in progress — click target pin, or Esc to cancel'
-              : 'Wire Mode — click a pin to start connection (Esc to exit)'}
+              ? 'Click & drag to target pin · Release to connect'
+              : 'Wiring Mode — click & drag any pin or breadboard hole'}
           </span>
+
+          {/* Quick Wire Color Swatches */}
+          {viewState.activeWiring && (
+            <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200">
+              {[
+                { color: '#1e293b', label: 'GND (Black)' },
+                { color: '#ef4444', label: '5V/Power (Red)' },
+                { color: '#f97316', label: '3.3V (Orange)' },
+                { color: '#eab308', label: 'PWM (Yellow)' },
+                { color: '#10b981', label: 'Analog (Green)' },
+                { color: '#3b82f6', label: 'Signal (Blue)' },
+                { color: '#8b5cf6', label: 'I2C/SPI (Purple)' },
+                { color: '#ffffff', label: 'Misc (White)' },
+              ].map((swatch) => {
+                const isSelected =
+                  (viewState.activeWiring?.wireColor || viewState.selectedWireColor) ===
+                  swatch.color;
+                return (
+                  <button
+                    key={swatch.color}
+                    onClick={() => viewStore.setWireColor(swatch.color)}
+                    title={swatch.label}
+                    className={`w-3.5 h-3.5 rounded-full border transition-all cursor-pointer ${
+                      isSelected
+                        ? 'scale-125 border-slate-900 shadow-xs ring-1 ring-blue-500'
+                        : 'border-slate-300 hover:scale-110'
+                    }`}
+                    style={{ backgroundColor: swatch.color }}
+                  />
+                );
+              })}
+            </div>
+          )}
+
           <button
             onClick={() => {
               if (viewState.activeConnectorWiring) {
@@ -369,8 +403,8 @@ export const ViewportOverlay: React.FC = () => {
                 viewStore.cancelWiring();
               }
             }}
-            className="ml-1 text-slate-400 hover:text-slate-700 text-[11px] px-1.5 py-0.5 rounded hover:bg-slate-100 transition-colors cursor-pointer"
-            title="Exit Connection Mode (Esc)"
+            className="ml-0.5 text-slate-400 hover:text-slate-700 text-[11px] px-1.5 py-0.5 rounded hover:bg-slate-100 transition-colors cursor-pointer"
+            title="Cancel Wiring (Esc)"
           >
             Esc
           </button>

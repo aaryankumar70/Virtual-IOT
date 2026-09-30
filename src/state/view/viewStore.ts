@@ -6,6 +6,10 @@ export interface ActiveWiringState {
   sourceComponentId: string;
   sourcePinId: string;
   currentWorldPos: { x: number; y: number; z: number };
+  isDragging?: boolean;
+  startScreenPos?: { x: number; y: number };
+  wireColor?: string;
+  snappedTarget?: { componentId: string; pinId: string } | null;
 }
 
 export interface HoveredPinState {
@@ -81,6 +85,7 @@ export interface ViewState {
   theme: 'light' | 'dark';
   hardwareDebugMode: boolean;
   connectionFeedback: ConnectionFeedbackState | null;
+  selectedWireColor: string;
 }
 
 let state: ViewState = {
@@ -111,6 +116,7 @@ let state: ViewState = {
   theme: 'light',
   hardwareDebugMode: false,
   connectionFeedback: null,
+  selectedWireColor: '#3b82f6',
 };
 
 const listeners = new Set<() => void>();
@@ -224,7 +230,16 @@ export const viewStore = {
     notify();
   },
 
-  startWiring(componentId: string, pinId: string, worldPos: { x: number; y: number; z: number }) {
+  startWiring(
+    componentId: string,
+    pinId: string,
+    worldPos: { x: number; y: number; z: number },
+    options?: {
+      isDragging?: boolean;
+      startScreenPos?: { x: number; y: number };
+      wireColor?: string;
+    }
+  ) {
     state = {
       ...state,
       wireModeActive: true,
@@ -232,7 +247,52 @@ export const viewStore = {
         sourceComponentId: componentId,
         sourcePinId: pinId,
         currentWorldPos: worldPos,
+        isDragging: options?.isDragging ?? false,
+        startScreenPos: options?.startScreenPos,
+        wireColor: options?.wireColor ?? state.selectedWireColor,
+        snappedTarget: null,
       },
+    };
+    notify();
+  },
+
+  setIsDraggingWire(isDragging: boolean) {
+    if (!state.activeWiring || state.activeWiring.isDragging === isDragging) return;
+    state = {
+      ...state,
+      activeWiring: {
+        ...state.activeWiring,
+        isDragging,
+      },
+    };
+    notify();
+  },
+
+  setWiringSnappedTarget(target: { componentId: string; pinId: string } | null) {
+    if (!state.activeWiring) return;
+    if (
+      state.activeWiring.snappedTarget?.componentId === target?.componentId &&
+      state.activeWiring.snappedTarget?.pinId === target?.pinId
+    ) {
+      return;
+    }
+    state = {
+      ...state,
+      activeWiring: {
+        ...state.activeWiring,
+        snappedTarget: target,
+      },
+    };
+    notify();
+  },
+
+  setWireColor(color: string) {
+    state = {
+      ...state,
+      selectedWireColor: color,
+      activeWiring: state.activeWiring
+        ? { ...state.activeWiring, wireColor: color }
+        : null,
     };
     notify();
   },
