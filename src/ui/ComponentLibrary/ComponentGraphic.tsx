@@ -175,6 +175,47 @@ export const ComponentGraphic: React.FC<Props> = ({ type, className = 'w-full h-
         </svg>
       );
 
+    case 'capacitor':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Wire Leads */}
+          <line x1="72" y1="78" x2="72" y2="110" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
+          <line x1="88" y1="78" x2="88" y2="104" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
+          {/* Rubber Base */}
+          <ellipse cx="80" cy="78" rx="22" ry="7" fill="#0f172a" />
+          {/* Cylindrical Canister Sleeve */}
+          <path d="M58 28 C58 20, 102 20, 102 28 L102 78 C102 85, 58 85, 58 78 Z" fill="#1e3a8a" stroke="#172554" strokeWidth="1.5" />
+          {/* Top Aluminum Vent Cap */}
+          <ellipse cx="80" cy="28" rx="22" ry="7" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1" />
+          <line x1="80" y1="23" x2="80" y2="33" stroke="#64748b" strokeWidth="1" />
+          <line x1="72" y1="28" x2="88" y2="28" stroke="#64748b" strokeWidth="1" />
+          {/* Negative Polarity Stripe */}
+          <path d="M88 28 L98 28 L98 78 L88 78 Z" fill="#f8fafc" />
+          <text x="93" y="46" fill="#1e293b" fontSize="9" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">-</text>
+          <text x="93" y="62" fill="#1e293b" fontSize="9" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">-</text>
+          <text x="93" y="74" fill="#1e293b" fontSize="9" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">-</text>
+          {/* Label Rating */}
+          <text x="73" y="56" fill="#ffffff" opacity="0.9" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">100µF</text>
+          <text x="73" y="64" fill="#ffffff" opacity="0.75" fontSize="5.5" fontFamily="sans-serif" textAnchor="middle">25V</text>
+        </svg>
+      );
+
+    case 'capacitor-ceramic':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Wire Leads */}
+          <line x1="70" y1="72" x2="70" y2="108" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
+          <line x1="90" y1="72" x2="90" y2="108" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
+          {/* Ceramic Disc Body */}
+          <ellipse cx="80" cy="50" rx="26" ry="24" fill="#d97706" stroke="#b45309" strokeWidth="2" />
+          {/* Top highlight glare */}
+          <path d="M62 42 C68 34, 92 34, 98 42" stroke="#fde68a" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.6" />
+          {/* Value Marking */}
+          <text x="80" y="54" fill="#451a03" fontSize="10" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">104</text>
+          <text x="80" y="63" fill="#451a03" fontSize="6" fontFamily="sans-serif" textAnchor="middle">50V</text>
+        </svg>
+      );
+
     case 'push-button':
       return (
         <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">

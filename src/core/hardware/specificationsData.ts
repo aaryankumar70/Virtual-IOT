@@ -1189,3 +1189,103 @@ export const FPVMonitorSpecification: HardwareSpecification = {
     },
   ],
 };
+
+// 12. ELECTROLYTIC CAPACITOR (100uF 25V)
+export const CapacitorSpecification: HardwareSpecification = {
+  modelNumber: 'UVR1E101MDD',
+  manufacturer: 'Nichicon / Panasonic',
+  revision: 'VR Series Radial',
+  datasheetUrl: 'https://www.nichicon.co.jp/english/products/pdfs/e-vr.pdf',
+  dimensions: {
+    widthMm: 6.3,
+    heightMm: 11.0,
+    depthMm: 6.3,
+    massGrams: 0.8,
+    mountingHolePitchMm: '2.5mm Lead Pitch (Breadboard Compatible)',
+  },
+  electrical: {
+    operatingVoltage: 'Up to 25V DC',
+    minVoltage: 0.0,
+    maxVoltage: 25.0,
+    logicLevel: 'Analog Passive Filtering',
+    quiescentCurrentMa: 0,
+    maxCurrentDrawMa: 180,
+    powerRatingWatts: 0.25,
+  },
+  protocols: ['DC Decoupling', 'AC Ripple Smoothing', 'Energy Storage'],
+  mechanicalMounts: ['Through-Hole Radial Leads (2.5mm Pitch)'],
+  features: [
+    '100 µF Nominal Capacitance with ±20% Tolerance',
+    '25V DC Maximum Working Voltage Rating (32V Surge)',
+    'Low Equivalent Series Resistance (ESR) for Ripple Rejection',
+    'Safety pressure relief vent scored into aluminum top',
+    'Standard 2.54mm breadboard pitch compatible wire leads',
+  ],
+  subcomponents: [
+    {
+      id: 'sub_cap_can',
+      name: 'Aluminum Cylindrical Case & Rubber Bung',
+      category: 'chassis',
+      partNumber: 'AL-CAN-6X11',
+      manufacturer: 'Nichicon',
+      description: 'Extruded aluminum can with cross-scored safety relief vent and EPDM rubber bung seal.',
+      status: 'nominal',
+      specifications: { diameterMm: 6.3, heightMm: 11.0, sleeve: 'Blue PVC' },
+    },
+    {
+      id: 'sub_cap_foil',
+      name: 'Etched Aluminum Foil & Electrolyte Separator',
+      category: 'passive',
+      partNumber: 'ANODE-FOIL-25V',
+      manufacturer: 'Nichicon',
+      description: 'High-purity etched aluminum oxide dielectric layer immersed in liquid electrolyte.',
+      status: 'nominal',
+      specifications: { capacitanceUf: 100, tolerancePercent: 20, maxTempC: 85 },
+    },
+  ],
+};
+
+// 13. CERAMIC DISC CAPACITOR (100nF 50V)
+export const CeramicCapacitorSpecification: HardwareSpecification = {
+  modelNumber: 'K104K15X7RF53L2',
+  manufacturer: 'Vishay / Murata',
+  revision: 'X7R Monolithic',
+  datasheetUrl: 'https://www.vishay.com/docs/45233/kseries.pdf',
+  dimensions: {
+    widthMm: 5.0,
+    heightMm: 7.5,
+    depthMm: 3.2,
+    massGrams: 0.2,
+    mountingHolePitchMm: '5.08mm / 2.54mm Lead Spacing',
+  },
+  electrical: {
+    operatingVoltage: 'Up to 50V DC',
+    minVoltage: 0.0,
+    maxVoltage: 50.0,
+    logicLevel: 'High-Frequency Bypass',
+    quiescentCurrentMa: 0,
+    maxCurrentDrawMa: 50,
+    powerRatingWatts: 0.1,
+  },
+  protocols: ['High-Frequency Bypass', 'IC VCC Decoupling', 'Noise Suppression'],
+  mechanicalMounts: ['Through-Hole Radial Leads (2.54mm Breadboard Friendly)'],
+  features: [
+    '100 nF (0.1 µF, Code "104") Capacitance',
+    'Class 2 X7R Temperature Stable Ceramic Dielectric (±15% from -55°C to +125°C)',
+    '50V DC Maximum Working Voltage',
+    'Ultra-low parasitic inductance for IC power rail decoupling',
+    'Non-polarized: can be inserted in either orientation',
+  ],
+  subcomponents: [
+    {
+      id: 'sub_cer_disc',
+      name: 'Epoxy Coated Ceramic Dielectric Disc',
+      category: 'passive',
+      partNumber: 'CER-X7R-104',
+      manufacturer: 'Vishay',
+      description: 'Multi-layer barium titanate ceramic dielectric with flame-retardant epoxy coating.',
+      status: 'nominal',
+      specifications: { capacitanceNf: 100, code: '104', dielectric: 'X7R' },
+    },
+  ],
+};

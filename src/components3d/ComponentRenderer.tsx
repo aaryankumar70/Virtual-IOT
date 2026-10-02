@@ -5,6 +5,8 @@ import { ESP32Mesh } from './ESP32/ESP32Mesh';
 import { BreadboardMesh } from './Breadboard/BreadboardMesh';
 import { LEDMesh } from './LED/LEDMesh';
 import { ResistorMesh } from './Resistor/ResistorMesh';
+import { CapacitorMesh } from './Capacitor/CapacitorMesh';
+import { CeramicCapacitorMesh } from './Capacitor/CeramicCapacitorMesh';
 import { PushButtonMesh } from './PushButton/PushButtonMesh';
 import { BuzzerMesh } from './Buzzer/BuzzerMesh';
 import { RaspberryPiMesh } from './RaspberryPi/RaspberryPiMesh';
@@ -51,6 +53,10 @@ export const ComponentRenderer: React.FC<Props> = ({ component }) => {
       return <LEDRGBMesh component={component} />;
     case 'resistor':
       return <ResistorMesh component={component} />;
+    case 'capacitor':
+      return <CapacitorMesh component={component} />;
+    case 'capacitor-ceramic':
+      return <CeramicCapacitorMesh component={component} />;
     case 'push-button':
       return <PushButtonMesh component={component} />;
     case 'buzzer':

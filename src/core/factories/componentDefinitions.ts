@@ -16,6 +16,8 @@ import {
   TFTColorScreenSpecification,
   TM1637DisplaySpecification,
   FPVMonitorSpecification,
+  CapacitorSpecification,
+  CeramicCapacitorSpecification,
 } from '../hardware/specificationsData';
 
 // 1. ARDUINO UNO
@@ -144,6 +146,42 @@ export const ResistorDefinition: ComponentDefinition = {
   pins: resistorPins,
   defaultState: { resistance: 220 },
   dimensions: { width: 2.0, height: 0.45, depth: 0.45 },
+};
+
+// 3B. ELECTROLYTIC CAPACITOR
+const capacitorPins: VirtualPin[] = [
+  { id: 'anode', name: 'Anode (+)', type: 'power', direction: 'input', localPosition: { x: -0.22, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'cathode', name: 'Cathode (-)', type: 'ground', direction: 'output', localPosition: { x: 0.22, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
+];
+
+export const CapacitorDefinition: ComponentDefinition = {
+  type: 'capacitor',
+  displayName: 'Electrolytic Capacitor (100µF)',
+  category: 'passive',
+  description: 'Polarized aluminum electrolytic capacitor (100µF, 25V) for power rail filtering and bulk energy storage.',
+  pins: capacitorPins,
+  specification: CapacitorSpecification,
+  subcomponents: CapacitorSpecification.subcomponents,
+  defaultState: { capacitance: '100µF', voltageRating: '25V' },
+  dimensions: { width: 0.8, height: 1.2, depth: 0.8 },
+};
+
+// 3C. CERAMIC DISC CAPACITOR
+const ceramicCapacitorPins: VirtualPin[] = [
+  { id: 'pin1', name: 'Lead 1', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.25, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'pin2', name: 'Lead 2', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.25, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
+];
+
+export const CeramicCapacitorDefinition: ComponentDefinition = {
+  type: 'capacitor-ceramic',
+  displayName: 'Ceramic Capacitor (100nF)',
+  category: 'passive',
+  description: 'Non-polarized ceramic disc capacitor (100nF / 0.1µF, 50V) for high-frequency decoupling and IC bypassing.',
+  pins: ceramicCapacitorPins,
+  specification: CeramicCapacitorSpecification,
+  subcomponents: CeramicCapacitorSpecification.subcomponents,
+  defaultState: { capacitance: '100nF', voltageRating: '50V' },
+  dimensions: { width: 0.7, height: 1.0, depth: 0.4 },
 };
 
 // 4. BREADBOARD (Section 25 - Logical hole/pin model)
@@ -1022,6 +1060,8 @@ export function registerAllComponents() {
   ComponentRegistry.register(LEDDefinition);
   ComponentRegistry.register(LEDRGBDefinition);
   ComponentRegistry.register(ResistorDefinition);
+  ComponentRegistry.register(CapacitorDefinition);
+  ComponentRegistry.register(CeramicCapacitorDefinition);
   ComponentRegistry.register(PushButtonDefinition);
   ComponentRegistry.register(BuzzerDefinition);
   ComponentRegistry.register(UltrasonicSensorDefinition);

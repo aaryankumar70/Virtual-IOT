@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import { TopToolbar } from '../ui/Toolbar/TopToolbar';
-import { ComponentLibraryPanel, activeDraggedType, setActiveDraggedType } from '../ui/ComponentLibrary/ComponentLibraryPanel';
+import { ComponentPalette, activeDraggedType, setActiveDraggedType } from '../ui/ComponentPalette';
 import { ComponentInspectorPanel } from '../ui/Inspector/ComponentInspectorPanel';
 import { LabContextMenu } from '../ui/ContextMenu/LabContextMenu';
 import { PinTooltip } from '../ui/Tooltip/PinTooltip';
@@ -119,7 +119,7 @@ export const Workspace: React.FC = () => {
     <div id="virtual-iot-lab-root" className="flex flex-col w-screen h-screen overflow-hidden bg-slate-100">
       <TopToolbar />
       <div className="flex-1 flex relative overflow-hidden">
-        {viewState.libraryOpen && <ComponentLibraryPanel />}
+        {viewState.libraryOpen && <ComponentPalette />}
         <div
           ref={canvasContainerRef}
           id="canvas-viewport"
