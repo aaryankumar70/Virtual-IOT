@@ -18,6 +18,7 @@ import {
   FPVMonitorSpecification,
   CapacitorSpecification,
   CeramicCapacitorSpecification,
+  OscilloscopeSpecification,
 } from '../hardware/specificationsData';
 
 // 1. ARDUINO UNO
@@ -1051,6 +1052,54 @@ export const FPVMonitorDefinition: ComponentDefinition = {
   dimensions: { width: 11.5, height: 3.5, depth: 7.5 },
 };
 
+// 26. DIGITAL STORAGE OSCILLOSCOPE (DSO)
+const oscilloscopePins: VirtualPin[] = [
+  {
+    id: 'ch1_probe',
+    name: 'CH1 Input (Probe A)',
+    type: 'analog',
+    direction: 'input',
+    localPosition: { x: 0.6, y: 0.5, z: 1.2 },
+    connectorStyle: 'header-pin',
+  },
+  {
+    id: 'ch2_probe',
+    name: 'CH2 Input (Probe B)',
+    type: 'analog',
+    direction: 'input',
+    localPosition: { x: 1.2, y: 0.5, z: 1.2 },
+    connectorStyle: 'header-pin',
+  },
+  {
+    id: 'gnd_probe',
+    name: 'GND Clip (0V Reference)',
+    type: 'ground',
+    direction: 'power',
+    localPosition: { x: 1.75, y: 0.5, z: 1.2 },
+    connectorStyle: 'header-pin',
+  },
+  {
+    id: 'comp_lug',
+    name: 'Probe Comp (1kHz 3V Square)',
+    type: 'pwm',
+    direction: 'output',
+    localPosition: { x: -1.75, y: 0.5, z: 1.2 },
+    connectorStyle: 'lead-tip',
+  },
+];
+
+export const OscilloscopeDefinition: ComponentDefinition = {
+  type: 'oscilloscope',
+  displayName: 'Digital Storage Oscilloscope',
+  category: 'instrument',
+  description: 'Dual-channel 100MSa/s real-time oscilloscope for visualizing analog signals, PWM duty cycles, and circuit waveforms.',
+  pins: oscilloscopePins,
+  specification: OscilloscopeSpecification,
+  subcomponents: OscilloscopeSpecification.subcomponents,
+  defaultState: { powered: true, ch1Enabled: true, ch2Enabled: true },
+  dimensions: { width: 4.4, height: 2.6, depth: 2.2 },
+};
+
 // Register all definitions into ComponentRegistry
 export function registerAllComponents() {
   ComponentRegistry.register(ArduinoUnoDefinition);
@@ -1085,6 +1134,9 @@ export function registerAllComponents() {
   ComponentRegistry.register(TFTScreenDefinition);
   ComponentRegistry.register(TM1637DisplayDefinition);
   ComponentRegistry.register(FPVMonitorDefinition);
+
+  // Benchtop Instruments
+  ComponentRegistry.register(OscilloscopeDefinition);
 }
 
 // Call on startup

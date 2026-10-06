@@ -18,11 +18,13 @@ import {
   X,
   Plus,
   GripVertical,
+  Activity,
 } from 'lucide-react';
 import { ComponentRegistry } from '../../core/registry/ComponentRegistry';
 import { createComponent } from '../../core/factories/componentFactory';
 import { projectStore, useProject } from '../../state/project/projectStore';
 import { viewStore, useView } from '../../state/view/viewStore';
+import { oscilloscopeStore } from '../../state/oscilloscope/oscilloscopeStore';
 import { historyManager, Commands } from '../../editor/history/historyManager';
 import { ComponentGraphic } from '../ComponentLibrary/ComponentGraphic';
 
@@ -33,6 +35,7 @@ export function setActiveDraggedType(type: string | null) {
 
 // Basic electronic components specifically highlighted for quick access
 const BASIC_COMPONENT_TYPES = [
+  'oscilloscope',
   'resistor',
   'led',
   'capacitor',
@@ -54,6 +57,7 @@ export const ComponentPalette: React.FC = () => {
   const categories = [
     { id: 'all', label: 'All Components', icon: Boxes },
     { id: 'basic', label: 'Basic Electronics', icon: Zap },
+    { id: 'instrument', label: 'Test Instruments', icon: Activity },
     { id: 'passive', label: 'Passives', icon: Zap },
     { id: 'output', label: 'Output & Actuators', icon: Volume2 },
     { id: 'input', label: 'Input & Switches', icon: Sliders },
@@ -178,7 +182,7 @@ export const ComponentPalette: React.FC = () => {
               <input
                 id="input-search-components"
                 type="text"
-                placeholder="Search resistors, LEDs, capacitors..."
+                placeholder="Search oscilloscope, resistors, LEDs, capacitors..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 focus:border-blue-500 text-xs text-slate-800 pl-9 pr-8 py-2 rounded-lg outline-none placeholder-slate-400 transition-all"
@@ -226,7 +230,9 @@ export const ComponentPalette: React.FC = () => {
                       {def.displayName.split('(')[0].trim()}
                     </span>
                     <span className="text-[9px] text-slate-400 truncate w-full mt-0.5">
-                      {def.type === 'resistor'
+                      {def.type === 'oscilloscope'
+                        ? '100MSa/s DSO'
+                        : def.type === 'resistor'
                         ? '220Ω'
                         : def.type === 'capacitor'
                         ? '100µF'
@@ -337,17 +343,42 @@ export const ComponentPalette: React.FC = () => {
       {/* Examples Tab */}
       {viewState.activeTab === 'examples' && (
         <div className="p-4 flex flex-col gap-3 text-xs overflow-y-auto">
+          {/* Example 1: Oscilloscope connected to breadboard PWM and RC Filter */}
           <div
-            onClick={() => projectStore.loadExampleCircuit()}
-            className="p-3 rounded-lg border border-slate-200 hover:border-blue-400 bg-white hover:bg-slate-50 cursor-pointer transition-all flex items-start gap-3"
+            id="example-oscilloscope-lab"
+            onClick={() => {
+              projectStore.loadOscilloscopeCircuit();
+              oscilloscopeStore.openOscilloscope();
+            }}
+            className="p-3 rounded-lg border border-slate-200 hover:border-amber-400 bg-white hover:bg-amber-50/30 cursor-pointer transition-all flex items-start gap-3 shadow-2xs group"
           >
-            <div className="p-2 rounded-md bg-blue-50 text-blue-600">
-              <Sparkles size={16} />
+            <div className="p-2 rounded-md bg-amber-50 text-amber-600 group-hover:bg-amber-100/70 transition-colors">
+              <Activity size={18} />
             </div>
             <div>
-              <h4 className="font-semibold text-slate-800">Arduino Uno LED Circuit</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Arduino Uno connected via breadboard to 220Ω resistor and 5mm LED.
+              <div className="flex items-center gap-1.5">
+                <h4 className="font-semibold text-slate-800 group-hover:text-amber-700">Oscilloscope PWM & RC Filter Lab</h4>
+                <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-mono font-medium">Featured</span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                Dual-channel DSO connected to breadboard pins analyzing 490Hz PWM and filtered analog waveform.
+              </p>
+            </div>
+          </div>
+
+          {/* Example 2: Arduino Uno LED Circuit */}
+          <div
+            id="example-arduino-led"
+            onClick={() => projectStore.loadExampleCircuit()}
+            className="p-3 rounded-lg border border-slate-200 hover:border-blue-400 bg-white hover:bg-slate-50 cursor-pointer transition-all flex items-start gap-3 shadow-2xs group"
+          >
+            <div className="p-2 rounded-md bg-blue-50 text-blue-600 group-hover:bg-blue-100/70 transition-colors">
+              <Sparkles size={18} />
+            </div>
+            <div>
+              <h4 className="font-semibold text-slate-800 group-hover:text-blue-600">Arduino Uno LED & OLED Circuit</h4>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                Arduino Uno connected via breadboard to 220Ω resistor, 5mm LED, and I2C OLED display.
               </p>
             </div>
           </div>

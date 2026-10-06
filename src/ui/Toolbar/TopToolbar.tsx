@@ -16,15 +16,18 @@ import {
   Moon,
   User,
   Cpu,
+  Activity,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
+import { oscilloscopeStore, useOscilloscope } from '../../state/oscilloscope/oscilloscopeStore';
 import { historyManager, Commands } from '../../editor/history/historyManager';
 import { serializeProject, deserializeProject } from '../../project/serialization/projectSchema';
 
 export const TopToolbar: React.FC = () => {
   const viewState = useView();
   const projectState = useProject();
+  const oscState = useOscilloscope();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedPrimaryId = viewState.selectedComponentIds[0] || null;
@@ -210,6 +213,21 @@ export const TopToolbar: React.FC = () => {
         >
           <Cable size={15} />
           <span className="text-[10px] font-medium mt-0.5">Wire</span>
+        </button>
+
+        {/* Oscilloscope */}
+        <button
+          id="btn-tool-oscilloscope"
+          onClick={() => oscilloscopeStore.openOscilloscope()}
+          title="Virtual Oscilloscope (O)"
+          className={`flex flex-col items-center justify-center px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+            oscState.isOpen
+              ? 'bg-amber-50 text-amber-600 border border-amber-300 shadow-xs'
+              : 'text-slate-600 hover:text-amber-600 hover:bg-amber-50/60 border border-transparent'
+          }`}
+        >
+          <Activity size={15} className={oscState.isOpen ? 'animate-pulse' : ''} />
+          <span className="text-[10px] font-medium mt-0.5">Scope</span>
         </button>
 
         <div className="w-[1px] h-6 bg-slate-200 mx-1" />

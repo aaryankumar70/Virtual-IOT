@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
+import { oscilloscopeStore } from '../../state/oscilloscope/oscilloscopeStore';
 import { historyManager, Commands } from '../history/historyManager';
 
 export function useKeyboardShortcuts() {
@@ -95,6 +96,12 @@ export function useKeyboardShortcuts() {
       // Wire mode toggle
       if (e.key === 'w' || e.key === 'W') {
         viewStore.toggleWireMode();
+        return;
+      }
+
+      // Oscilloscope modal toggle
+      if (e.key === 'o' || e.key === 'O') {
+        oscilloscopeStore.toggleOscilloscope();
         return;
       }
 

@@ -6,7 +6,7 @@ import { HardwareSpecification, HardwareSubcomponent } from '../hardware/Hardwar
 export interface ComponentDefinition {
   type: string;
   displayName: string;
-  category: 'microcontroller' | 'board' | 'prototyping' | 'output' | 'input' | 'sensor' | 'passive' | 'communication' | 'power' | 'display' | 'drone' | 'misc';
+  category: 'microcontroller' | 'board' | 'prototyping' | 'output' | 'input' | 'sensor' | 'passive' | 'communication' | 'power' | 'display' | 'drone' | 'instrument' | 'misc';
   description: string;
   manufacturer?: string;
   pins: VirtualPin[];

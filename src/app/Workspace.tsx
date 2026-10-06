@@ -6,6 +6,7 @@ import { ComponentPalette, activeDraggedType, setActiveDraggedType } from '../ui
 import { ComponentInspectorPanel } from '../ui/Inspector/ComponentInspectorPanel';
 import { LabContextMenu } from '../ui/ContextMenu/LabContextMenu';
 import { PinTooltip } from '../ui/Tooltip/PinTooltip';
+import { VirtualOscilloscopePanel } from '../ui/Oscilloscope/VirtualOscilloscopePanel';
 import { LabScene } from '../scene/World/LabScene';
 import { ViewportOverlay } from '../ui/Viewport/ViewportOverlay';
 import { activeCameraRef } from '../scene/Camera/activeCameraRef';
@@ -166,6 +167,7 @@ export const Workspace: React.FC = () => {
       </div>
       <PinTooltip />
       <LabContextMenu />
+      <VirtualOscilloscopePanel />
     </div>
   );
 };

@@ -32,6 +32,7 @@ import { LCD1602Mesh } from './Display/LCD1602Mesh';
 import { TFTScreenMesh } from './Display/TFTScreenMesh';
 import { TM1637SegmentMesh } from './Display/TM1637SegmentMesh';
 import { FPVMonitorMesh } from './Display/FPVMonitorMesh';
+import { OscilloscopeMesh } from './Oscilloscope/OscilloscopeMesh';
 
 interface Props {
   component: VirtualComponent;
@@ -99,6 +100,8 @@ export const ComponentRenderer: React.FC<Props> = ({ component }) => {
       return <TM1637SegmentMesh component={component} />;
     case 'fpv-monitor':
       return <FPVMonitorMesh component={component} />;
+    case 'oscilloscope':
+      return <OscilloscopeMesh component={component} />;
     default:
       return (
         <mesh position={[0, 0.5, 0]}>

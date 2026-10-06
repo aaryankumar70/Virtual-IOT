@@ -389,6 +389,98 @@ export const projectStore = {
     );
   },
 
+  loadOscilloscopeCircuit() {
+    this.resetProject();
+    state = {
+      ...state,
+      metadata: {
+        name: 'Oscilloscope PWM & RC Filter Lab',
+        description: 'Real-time oscilloscope connected to breadboard pins analyzing 490Hz PWM and filtered analog signals.',
+      },
+    };
+
+    // 1. Breadboard in center
+    const breadboard = createComponent('breadboard', { x: 0, y: 0, z: 0 });
+    // 2. Arduino Uno on left
+    const arduino = createComponent('arduino-uno', { x: -4.6, y: 0, z: 0 });
+    // 3. Digital Storage Oscilloscope top/bench
+    const oscilloscope = createComponent('oscilloscope', { x: 0.8, y: 0, z: -3.6 });
+    // 4. 220Ω Resistor
+    const resistor = createComponent('resistor', { x: -0.5, y: 0.35, z: -0.2 });
+    // 5. Ceramic Capacitor (RC filter)
+    const capacitor = createComponent('capacitor-ceramic', { x: 0.8, y: 0.35, z: 0.2 });
+
+    this.addComponent(breadboard);
+    this.addComponent(arduino);
+    this.addComponent(oscilloscope);
+    this.addComponent(resistor);
+    this.addComponent(capacitor);
+
+    // Wires:
+    // 1. Arduino D9 (490Hz PWM) -> Breadboard Row 15 Hole A (Orange wire)
+    this.addConnection(
+      { componentId: arduino.id, pinId: 'd9' },
+      { componentId: breadboard.id, pinId: 'row_15_a' },
+      '#f97316'
+    );
+
+    // 2. Breadboard Row 15 Hole B -> Resistor Lead 1
+    this.addConnection(
+      { componentId: breadboard.id, pinId: 'row_15_b' },
+      { componentId: resistor.id, pinId: 'pin1' },
+      '#eab308'
+    );
+
+    // 3. Resistor Lead 2 -> Breadboard Row 18 Hole A
+    this.addConnection(
+      { componentId: resistor.id, pinId: 'pin2' },
+      { componentId: breadboard.id, pinId: 'row_18_a' },
+      '#eab308'
+    );
+
+    // 4. Capacitor Lead 1 -> Breadboard Row 18 Hole B
+    this.addConnection(
+      { componentId: capacitor.id, pinId: 'pin1' },
+      { componentId: breadboard.id, pinId: 'row_18_b' },
+      '#38bdf8'
+    );
+
+    // 5. Capacitor Lead 2 -> Breadboard Bottom GND Rail (-)
+    this.addConnection(
+      { componentId: capacitor.id, pinId: 'pin2' },
+      { componentId: breadboard.id, pinId: 'rail_bot_minus_15' },
+      '#1e293b'
+    );
+
+    // 6. Arduino GND -> Breadboard Bottom GND Rail (-)
+    this.addConnection(
+      { componentId: arduino.id, pinId: 'gnd_1' },
+      { componentId: breadboard.id, pinId: 'rail_bot_minus_1' },
+      '#1e293b'
+    );
+
+    // 7. Oscilloscope CH1 Probe -> Breadboard Row 18 Hole C (Filtered RC analog signal! Yellow wire)
+    this.addConnection(
+      { componentId: oscilloscope.id, pinId: 'ch1_probe' },
+      { componentId: breadboard.id, pinId: 'row_18_c' },
+      '#facc15'
+    );
+
+    // 8. Oscilloscope CH2 Probe -> Arduino D3 (Raw 490Hz PWM! Cyan wire)
+    this.addConnection(
+      { componentId: oscilloscope.id, pinId: 'ch2_probe' },
+      { componentId: arduino.id, pinId: 'd3' },
+      '#06b6d4'
+    );
+
+    // 9. Oscilloscope GND Clip -> Breadboard Bottom GND Rail (-)
+    this.addConnection(
+      { componentId: oscilloscope.id, pinId: 'gnd_probe' },
+      { componentId: breadboard.id, pinId: 'rail_bot_minus_25' },
+      '#1e293b'
+    );
+  },
+
   getPinWorldPosition(componentId: string, pinId: string) {
     const comp = state.components.find((c) => c.id === componentId);
     if (!comp) return null;

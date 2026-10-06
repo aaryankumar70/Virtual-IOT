@@ -621,6 +621,39 @@ export const ComponentGraphic: React.FC<Props> = ({ type, className = 'w-full h-
         </svg>
       );
 
+    case 'oscilloscope':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Benchtop Chassis */}
+          <rect x="18" y="20" width="124" height="80" rx="6" fill="#334155" stroke="#1e293b" strokeWidth="2" />
+          {/* Carry Handle */}
+          <rect x="45" y="14" width="70" height="8" rx="2" fill="#1e293b" />
+          {/* Dark Phosphor CRT Display */}
+          <rect x="26" y="28" width="72" height="54" rx="3" fill="#030712" stroke="#475569" strokeWidth="1.5" />
+          {/* Dotted Grid lines */}
+          <line x1="26" y1="55" x2="98" y2="55" stroke="#1e3a8a" strokeWidth="0.8" strokeDasharray="2 2" />
+          <line x1="62" y1="28" x2="62" y2="82" stroke="#1e3a8a" strokeWidth="0.8" strokeDasharray="2 2" />
+          {/* Yellow PWM & Analog Waveform Traces */}
+          <path d="M28 55 H40 V38 H54 V72 H68 V38 H82 V72 H96" stroke="#facc15" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M28 65 Q40 50, 52 65 T76 65 T96 65" stroke="#06b6d4" strokeWidth="1.2" opacity="0.8" fill="none" />
+          {/* Front Control Panel Right */}
+          {/* RUN/STOP Button */}
+          <rect x="106" y="28" width="16" height="8" rx="1.5" fill="#22c55e" />
+          {/* AUTO Button */}
+          <rect x="126" y="28" width="12" height="8" rx="1.5" fill="#3b82f6" />
+          {/* Timebase Rotary Knob */}
+          <circle cx="120" cy="46" r="7" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1" />
+          <line x1="120" y1="46" x2="124" y2="42" stroke="#0f172a" strokeWidth="1.5" />
+          {/* CH1 & CH2 Vertical Knobs */}
+          <circle cx="112" cy="64" r="5.5" fill="#cbd5e1" stroke="#eab308" strokeWidth="1.2" />
+          <circle cx="128" cy="64" r="5.5" fill="#cbd5e1" stroke="#06b6d4" strokeWidth="1.2" />
+          {/* Bottom BNC Input Ports */}
+          <circle cx="108" cy="84" r="4.5" fill="#94a3b8" stroke="#eab308" strokeWidth="1.5" />
+          <circle cx="120" cy="84" r="4.5" fill="#94a3b8" stroke="#06b6d4" strokeWidth="1.5" />
+          <circle cx="132" cy="84" r="4.5" fill="#475569" stroke="#1e293b" strokeWidth="1.5" />
+        </svg>
+      );
+
     default:
       return (
         <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
