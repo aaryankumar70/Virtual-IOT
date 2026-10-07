@@ -55,9 +55,22 @@ export const Workspace: React.FC = () => {
         posZ = Number(posZ.toFixed(2));
       }
 
+      let posY = 0;
+      const breadboard = projectStore.getState().components.find((c) => c.type === 'breadboard');
+      if (breadboard) {
+        const bx = breadboard.transform.position.x;
+        const bz = breadboard.transform.position.z;
+        const by = breadboard.transform.position.y;
+        if (Math.abs(posX - bx) <= 3.8 && Math.abs(posZ - bz) <= 2.2) {
+          if (['resistor', 'led', 'capacitor', 'capacitor-ceramic', 'led-rgb', 'push-button', 'buzzer'].includes(activeDraggedType)) {
+            posY = by + 0.35;
+          }
+        }
+      }
+
       viewStore.setDragPreview({
         type: activeDraggedType,
-        worldPos: { x: posX, y: 0, z: posZ },
+        worldPos: { x: posX, y: posY, z: posZ },
       });
     }
   };
@@ -109,7 +122,18 @@ export const Workspace: React.FC = () => {
       spawnZ = Number(spawnZ.toFixed(2));
     }
 
-    const newComp = createComponent(componentType, { x: spawnX, y: 0, z: spawnZ });
+    let spawnY = 0;
+    const breadboard = projectStore.getState().components.find((c) => c.type === 'breadboard');
+    if (breadboard && ['resistor', 'led', 'capacitor', 'capacitor-ceramic', 'led-rgb', 'push-button', 'buzzer'].includes(componentType)) {
+      const bx = breadboard.transform.position.x;
+      const bz = breadboard.transform.position.z;
+      const by = breadboard.transform.position.y;
+      if (Math.abs(spawnX - bx) <= 3.8 && Math.abs(spawnZ - bz) <= 2.2) {
+        spawnY = by + 0.35;
+      }
+    }
+
+    const newComp = createComponent(componentType, { x: spawnX, y: spawnY, z: spawnZ });
     historyManager.execute(Commands.addComponent(newComp));
     viewStore.selectComponent(newComp.id);
   };
@@ -152,6 +176,12 @@ export const Workspace: React.FC = () => {
                   building your circuit, or load an example circuit.
                 </p>
                 <div className="flex items-center gap-2 pt-2">
+                  <button
+                    onClick={() => projectStore.loadOscilloscopeCircuit()}
+                    className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-xs text-white font-medium transition-colors shadow-xs"
+                  >
+                    Load Oscilloscope Lab
+                  </button>
                   <button
                     onClick={() => projectStore.loadExampleCircuit()}
                     className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-xs text-white font-medium transition-colors shadow-xs"

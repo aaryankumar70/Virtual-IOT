@@ -20,7 +20,7 @@ const DragGhostPreview: React.FC<{ preview: DragPreviewState }> = ({ preview }) 
   const depth = def?.dimensions?.depth || 2;
 
   return (
-    <group position={[preview.worldPos.x, 0, preview.worldPos.z]}>
+    <group position={[preview.worldPos.x, preview.worldPos.y || 0, preview.worldPos.z]}>
       {/* Ground Footprint Ring */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
         <ringGeometry args={[Math.max(width, depth) * 0.45, Math.max(width, depth) * 0.52, 32]} />
