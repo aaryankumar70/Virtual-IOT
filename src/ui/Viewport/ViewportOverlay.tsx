@@ -411,6 +411,18 @@ export const ViewportOverlay: React.FC = () => {
         </div>
       )}
 
+      {/* Breadboard Drop Target Active HUD */}
+      {viewState.dragPreview && viewState.breadboardSnapTarget?.label && (
+        <div
+          id="breadboard-drop-target-hud"
+          className="absolute top-13 left-1/2 -translate-x-1/2 z-30 select-none pointer-events-none flex items-center gap-2 bg-emerald-900/90 text-emerald-100 border border-emerald-500/80 backdrop-blur-md shadow-lg px-4 py-1.5 rounded-full text-xs font-mono animate-in fade-in zoom-in-95 duration-100"
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-ping" />
+          <span className="font-semibold text-emerald-300">Breadboard Drop Target:</span>
+          <span className="text-white font-medium">{viewState.breadboardSnapTarget.label}</span>
+        </div>
+      )}
+
       {/* Real-time Connection Feedback Toast */}
       {viewState.connectionFeedback && (
         <div

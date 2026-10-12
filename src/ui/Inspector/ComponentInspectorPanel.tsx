@@ -754,6 +754,53 @@ export const ComponentInspectorPanel: React.FC = () => {
                 </div>
               )}
 
+              {/* Breadboard Architecture & Inserted Components */}
+              {selectedComponent.type === 'breadboard' && (
+                <div className="flex flex-col gap-3 p-3 rounded-lg bg-emerald-50/70 border border-emerald-200">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-emerald-950 flex items-center gap-1.5">
+                      <Layers size={14} className="text-emerald-600" />
+                      <span>400 Tie-Point Breadboard</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded">
+                      30 Columns
+                    </span>
+                  </div>
+
+                  <div className="text-[11px] text-slate-600 leading-relaxed">
+                    Standard 2.54mm pitch prototyping platform with dual terminal banks (A-E and F-J) isolated by an IC DIP trough, plus top and bottom power distribution buses (+ / -).
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                    <div className="bg-white p-2 rounded border border-emerald-100">
+                      <div className="text-slate-400 uppercase text-[9px]">Terminal Strips</div>
+                      <div className="font-semibold text-slate-800">300 Tie Points</div>
+                      <div className="text-slate-500 text-[9px]">Rows 1-30 (A-E / F-J)</div>
+                    </div>
+                    <div className="bg-white p-2 rounded border border-emerald-100">
+                      <div className="text-slate-400 uppercase text-[9px]">Power Buses</div>
+                      <div className="font-semibold text-slate-800">100 Tie Points</div>
+                      <div className="text-slate-500 text-[9px]">Top & Bottom (+ / -)</div>
+                    </div>
+                  </div>
+
+                  {/* Attached Connections count */}
+                  <div className="pt-2 border-t border-emerald-200/60 flex items-center justify-between text-[11px]">
+                    <span className="text-slate-600">Active Circuit Nodes:</span>
+                    <span className="font-bold text-emerald-700 font-mono">
+                      {
+                        projectState.connections.filter(
+                          (c) =>
+                            c.source.componentId === selectedComponent.id ||
+                            c.target.componentId === selectedComponent.id
+                        ).length
+                      }{' '}
+                      connections
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* Section: Transform */}
           <div className="flex flex-col gap-2">
             <span className="font-bold text-xs text-slate-900">Transform</span>

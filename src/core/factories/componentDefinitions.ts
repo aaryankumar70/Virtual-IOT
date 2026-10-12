@@ -185,28 +185,46 @@ export const CeramicCapacitorDefinition: ComponentDefinition = {
   dimensions: { width: 0.7, height: 1.0, depth: 0.4 },
 };
 
-// 4. BREADBOARD (Section 25 - Logical hole/pin model)
+// 4. BREADBOARD (Section 25 - Standard Half-Size 400 Tie-Point Model)
 function generateBreadboardPins(): VirtualPin[] {
   const pins: VirtualPin[] = [];
-  const rows = 12; // 12 columns/rows of 5 holes each side + power rails
-  const xSpacing = 0.55;
-  const zSpacing = 0.45;
-  const xOffset = -((rows - 1) * xSpacing) / 2;
+  const rows = 30; // 30 columns for standard half-size solderless breadboard
+  const xSpacing = 0.25;
+  const xOffset = -((rows - 1) * xSpacing) / 2; // -3.625
 
-  // Power Rails Top: + (Red) and - (Blue)
-  for (let r = 0; r < rows; r++) {
-    const x = xOffset + r * xSpacing;
+  // 1. Top Power Distribution Rails: + (Red, z = -1.72) and - (Blue, z = -1.35)
+  for (let r = 1; r <= rows; r++) {
+    const x = xOffset + (r - 1) * xSpacing;
+    // 1-based IDs
     pins.push({
       id: `rail_top_plus_${r}`,
-      name: `Top Rail + (${r + 1})`,
+      name: `Top Rail + (${r})`,
       type: 'power',
       direction: 'bidirectional',
-      localPosition: { x, y: 0.43, z: -1.75 },
+      localPosition: { x, y: 0.43, z: -1.72 },
       connectorStyle: 'breadboard-hole',
     });
     pins.push({
       id: `rail_top_minus_${r}`,
-      name: `Top Rail - (${r + 1})`,
+      name: `Top Rail - (${r})`,
+      type: 'ground',
+      direction: 'bidirectional',
+      localPosition: { x, y: 0.43, z: -1.35 },
+      connectorStyle: 'breadboard-hole',
+    });
+
+    // 0-based aliases for backward compatibility (rail_top_plus_0 .. rail_top_plus_29)
+    pins.push({
+      id: `rail_top_plus_${r - 1}`,
+      name: `Top Rail + (${r})`,
+      type: 'power',
+      direction: 'bidirectional',
+      localPosition: { x, y: 0.43, z: -1.72 },
+      connectorStyle: 'breadboard-hole',
+    });
+    pins.push({
+      id: `rail_top_minus_${r - 1}`,
+      name: `Top Rail - (${r})`,
       type: 'ground',
       direction: 'bidirectional',
       localPosition: { x, y: 0.43, z: -1.35 },
@@ -214,43 +232,56 @@ function generateBreadboardPins(): VirtualPin[] {
     });
   }
 
-  // Terminal rows: Section A-E (z from -1.0 to -0.2) and F-J (z from 0.2 to 1.0)
-  const colsAE = ['A', 'B', 'C', 'D', 'E'];
-  const colsFJ = ['F', 'G', 'H', 'I', 'J'];
+  // 2. Terminal rows: Bank A-E (z: -0.88 to -0.07) and Bank F-J (z: 0.07 to 0.88)
+  const colsAE = [
+    { letter: 'a', z: -0.88 },
+    { letter: 'b', z: -0.66 },
+    { letter: 'c', z: -0.44 },
+    { letter: 'd', z: -0.22 },
+    { letter: 'e', z: -0.07 },
+  ];
+  const colsFJ = [
+    { letter: 'f', z: 0.07 },
+    { letter: 'g', z: 0.22 },
+    { letter: 'h', z: 0.44 },
+    { letter: 'i', z: 0.66 },
+    { letter: 'j', z: 0.88 },
+  ];
 
   for (let r = 1; r <= rows; r++) {
     const x = xOffset + (r - 1) * xSpacing;
-    // A-E
-    colsAE.forEach((col, idx) => {
+    // Bank A-E
+    colsAE.forEach(({ letter, z }) => {
       pins.push({
-        id: `row_${r}_${col.toLowerCase()}`,
-        name: `Row ${r} Pin ${col}`,
+        id: `row_${r}_${letter}`,
+        name: `Row ${r} Pin ${letter.toUpperCase()}`,
         type: 'digital',
         direction: 'bidirectional',
-        localPosition: { x, y: 0.43, z: -0.95 + idx * zSpacing * 0.45 },
+        localPosition: { x, y: 0.43, z },
         connectorStyle: 'breadboard-hole',
       });
     });
 
-    // F-J
-    colsFJ.forEach((col, idx) => {
+    // Bank F-J
+    colsFJ.forEach(({ letter, z }) => {
       pins.push({
-        id: `row_${r}_${col.toLowerCase()}`,
-        name: `Row ${r} Pin ${col}`,
+        id: `row_${r}_${letter}`,
+        name: `Row ${r} Pin ${letter.toUpperCase()}`,
         type: 'digital',
         direction: 'bidirectional',
-        localPosition: { x, y: 0.43, z: 0.25 + idx * zSpacing * 0.45 },
+        localPosition: { x, y: 0.43, z },
         connectorStyle: 'breadboard-hole',
       });
     });
   }
 
-  // Power Rails Bottom: + (Red) and - (Blue)
-  for (let r = 0; r < rows; r++) {
-    const x = xOffset + r * xSpacing;
+  // 3. Bottom Power Distribution Rails: + (Red, z = 1.35) and - (Blue, z = 1.72)
+  for (let r = 1; r <= rows; r++) {
+    const x = xOffset + (r - 1) * xSpacing;
+    // 1-based IDs
     pins.push({
       id: `rail_bot_plus_${r}`,
-      name: `Bottom Rail + (${r + 1})`,
+      name: `Bottom Rail + (${r})`,
       type: 'power',
       direction: 'bidirectional',
       localPosition: { x, y: 0.43, z: 1.35 },
@@ -258,26 +289,54 @@ function generateBreadboardPins(): VirtualPin[] {
     });
     pins.push({
       id: `rail_bot_minus_${r}`,
-      name: `Bottom Rail - (${r + 1})`,
+      name: `Bottom Rail - (${r})`,
       type: 'ground',
       direction: 'bidirectional',
-      localPosition: { x, y: 0.43, z: 1.75 },
+      localPosition: { x, y: 0.43, z: 1.72 },
+      connectorStyle: 'breadboard-hole',
+    });
+
+    // 0-based aliases for backward compatibility (rail_bot_plus_0 .. rail_bot_plus_29)
+    pins.push({
+      id: `rail_bot_plus_${r - 1}`,
+      name: `Bottom Rail + (${r})`,
+      type: 'power',
+      direction: 'bidirectional',
+      localPosition: { x, y: 0.43, z: 1.35 },
+      connectorStyle: 'breadboard-hole',
+    });
+    pins.push({
+      id: `rail_bot_minus_${r - 1}`,
+      name: `Bottom Rail - (${r})`,
+      type: 'ground',
+      direction: 'bidirectional',
+      localPosition: { x, y: 0.43, z: 1.72 },
       connectorStyle: 'breadboard-hole',
     });
   }
 
-  return pins;
+  // Deduplicate by pin id just in case
+  const uniquePins: VirtualPin[] = [];
+  const seenIds = new Set<string>();
+  for (const pin of pins) {
+    if (!seenIds.has(pin.id)) {
+      seenIds.add(pin.id);
+      uniquePins.push(pin);
+    }
+  }
+
+  return uniquePins;
 }
 
 export const BreadboardDefinition: ComponentDefinition = {
   type: 'breadboard',
   displayName: 'Half-Size Breadboard',
   category: 'prototyping',
-  description: 'Solderless breadboard with dual power distribution buses and center divider for DIP ICs.',
+  description: 'Realistic 400 tie-point solderless breadboard with dual power distribution buses and center divider for DIP ICs.',
   pins: generateBreadboardPins(),
   specification: BreadboardSpecification,
   subcomponents: BreadboardSpecification.subcomponents,
-  dimensions: { width: 7.5, height: 0.6, depth: 4.2 },
+  dimensions: { width: 8.4, height: 0.42, depth: 4.2 },
 };
 
 // 5. ESP32 NodeMCU

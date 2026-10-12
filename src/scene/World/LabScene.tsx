@@ -14,30 +14,38 @@ import { ComponentRegistry } from '../../core/registry/ComponentRegistry';
 import { THEME } from '../../utils/theme';
 
 const DragGhostPreview: React.FC<{ preview: DragPreviewState }> = ({ preview }) => {
+  const viewState = useView();
   const def = ComponentRegistry.get(preview.type);
   const width = def?.dimensions?.width || 2;
   const height = def?.dimensions?.height || 0.4;
   const depth = def?.dimensions?.depth || 2;
+
+  const isOverBreadboard = !!viewState.breadboardSnapTarget;
 
   return (
     <group position={[preview.worldPos.x, preview.worldPos.y || 0, preview.worldPos.z]}>
       {/* Ground Footprint Ring */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
         <ringGeometry args={[Math.max(width, depth) * 0.45, Math.max(width, depth) * 0.52, 32]} />
-        <meshBasicMaterial color="#3b82f6" transparent opacity={0.6} side={THREE.DoubleSide} />
+        <meshBasicMaterial
+          color={isOverBreadboard ? '#10b981' : '#3b82f6'}
+          transparent
+          opacity={0.7}
+          side={THREE.DoubleSide}
+        />
       </mesh>
 
       {/* Ghost Bounding Box */}
       <mesh position={[0, height / 2, 0]}>
         <boxGeometry args={[width, height, depth]} />
         <meshStandardMaterial
-          color="#3b82f6"
+          color={isOverBreadboard ? '#10b981' : '#3b82f6'}
           transparent
-          opacity={0.35}
+          opacity={0.4}
           roughness={0.3}
           metalness={0.1}
-          emissive="#2563eb"
-          emissiveIntensity={0.2}
+          emissive={isOverBreadboard ? '#059669' : '#2563eb'}
+          emissiveIntensity={0.3}
         />
       </mesh>
     </group>

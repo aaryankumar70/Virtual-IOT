@@ -15,7 +15,8 @@ import { useProject, projectStore } from '../state/project/projectStore';
 import { useKeyboardShortcuts } from '../editor/shortcuts/KeyboardShortcuts';
 import { createComponent } from '../core/factories/componentFactory';
 import { historyManager, Commands } from '../editor/history/historyManager';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Layers } from 'lucide-react';
+import { calculateComponentBreadboardPlacement } from '../utils/breadboardSnap';
 
 export const Workspace: React.FC = () => {
   const viewState = useView();
@@ -55,22 +56,40 @@ export const Workspace: React.FC = () => {
         posZ = Number(posZ.toFixed(2));
       }
 
-      let posY = 0;
+      // Check if hovering over an existing breadboard in the workspace
       const breadboard = projectStore.getState().components.find((c) => c.type === 'breadboard');
-      if (breadboard) {
-        const bx = breadboard.transform.position.x;
-        const bz = breadboard.transform.position.z;
-        const by = breadboard.transform.position.y;
-        if (Math.abs(posX - bx) <= 3.8 && Math.abs(posZ - bz) <= 2.2) {
-          if (['resistor', 'led', 'capacitor', 'capacitor-ceramic', 'led-rgb', 'push-button', 'buzzer'].includes(activeDraggedType)) {
-            posY = by + 0.35;
-          }
+      if (breadboard && activeDraggedType !== 'breadboard') {
+        const placement = calculateComponentBreadboardPlacement(
+          breadboard,
+          activeDraggedType,
+          posX,
+          posZ
+        );
+
+        if (placement) {
+          viewStore.setBreadboardSnapTarget({
+            breadboardId: placement.breadboardId,
+            holeId: placement.targetHoles[0]?.holeId || '',
+            position: placement.snappedPosition,
+            targetHoles: placement.targetHoles,
+            label: placement.label,
+            column: placement.column,
+          });
+
+          viewStore.setDragPreview({
+            type: activeDraggedType,
+            worldPos: placement.snappedPosition,
+          });
+          return;
         }
       }
 
+      // Not over breadboard: clear breadboard snap target
+      viewStore.setBreadboardSnapTarget(null);
+
       viewStore.setDragPreview({
         type: activeDraggedType,
-        worldPos: { x: posX, y: posY, z: posZ },
+        worldPos: { x: posX, y: 0, z: posZ },
       });
     }
   };
@@ -78,6 +97,7 @@ export const Workspace: React.FC = () => {
   const handleDragLeave = (e: React.DragEvent) => {
     if (e.currentTarget.contains(e.relatedTarget as Node)) return;
     viewStore.setDragPreview(null);
+    viewStore.setBreadboardSnapTarget(null);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -122,18 +142,53 @@ export const Workspace: React.FC = () => {
       spawnZ = Number(spawnZ.toFixed(2));
     }
 
-    let spawnY = 0;
     const breadboard = projectStore.getState().components.find((c) => c.type === 'breadboard');
-    if (breadboard && ['resistor', 'led', 'capacitor', 'capacitor-ceramic', 'led-rgb', 'push-button', 'buzzer'].includes(componentType)) {
-      const bx = breadboard.transform.position.x;
-      const bz = breadboard.transform.position.z;
-      const by = breadboard.transform.position.y;
-      if (Math.abs(spawnX - bx) <= 3.8 && Math.abs(spawnZ - bz) <= 2.2) {
-        spawnY = by + 0.35;
+
+    // Check if dropping onto breadboard
+    if (breadboard && componentType !== 'breadboard') {
+      const placement = calculateComponentBreadboardPlacement(
+        breadboard,
+        componentType,
+        spawnX,
+        spawnZ
+      );
+
+      if (placement) {
+        const newComp = createComponent(componentType, placement.snappedPosition);
+        historyManager.execute(Commands.addComponent(newComp));
+
+        // Automatically connect leads into the targeted breadboard socket holes!
+        placement.targetHoles.forEach((target) => {
+          projectStore.addConnection(
+            {
+              componentId: newComp.id,
+              interfaceId: target.pinId,
+              type: 'pin',
+              pinId: target.pinId,
+            },
+            {
+              componentId: breadboard.id,
+              interfaceId: target.holeId,
+              type: 'breadboard-hole',
+              pinId: target.holeId,
+            },
+            'breadboard'
+          );
+        });
+
+        viewStore.selectComponent(newComp.id);
+        viewStore.setBreadboardSnapTarget(null);
+        viewStore.setConnectionFeedback({
+          message: `${placement.label} (Inserted)`,
+          severity: 'info',
+        });
+        return;
       }
     }
 
-    const newComp = createComponent(componentType, { x: spawnX, y: spawnY, z: spawnZ });
+    // Normal workspace ground drop
+    viewStore.setBreadboardSnapTarget(null);
+    const newComp = createComponent(componentType, { x: spawnX, y: 0, z: spawnZ });
     historyManager.execute(Commands.addComponent(newComp));
     viewStore.selectComponent(newComp.id);
   };
@@ -176,6 +231,17 @@ export const Workspace: React.FC = () => {
                   building your circuit, or load an example circuit.
                 </p>
                 <div className="flex items-center gap-2 pt-2">
+                  <button
+                    onClick={() => {
+                      const bb = createComponent('breadboard', { x: 0, y: 0, z: 0 });
+                      historyManager.execute(Commands.addComponent(bb));
+                      viewStore.selectComponent(bb.id);
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-xs text-white font-medium transition-colors shadow-xs flex items-center gap-1.5"
+                  >
+                    <Layers size={13} />
+                    Add Breadboard
+                  </button>
                   <button
                     onClick={() => projectStore.loadOscilloscopeCircuit()}
                     className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-xs text-white font-medium transition-colors shadow-xs"

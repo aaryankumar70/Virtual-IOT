@@ -50,6 +50,15 @@ export interface BreadboardSnapTargetState {
   breadboardId: string;
   holeId: string;
   position: { x: number; y: number; z: number };
+  targetHoles?: {
+    pinId: string;
+    holeId: string;
+    worldPos: { x: number; y: number; z: number };
+    column: number;
+    rowLabel: string;
+  }[];
+  label?: string;
+  column?: number;
 }
 
 export interface ConnectionFeedbackState {

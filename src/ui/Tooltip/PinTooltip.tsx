@@ -33,6 +33,22 @@ export const PinTooltip: React.FC = () => {
       subType = `${pin.type} • ${pin.direction}`;
       dotColor = getPinColor(pin.type);
 
+      if (comp.type === 'breadboard') {
+        if (pin.id.startsWith('rail_')) {
+          hintText = pin.id.includes('plus')
+            ? 'Positive Rail (+ Bus) · Ties all 30 tie-points along rail'
+            : 'Ground Rail (- Bus) · Ties all 30 tie-points along rail';
+        } else if (pin.id.startsWith('row_')) {
+          const match = pin.id.match(/^row_(\d+)_([a-j])$/i);
+          if (match) {
+            const col = match[1];
+            const letter = match[2].toLowerCase();
+            const bank = ['a', 'b', 'c', 'd', 'e'].includes(letter) ? 'A-E' : 'F-J';
+            hintText = `Row ${col} (Bank ${bank}) · 5 internally tied conductive sockets`;
+          }
+        }
+      }
+
       // If pin wiring, show live validation message
       if (activeWiring && activeWiring.sourceComponentId !== hoveredPin.componentId) {
         const sourceComp = projectState.components.find(
