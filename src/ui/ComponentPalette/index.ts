@@ -1,1 +1,1 @@
-export { ComponentPalette, activeDraggedType, setActiveDraggedType } from './ComponentPalette';
+export { ComponentPalette, activeDraggedType, activeDraggedState, setActiveDraggedType } from './ComponentPalette';

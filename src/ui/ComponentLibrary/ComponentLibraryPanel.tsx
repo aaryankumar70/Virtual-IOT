@@ -1,5 +1,5 @@
 import React from 'react';
-import { ComponentPalette, activeDraggedType, setActiveDraggedType } from '../ComponentPalette/ComponentPalette';
+import { ComponentPalette, activeDraggedType, activeDraggedState, setActiveDraggedType } from '../ComponentPalette/ComponentPalette';
 
-export { ComponentPalette, activeDraggedType, setActiveDraggedType };
+export { ComponentPalette, activeDraggedType, activeDraggedState, setActiveDraggedType };
 export const ComponentLibraryPanel: React.FC = ComponentPalette;

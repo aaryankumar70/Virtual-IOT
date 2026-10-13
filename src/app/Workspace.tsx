@@ -106,10 +106,12 @@ export const Workspace: React.FC = () => {
 
     const dataStr = e.dataTransfer.getData('application/json');
     let componentType = activeDraggedType;
+    let initialStateOverrides: Record<string, unknown> | undefined = undefined;
     if (dataStr) {
       try {
         const parsed = JSON.parse(dataStr);
         if (parsed.type) componentType = parsed.type;
+        if (parsed.state) initialStateOverrides = parsed.state;
       } catch (err) {
         console.error('Failed to parse drag data:', err);
       }
@@ -154,7 +156,7 @@ export const Workspace: React.FC = () => {
       );
 
       if (placement) {
-        const newComp = createComponent(componentType, placement.snappedPosition);
+        const newComp = createComponent(componentType, placement.snappedPosition, initialStateOverrides);
         historyManager.execute(Commands.addComponent(newComp));
 
         // Automatically connect leads into the targeted breadboard socket holes!
@@ -188,7 +190,7 @@ export const Workspace: React.FC = () => {
 
     // Normal workspace ground drop
     viewStore.setBreadboardSnapTarget(null);
-    const newComp = createComponent(componentType, { x: spawnX, y: 0, z: spawnZ });
+    const newComp = createComponent(componentType, { x: spawnX, y: 0, z: spawnZ }, initialStateOverrides);
     historyManager.execute(Commands.addComponent(newComp));
     viewStore.selectComponent(newComp.id);
   };

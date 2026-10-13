@@ -11,7 +11,8 @@ export function generateId(prefix: string = 'comp'): string {
 
 export function createComponent(
   type: string,
-  initialPosition?: Vector3D
+  initialPosition?: Vector3D,
+  initialState?: Record<string, unknown>
 ): VirtualComponent {
   const def = ComponentRegistry.get(type);
   if (!def) {
@@ -53,10 +54,24 @@ export function createComponent(
     ? { ...initialPosition }
     : { x: 0, y: 0, z: 0 };
 
+  let customName = `${def.displayName}`;
+  if (initialState?.resistance) {
+    customName = `Resistor (${initialState.resistance}Ω)`;
+  } else if (initialState?.color && type === 'led') {
+    const colorMap: Record<string, string> = {
+      '#ef4444': 'Red',
+      '#10b981': 'Green',
+      '#3b82f6': 'Blue',
+      '#eab308': 'Yellow',
+    };
+    const cName = colorMap[initialState.color as string] || 'LED';
+    customName = `${cName} 5mm LED`;
+  }
+
   return {
     id,
     type: def.type,
-    name: `${def.displayName}`,
+    name: customName,
     transform: {
       position,
       rotation: { x: 0, y: 0, z: 0 },
@@ -72,6 +87,9 @@ export function createComponent(
     },
     specification: def.specification ? JSON.parse(JSON.stringify(def.specification)) : undefined,
     subcomponents: def.subcomponents ? JSON.parse(JSON.stringify(def.subcomponents)) : undefined,
-    state: def.defaultState ? JSON.parse(JSON.stringify(def.defaultState)) : {},
+    state: {
+      ...(def.defaultState ? JSON.parse(JSON.stringify(def.defaultState)) : {}),
+      ...(initialState ? JSON.parse(JSON.stringify(initialState)) : {}),
+    },
   };
 }
