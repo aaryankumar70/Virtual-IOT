@@ -4,12 +4,23 @@ import { Connection } from '../../core/connections/Connection';
 import { useProject, projectStore } from '../../state/project/projectStore';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { THEME } from '../../utils/theme';
+import { checkContinuity } from '../../core/circuit/continuityChecker';
 
 interface SingleWireProps {
   connection: Connection;
+  isContinuityMode?: boolean;
+  isValidContinuity?: boolean;
+  isShortCircuit?: boolean;
+  isBrokenPath?: boolean;
 }
 
-const SingleConnection: React.FC<SingleWireProps> = React.memo(({ connection }) => {
+const SingleConnection: React.FC<SingleWireProps> = React.memo(({
+  connection,
+  isContinuityMode = false,
+  isValidContinuity = false,
+  isShortCircuit = false,
+  isBrokenPath = false,
+}) => {
   const projectState = useProject();
   const viewState = useView();
 
@@ -100,11 +111,12 @@ const SingleConnection: React.FC<SingleWireProps> = React.memo(({ connection }) 
     });
   };
 
-  // Visual styling based on connection type
+  // Visual styling based on connection type and continuity mode
   let jacketColor = connection.color || THEME.accent.primary;
   let emissiveColor = isSelected ? THEME.accent.primary : jacketColor;
   let metalness = 0.2;
   let roughness = 0.3;
+  let emissiveIntensity = isSelected ? 0.6 : connType === 'usb' ? 0.05 : 0.25;
 
   if (connType === 'usb') {
     jacketColor = isSelected ? THEME.accent.hover : '#1e293b';
@@ -119,6 +131,29 @@ const SingleConnection: React.FC<SingleWireProps> = React.memo(({ connection }) 
     roughness = 0.4;
   }
 
+  // Continuity Mode Highlights: Green for valid connections, Red for short circuits, Amber for broken paths
+  if (isContinuityMode) {
+    if (isShortCircuit) {
+      jacketColor = '#ef4444';
+      emissiveColor = '#dc2626';
+      emissiveIntensity = 0.95;
+      metalness = 0.4;
+      roughness = 0.2;
+    } else if (isValidContinuity) {
+      jacketColor = '#22c55e';
+      emissiveColor = '#16a34a';
+      emissiveIntensity = 0.85;
+      metalness = 0.3;
+      roughness = 0.2;
+    } else if (isBrokenPath) {
+      jacketColor = '#f59e0b';
+      emissiveColor = '#d97706';
+      emissiveIntensity = 0.5;
+      metalness = 0.2;
+      roughness = 0.4;
+    }
+  }
+
   return (
     <group>
       {/* Interactive Cable / Wire Tube */}
@@ -130,7 +165,7 @@ const SingleConnection: React.FC<SingleWireProps> = React.memo(({ connection }) 
         <meshStandardMaterial
           color={jacketColor}
           emissive={emissiveColor}
-          emissiveIntensity={isSelected ? 0.6 : connType === 'usb' ? 0.05 : 0.25}
+          emissiveIntensity={emissiveIntensity}
           roughness={roughness}
           metalness={metalness}
         />
@@ -335,11 +370,24 @@ const ActiveWirePreview: React.FC = () => {
 
 export const WireRenderer: React.FC = () => {
   const projectState = useProject();
+  const viewState = useView();
+
+  const continuityReport = useMemo(() => {
+    if (!viewState.continuityMode) return null;
+    return checkContinuity(projectState.components, projectState.connections);
+  }, [viewState.continuityMode, projectState.components, projectState.connections]);
 
   return (
     <group>
       {projectState.connections.map((connection) => (
-        <SingleConnection key={connection.id} connection={connection} />
+        <SingleConnection
+          key={connection.id}
+          connection={connection}
+          isContinuityMode={viewState.continuityMode}
+          isValidContinuity={continuityReport ? continuityReport.validConnectionIds.has(connection.id) : false}
+          isShortCircuit={continuityReport ? continuityReport.shortCircuitConnectionIds.has(connection.id) : false}
+          isBrokenPath={continuityReport ? continuityReport.brokenConnectionIds.has(connection.id) : false}
+        />
       ))}
       <ActiveWirePreview />
     </group>

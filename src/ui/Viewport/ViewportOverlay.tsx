@@ -22,6 +22,7 @@ import {
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
 import { historyManager, Commands } from '../../editor/history/historyManager';
+import { ContinuityHUD } from '../Continuity/ContinuityHUD';
 
 export const ViewportOverlay: React.FC = () => {
   const viewState = useView();
@@ -703,7 +704,19 @@ export const ViewportOverlay: React.FC = () => {
             </span>
           </>
         )}
+        {viewState.continuityMode && (
+          <>
+            <span>·</span>
+            <span className="text-emerald-600 font-semibold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Continuity Mode
+            </span>
+          </>
+        )}
       </div>
+
+      {/* Continuity Checker HUD */}
+      <ContinuityHUD />
 
       {/* Bottom Right Floating Quick Camera Navigation */}
       <div className="absolute bottom-3 right-3 z-10 select-none pointer-events-auto flex flex-col gap-1 bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xs p-1 rounded-lg">

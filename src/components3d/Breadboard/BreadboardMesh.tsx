@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { VirtualComponent } from '../../core/components/VirtualComponent';
 import { PinMesh } from '../../scene/World/PinMesh';
 import { useView } from '../../state/view/viewStore';
+import { useProject } from '../../state/project/projectStore';
+import { checkContinuity } from '../../core/circuit/continuityChecker';
 import { useBreadboardTexture } from './useBreadboardTexture';
 import {
   BREADBOARD_PITCH_X,
@@ -70,6 +72,42 @@ export const BreadboardMesh: React.FC<BreadboardMeshProps> = ({ component }) => 
 
     return null;
   }, [viewState.activeWiring?.snappedTarget, viewState.hoveredPin, component.id]);
+
+  const projectState = useProject();
+
+  const continuityReport = useMemo(() => {
+    if (!viewState.continuityMode) return null;
+    return checkContinuity(projectState.components, projectState.connections);
+  }, [viewState.continuityMode, projectState.components, projectState.connections]);
+
+  const continuityRows = useMemo(() => {
+    if (!continuityReport) return [];
+    const activeRows: { key: string; colX: number; centerZ: number; lengthZ: number; isShort: boolean }[] = [];
+    const processedNodes = new Set<string>();
+
+    component.pins?.forEach((pin) => {
+      const pinKey = `${component.id}:${pin.id}`;
+      const isShort = continuityReport.shortPinKeys.has(pinKey);
+      const isValid = continuityReport.validPinKeys.has(pinKey);
+      if (!isShort && !isValid) return;
+
+      const match = pin.id.match(/^row_(\d+)_([a-j])$/i);
+      if (match) {
+        const col = parseInt(match[1], 10);
+        const letter = match[2].toLowerCase();
+        const isTop = ['a', 'b', 'c', 'd', 'e'].includes(letter);
+        const nodeKey = `row_${col}_${isTop ? 'top' : 'bot'}`;
+        if (!processedNodes.has(nodeKey)) {
+          processedNodes.add(nodeKey);
+          const colX = BREADBOARD_X_OFFSET + (col - 1) * BREADBOARD_PITCH_X;
+          const centerZ = isTop ? -0.475 : 0.475;
+          activeRows.push({ key: nodeKey, colX, centerZ, lengthZ: 0.85, isShort });
+        }
+      }
+    });
+
+    return activeRows;
+  }, [continuityReport, component.id, component.pins]);
 
   return (
     <group>
@@ -148,6 +186,23 @@ export const BreadboardMesh: React.FC<BreadboardMeshProps> = ({ component }) => 
           </mesh>
         </group>
       )}
+
+      {/* Continuity Mode: highlight connected breadboard conductive rows in green (or red for shorts) */}
+      {viewState.continuityMode &&
+        continuityRows.map((r) => (
+          <group key={r.key} position={[r.colX, 0.424, r.centerZ]}>
+            <mesh>
+              <boxGeometry args={[0.22, 0.005, r.lengthZ]} />
+              <meshStandardMaterial
+                color={r.isShort ? '#ef4444' : '#22c55e'}
+                emissive={r.isShort ? '#dc2626' : '#16a34a'}
+                emissiveIntensity={0.8}
+                transparent
+                opacity={0.7}
+              />
+            </mesh>
+          </group>
+        ))}
 
       {/* 5. Drop Target Insertion Rings (Shows where leads will plug in during drag) */}
       {isDropTarget && viewState.breadboardSnapTarget?.targetHoles && (

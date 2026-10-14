@@ -17,18 +17,25 @@ import {
   User,
   Cpu,
   Activity,
+  Zap,
+  CheckCircle2,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
 import { oscilloscopeStore, useOscilloscope } from '../../state/oscilloscope/oscilloscopeStore';
 import { historyManager, Commands } from '../../editor/history/historyManager';
 import { serializeProject, deserializeProject } from '../../project/serialization/projectSchema';
+import { checkContinuity } from '../../core/circuit/continuityChecker';
 
 export const TopToolbar: React.FC = () => {
   const viewState = useView();
   const projectState = useProject();
   const oscState = useOscilloscope();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const continuityReport = React.useMemo(() => {
+    return checkContinuity(projectState.components, projectState.connections);
+  }, [projectState.components, projectState.connections]);
 
   const selectedPrimaryId = viewState.selectedComponentIds[0] || null;
 
@@ -228,6 +235,33 @@ export const TopToolbar: React.FC = () => {
         >
           <Activity size={15} className={oscState.isOpen ? 'animate-pulse' : ''} />
           <span className="text-[10px] font-medium mt-0.5">Scope</span>
+        </button>
+
+        {/* Continuity Checker */}
+        <button
+          id="btn-tool-continuity"
+          onClick={() => viewStore.toggleContinuityMode()}
+          title="Continuity Checker (Valid connections in green, short circuits & broken paths)"
+          className={`flex flex-col items-center justify-center px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+            viewState.continuityMode
+              ? continuityReport.hasShortCircuit
+                ? 'bg-red-50 text-red-600 border border-red-300 shadow-xs'
+                : 'bg-emerald-50 text-emerald-600 border border-emerald-300 shadow-xs'
+              : 'text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/60 border border-transparent'
+          }`}
+        >
+          <div className="relative flex items-center justify-center">
+            <Zap size={15} className={viewState.continuityMode ? 'fill-current' : ''} />
+            {continuityReport.hasShortCircuit ? (
+              <span className="absolute -top-1 -right-1.5 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+              </span>
+            ) : projectState.connections.length > 0 ? (
+              <span className="absolute -top-0.5 -right-1 w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            ) : null}
+          </div>
+          <span className="text-[10px] font-medium mt-0.5">Continuity</span>
         </button>
 
         <div className="w-[1px] h-6 bg-slate-200 mx-1" />

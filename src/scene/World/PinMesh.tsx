@@ -6,6 +6,7 @@ import { viewStore, useView } from '../../state/view/viewStore';
 import { projectStore, useProject } from '../../state/project/projectStore';
 import { validateConnection } from '../../core/connections/validateConnection';
 import { historyManager, Commands } from '../../editor/history/historyManager';
+import { checkContinuity, testPinContinuity } from '../../core/circuit/continuityChecker';
 
 interface PinMeshProps {
   pin: VirtualPin;
@@ -81,34 +82,83 @@ export const PinMesh: React.FC<PinMeshProps> = React.memo(({ pin, componentId, c
     return validation.valid ? 'valid' : 'invalid';
   }, [viewState.activeWiring, isWiringSource, projectState.components, componentId, pin]);
 
+  const probeIndex = viewState.probeSelectedPins.findIndex(
+    (p) => p.componentId === componentId && p.pinId === pin.id
+  );
+  const isProbed = probeIndex !== -1;
+
   // Color calculation
   const pinBaseColor = getPinColor(pin.type);
   const color = useMemo(() => {
+    if (isProbed) return probeIndex === 0 ? '#ef4444' : '#0284c7';
     if (isWiringSource) return THEME.accent.hover;
     if (isSnappedTarget || isHovered) {
       if (wiringTargetFeedback === 'valid') return THEME.state.success;
       if (wiringTargetFeedback === 'invalid') return THEME.state.error;
       return THEME.accent.hover;
     }
+    if (viewState.continuityMode && isConnected) {
+      const report = checkContinuity(projectState.components, projectState.connections);
+      const pinKey = `${componentId}:${pin.id}`;
+      if (report.shortPinKeys.has(pinKey)) return '#ef4444';
+      if (report.validPinKeys.has(pinKey)) return '#22c55e';
+    }
     if (isBreadboardTieHighlight) return '#38bdf8';
     if (isConnected) return pinBaseColor;
     return '#8b9bb4';
-  }, [isWiringSource, isSnappedTarget, isHovered, wiringTargetFeedback, isBreadboardTieHighlight, isConnected, pinBaseColor]);
+  }, [
+    isProbed,
+    probeIndex,
+    isWiringSource,
+    isSnappedTarget,
+    isHovered,
+    wiringTargetFeedback,
+    isBreadboardTieHighlight,
+    isConnected,
+    pinBaseColor,
+    viewState.continuityMode,
+    projectState.components,
+    projectState.connections,
+    componentId,
+    pin.id,
+  ]);
 
   const emissiveColor = useMemo(() => {
+    if (isProbed) return probeIndex === 0 ? '#dc2626' : '#0284c7';
     if (isWiringSource) return THEME.accent.primary;
     if (isSnappedTarget || isHovered) {
       if (wiringTargetFeedback === 'valid') return THEME.state.success;
       if (wiringTargetFeedback === 'invalid') return THEME.state.error;
       return THEME.accent.hover;
     }
+    if (viewState.continuityMode && isConnected) {
+      const report = checkContinuity(projectState.components, projectState.connections);
+      const pinKey = `${componentId}:${pin.id}`;
+      if (report.shortPinKeys.has(pinKey)) return '#dc2626';
+      if (report.validPinKeys.has(pinKey)) return '#16a34a';
+    }
     if (isBreadboardTieHighlight) return '#0284c7';
     if (isConnected) return pinBaseColor;
     return '#000000';
-  }, [isWiringSource, isSnappedTarget, isHovered, wiringTargetFeedback, isBreadboardTieHighlight, isConnected, pinBaseColor]);
+  }, [
+    isProbed,
+    probeIndex,
+    isWiringSource,
+    isSnappedTarget,
+    isHovered,
+    wiringTargetFeedback,
+    isBreadboardTieHighlight,
+    isConnected,
+    pinBaseColor,
+    viewState.continuityMode,
+    projectState.components,
+    projectState.connections,
+    componentId,
+    pin.id,
+  ]);
 
-  const emissiveIntensity = isSnappedTarget ? 1.0 : (isHovered || isWiringSource) ? 0.9 : isBreadboardTieHighlight ? 0.75 : isConnected ? 0.4 : 0.1;
-  const scale = isSnappedTarget ? 1.5 : isHovered ? 1.4 : isWiringSource ? 1.3 : isBreadboardTieHighlight ? 1.15 : 1.0;
+  const emissiveIntensity = isProbed ? 1.0 : isSnappedTarget ? 1.0 : (isHovered || isWiringSource) ? 0.9 : isBreadboardTieHighlight ? 0.75 : (viewState.continuityMode && isConnected) ? 0.8 : isConnected ? 0.4 : 0.1;
+  const scale = isProbed ? 1.6 : isSnappedTarget ? 1.5 : isHovered ? 1.4 : isWiringSource ? 1.3 : isBreadboardTieHighlight ? 1.15 : 1.0;
 
   const completeConnection = () => {
     if (!viewState.activeWiring) return;
@@ -206,6 +256,34 @@ export const PinMesh: React.FC<PinMeshProps> = React.memo(({ pin, componentId, c
 
   const handleClick = (e: any) => {
     e.stopPropagation();
+    if (viewState.continuityProbeMode) {
+      viewStore.probePin(componentId, pin.id);
+      const currentProbes = [...viewState.probeSelectedPins];
+      const existingIdx = currentProbes.findIndex(
+        (p) => p.componentId === componentId && p.pinId === pin.id
+      );
+      if (existingIdx !== -1) {
+        currentProbes.splice(existingIdx, 1);
+      } else if (currentProbes.length < 2) {
+        currentProbes.push({ componentId, pinId: pin.id });
+      } else {
+        currentProbes.splice(0, currentProbes.length, { componentId, pinId: pin.id });
+      }
+
+      if (currentProbes.length === 2) {
+        const res = testPinContinuity(
+          projectState.components,
+          projectState.connections,
+          currentProbes[0],
+          currentProbes[1]
+        );
+        viewStore.setProbeResult(res);
+      } else {
+        viewStore.setProbeResult(null);
+      }
+      return;
+    }
+
     if (viewState.activeWiring) {
       if (isWiringSource) {
         viewStore.cancelWiring();
@@ -228,14 +306,28 @@ export const PinMesh: React.FC<PinMeshProps> = React.memo(({ pin, componentId, c
   };
 
   const showHighlightRing =
+    isProbed ||
     isSnappedTarget ||
     isHovered ||
     isWiringSource ||
     (viewState.activeWiring && !isWiringSource) ||
-    viewState.wireModeActive;
+    viewState.wireModeActive ||
+    (viewState.continuityMode && isConnected);
 
   const connectorStyle = pin.connectorStyle || 'header-pin';
   const isInteracting = isSnappedTarget || isHovered || isWiringSource || isConnected;
+
+  const ringColor = isProbed
+    ? (probeIndex === 0 ? '#ef4444' : '#0284c7')
+    : viewState.continuityMode && isConnected
+    ? emissiveColor
+    : isWiringSource
+    ? THEME.accent.hover
+    : (isSnappedTarget || isHovered)
+    ? (wiringTargetFeedback === 'valid' ? THEME.state.success : wiringTargetFeedback === 'invalid' ? THEME.state.error : THEME.accent.hover)
+    : viewState.activeWiring
+    ? THEME.accent.primary
+    : '#94a3b8';
 
   return (
     <group position={[pin.localPosition.x, pin.localPosition.y, pin.localPosition.z]}>
@@ -251,6 +343,32 @@ export const PinMesh: React.FC<PinMeshProps> = React.memo(({ pin, componentId, c
         <cylinderGeometry args={[0.26, 0.26, 0.42, 12]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
+
+      {/* 3D Multimeter Continuity Probe Needle when probed */}
+      {isProbed && (
+        <group position={[0, 0.12, 0]}>
+          <mesh position={[0, 0.12, 0]}>
+            <cylinderGeometry args={[0.015, 0.005, 0.24, 8]} />
+            <meshStandardMaterial color="#fbbf24" metalness={0.9} roughness={0.2} />
+          </mesh>
+          <mesh position={[0, 0.36, 0]}>
+            <cylinderGeometry args={[0.045, 0.035, 0.26, 12]} />
+            <meshStandardMaterial color={probeIndex === 0 ? '#dc2626' : '#1e293b'} roughness={0.4} />
+          </mesh>
+          <mesh position={[0, 0.52, 0]}>
+            <cylinderGeometry args={[0.02, 0.02, 0.08, 8]} />
+            <meshStandardMaterial color={probeIndex === 0 ? '#ef4444' : '#334155'} />
+          </mesh>
+          <mesh position={[0, 0.02, 0]}>
+            <sphereGeometry args={[0.045, 8, 8]} />
+            <meshStandardMaterial
+              color={probeIndex === 0 ? '#ef4444' : '#38bdf8'}
+              emissive={probeIndex === 0 ? '#ef4444' : '#38bdf8'}
+              emissiveIntensity={1.0}
+            />
+          </mesh>
+        </group>
+      )}
 
       {/* 1. Header Pin (Female Socket / Header): metal socket collar + conductive terminal */}
       {connectorStyle === 'header-pin' && (
@@ -331,17 +449,9 @@ export const PinMesh: React.FC<PinMeshProps> = React.memo(({ pin, componentId, c
         <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[isSnappedTarget ? 0.12 : 0.1, isSnappedTarget ? 0.22 : 0.16, 24]} />
           <meshBasicMaterial
-            color={
-              isWiringSource
-                ? THEME.accent.hover
-                : (isSnappedTarget || isHovered)
-                ? (wiringTargetFeedback === 'valid' ? THEME.state.success : wiringTargetFeedback === 'invalid' ? THEME.state.error : THEME.accent.hover)
-                : viewState.activeWiring
-                ? THEME.accent.primary
-                : '#94a3b8'
-            }
+            color={ringColor}
             transparent
-            opacity={isSnappedTarget ? 1.0 : (isHovered || isWiringSource) ? 0.9 : 0.4}
+            opacity={isProbed ? 1.0 : isSnappedTarget ? 1.0 : (isHovered || isWiringSource) ? 0.9 : 0.65}
             side={THREE.DoubleSide}
           />
         </mesh>

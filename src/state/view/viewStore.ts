@@ -95,6 +95,10 @@ export interface ViewState {
   hardwareDebugMode: boolean;
   connectionFeedback: ConnectionFeedbackState | null;
   selectedWireColor: string;
+  continuityMode: boolean;
+  continuityProbeMode: boolean;
+  probeSelectedPins: { componentId: string; pinId: string }[];
+  probeResult: { isContinuous: boolean; isShortCircuit: boolean; resistanceEstimate: string; message: string } | null;
 }
 
 let state: ViewState = {
@@ -126,6 +130,10 @@ let state: ViewState = {
   hardwareDebugMode: false,
   connectionFeedback: null,
   selectedWireColor: '#3b82f6',
+  continuityMode: false,
+  continuityProbeMode: false,
+  probeSelectedPins: [],
+  probeResult: null,
 };
 
 const listeners = new Set<() => void>();
@@ -526,6 +534,78 @@ export const viewStore = {
         notify();
       }, 2500);
     }
+  },
+
+  toggleContinuityMode() {
+    state = { ...state, continuityMode: !state.continuityMode };
+    notify();
+  },
+
+  setContinuityMode(active: boolean) {
+    state = { ...state, continuityMode: active };
+    notify();
+  },
+
+  toggleProbeMode() {
+    const nextProbe = !state.continuityProbeMode;
+    state = {
+      ...state,
+      continuityProbeMode: nextProbe,
+      continuityMode: nextProbe ? true : state.continuityMode,
+      probeSelectedPins: [],
+      probeResult: null,
+    };
+    notify();
+  },
+
+  setProbeMode(active: boolean) {
+    state = {
+      ...state,
+      continuityProbeMode: active,
+      continuityMode: active ? true : state.continuityMode,
+      probeSelectedPins: [],
+      probeResult: null,
+    };
+    notify();
+  },
+
+  setProbeResult(result: { isContinuous: boolean; isShortCircuit: boolean; resistanceEstimate: string; message: string } | null) {
+    state = { ...state, probeResult: result };
+    notify();
+  },
+
+  probePin(componentId: string, pinId: string) {
+    const current = [...state.probeSelectedPins];
+    // If clicking already probed pin, deselect it
+    const existingIndex = current.findIndex(
+      (p) => p.componentId === componentId && p.pinId === pinId
+    );
+    if (existingIndex !== -1) {
+      current.splice(existingIndex, 1);
+      state = { ...state, probeSelectedPins: current, probeResult: null };
+      notify();
+      return;
+    }
+
+    if (current.length >= 2) {
+      // Replace with first lead
+      state = {
+        ...state,
+        probeSelectedPins: [{ componentId, pinId }],
+        probeResult: null,
+      };
+      notify();
+      return;
+    }
+
+    current.push({ componentId, pinId });
+    state = { ...state, probeSelectedPins: current };
+    notify();
+  },
+
+  clearProbe() {
+    state = { ...state, probeSelectedPins: [], probeResult: null };
+    notify();
   },
 };
 
