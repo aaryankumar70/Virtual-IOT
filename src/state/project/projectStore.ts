@@ -12,6 +12,7 @@ import { createComponent, generateId } from '../../core/factories/componentFacto
 import { ProjectData } from '../../project/serialization/projectSchema';
 import { calculatePinWorldPosition } from '../../core/pins/pinPosition';
 import { calculateEndpointWorldPosition } from '../../core/connections/endpointPosition';
+import { viewStore } from '../view/viewStore';
 
 export interface ProjectState {
   metadata: {
@@ -479,6 +480,54 @@ export const projectStore = {
       { componentId: breadboard.id, pinId: 'rail_bot_minus_25' },
       '#1e293b'
     );
+  },
+
+  loadLogicGateCircuit() {
+    this.resetProject();
+    viewStore.clearSelection();
+
+    // 1. Breadboard centered
+    const breadboard = createComponent('breadboard', { x: 0, y: 0, z: 0 });
+    this.addComponent(breadboard);
+
+    // 2. AND Gate in columns 8, 9, 10
+    const andGate = createComponent('gate-and', { x: -1.375, y: 0.38, z: 0 }, { inputA: true, inputB: true });
+    this.addComponent(andGate);
+
+    // Plug AND gate pins into breadboard holes
+    this.addConnection({ componentId: andGate.id, pinId: 'pin_in_a' }, { componentId: breadboard.id, pinId: 'row_8_d' }, 'breadboard');
+    this.addConnection({ componentId: andGate.id, pinId: 'pin_in_b' }, { componentId: breadboard.id, pinId: 'row_9_d' }, 'breadboard');
+    this.addConnection({ componentId: andGate.id, pinId: 'pin_vcc' }, { componentId: breadboard.id, pinId: 'row_10_d' }, 'breadboard');
+    this.addConnection({ componentId: andGate.id, pinId: 'pin_out_y' }, { componentId: breadboard.id, pinId: 'row_8_g' }, 'breadboard');
+    this.addConnection({ componentId: andGate.id, pinId: 'pin_gnd' }, { componentId: breadboard.id, pinId: 'row_10_g' }, 'breadboard');
+
+    // 3. XOR Gate in columns 18, 19, 20
+    const xorGate = createComponent('gate-xor', { x: 1.125, y: 0.38, z: 0 }, { inputA: true, inputB: false });
+    this.addComponent(xorGate);
+
+    // Plug XOR gate pins into breadboard holes
+    this.addConnection({ componentId: xorGate.id, pinId: 'pin_in_a' }, { componentId: breadboard.id, pinId: 'row_18_d' }, 'breadboard');
+    this.addConnection({ componentId: xorGate.id, pinId: 'pin_in_b' }, { componentId: breadboard.id, pinId: 'row_19_d' }, 'breadboard');
+    this.addConnection({ componentId: xorGate.id, pinId: 'pin_vcc' }, { componentId: breadboard.id, pinId: 'row_20_d' }, 'breadboard');
+    this.addConnection({ componentId: xorGate.id, pinId: 'pin_out_y' }, { componentId: breadboard.id, pinId: 'row_18_g' }, 'breadboard');
+    this.addConnection({ componentId: xorGate.id, pinId: 'pin_gnd' }, { componentId: breadboard.id, pinId: 'row_20_g' }, 'breadboard');
+
+    // 4. Power supply / rails: wire top rail (+) to VCC
+    this.addConnection({ componentId: breadboard.id, pinId: 'rail_top_plus_10' }, { componentId: breadboard.id, pinId: 'row_10_b' }, '#ef4444');
+    this.addConnection({ componentId: breadboard.id, pinId: 'rail_top_plus_20' }, { componentId: breadboard.id, pinId: 'row_20_b' }, '#ef4444');
+
+    // Wire bottom rail (-) to GND
+    this.addConnection({ componentId: breadboard.id, pinId: 'rail_bot_minus_10' }, { componentId: breadboard.id, pinId: 'row_10_i' }, '#1e293b');
+    this.addConnection({ componentId: breadboard.id, pinId: 'rail_bot_minus_20' }, { componentId: breadboard.id, pinId: 'row_20_i' }, '#1e293b');
+
+    // 5. Green LED on AND gate output (row 8)
+    const led = createComponent('led', { x: -1.375, y: 0.35, z: 1.1 }, { color: '#10b981' });
+    this.addComponent(led);
+    this.addConnection({ componentId: led.id, pinId: 'anode' }, { componentId: breadboard.id, pinId: 'row_8_i' }, 'breadboard');
+    this.addConnection({ componentId: led.id, pinId: 'cathode' }, { componentId: breadboard.id, pinId: 'rail_bot_minus_8' }, 'breadboard');
+
+    viewStore.setContinuityMode(true);
+    viewStore.selectComponent(andGate.id);
   },
 
   getPinWorldPosition(componentId: string, pinId: string) {

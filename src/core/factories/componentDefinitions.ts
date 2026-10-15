@@ -19,6 +19,7 @@ import {
   CapacitorSpecification,
   CeramicCapacitorSpecification,
   OscilloscopeSpecification,
+  LogicGateSpecification,
 } from '../hardware/specificationsData';
 
 // 1. ARDUINO UNO
@@ -1159,6 +1160,173 @@ export const OscilloscopeDefinition: ComponentDefinition = {
   dimensions: { width: 4.4, height: 2.6, depth: 2.2 },
 };
 
+// 19. PREMADE LOGIC GATES (AND, OR, XOR, NOT, NAND, NOR, XNOR)
+function createTwoInputGatePins(): VirtualPin[] {
+  return [
+    {
+      id: 'pin_in_a',
+      name: 'Input A',
+      type: 'digital',
+      direction: 'input',
+      localPosition: { x: -0.25, y: -0.06, z: -0.22 },
+      connectorStyle: 'lead-tip',
+    },
+    {
+      id: 'pin_in_b',
+      name: 'Input B',
+      type: 'digital',
+      direction: 'input',
+      localPosition: { x: 0, y: -0.06, z: -0.22 },
+      connectorStyle: 'lead-tip',
+    },
+    {
+      id: 'pin_vcc',
+      name: 'VCC (+5V)',
+      type: 'power',
+      direction: 'power',
+      localPosition: { x: 0.25, y: -0.06, z: -0.22 },
+      connectorStyle: 'lead-tip',
+    },
+    {
+      id: 'pin_out_y',
+      name: 'Output Y',
+      type: 'digital',
+      direction: 'output',
+      localPosition: { x: -0.25, y: -0.06, z: 0.22 },
+      connectorStyle: 'lead-tip',
+    },
+    {
+      id: 'pin_gnd',
+      name: 'GND (0V)',
+      type: 'ground',
+      direction: 'power',
+      localPosition: { x: 0.25, y: -0.06, z: 0.22 },
+      connectorStyle: 'lead-tip',
+    },
+  ];
+}
+
+function createOneInputGatePins(): VirtualPin[] {
+  return [
+    {
+      id: 'pin_in_a',
+      name: 'Input A',
+      type: 'digital',
+      direction: 'input',
+      localPosition: { x: -0.25, y: -0.06, z: -0.22 },
+      connectorStyle: 'lead-tip',
+    },
+    {
+      id: 'pin_vcc',
+      name: 'VCC (+5V)',
+      type: 'power',
+      direction: 'power',
+      localPosition: { x: 0.25, y: -0.06, z: -0.22 },
+      connectorStyle: 'lead-tip',
+    },
+    {
+      id: 'pin_out_y',
+      name: 'Output Y',
+      type: 'digital',
+      direction: 'output',
+      localPosition: { x: -0.25, y: -0.06, z: 0.22 },
+      connectorStyle: 'lead-tip',
+    },
+    {
+      id: 'pin_gnd',
+      name: 'GND (0V)',
+      type: 'ground',
+      direction: 'power',
+      localPosition: { x: 0.25, y: -0.06, z: 0.22 },
+      connectorStyle: 'lead-tip',
+    },
+  ];
+}
+
+export const ANDGateDefinition: ComponentDefinition = {
+  type: 'gate-and',
+  displayName: 'AND Gate (74HC08)',
+  category: 'logic',
+  description: '2-Input AND logic gate. Output Y is HIGH (1) only when BOTH inputs A and B are HIGH (1). Y = A · B.',
+  pins: createTwoInputGatePins(),
+  specification: LogicGateSpecification,
+  subcomponents: LogicGateSpecification.subcomponents,
+  defaultState: { inputA: false, inputB: false, outputY: false, powered: true },
+  dimensions: { width: 1.05, height: 0.35, depth: 0.58 },
+};
+
+export const ORGateDefinition: ComponentDefinition = {
+  type: 'gate-or',
+  displayName: 'OR Gate (74HC32)',
+  category: 'logic',
+  description: '2-Input OR logic gate. Output Y is HIGH (1) if EITHER input A or input B is HIGH (1). Y = A + B.',
+  pins: createTwoInputGatePins(),
+  specification: LogicGateSpecification,
+  subcomponents: LogicGateSpecification.subcomponents,
+  defaultState: { inputA: false, inputB: false, outputY: false, powered: true },
+  dimensions: { width: 1.05, height: 0.35, depth: 0.58 },
+};
+
+export const XORGateDefinition: ComponentDefinition = {
+  type: 'gate-xor',
+  displayName: 'XOR Gate (74HC86)',
+  category: 'logic',
+  description: '2-Input Exclusive OR logic gate. Output Y is HIGH (1) when inputs DIFFER (one HIGH, one LOW). Y = A ⊕ B.',
+  pins: createTwoInputGatePins(),
+  specification: LogicGateSpecification,
+  subcomponents: LogicGateSpecification.subcomponents,
+  defaultState: { inputA: false, inputB: false, outputY: false, powered: true },
+  dimensions: { width: 1.05, height: 0.35, depth: 0.58 },
+};
+
+export const NOTGateDefinition: ComponentDefinition = {
+  type: 'gate-not',
+  displayName: 'NOT Gate / Inverter (74HC04)',
+  category: 'logic',
+  description: 'Inverter / NOT logic gate. Output Y is the inverse of input A (Output HIGH when input LOW). Y = ¬A.',
+  pins: createOneInputGatePins(),
+  specification: LogicGateSpecification,
+  subcomponents: LogicGateSpecification.subcomponents,
+  defaultState: { inputA: false, outputY: true, powered: true },
+  dimensions: { width: 1.05, height: 0.35, depth: 0.58 },
+};
+
+export const NANDGateDefinition: ComponentDefinition = {
+  type: 'gate-nand',
+  displayName: 'NAND Gate (74HC00)',
+  category: 'logic',
+  description: 'Universal NAND logic gate. Output Y is LOW (0) only when BOTH inputs A and B are HIGH (1). Y = ¬(A · B).',
+  pins: createTwoInputGatePins(),
+  specification: LogicGateSpecification,
+  subcomponents: LogicGateSpecification.subcomponents,
+  defaultState: { inputA: false, inputB: false, outputY: true, powered: true },
+  dimensions: { width: 1.05, height: 0.35, depth: 0.58 },
+};
+
+export const NORGateDefinition: ComponentDefinition = {
+  type: 'gate-nor',
+  displayName: 'NOR Gate (74HC02)',
+  category: 'logic',
+  description: 'Universal NOR logic gate. Output Y is HIGH (1) only when BOTH inputs A and B are LOW (0). Y = ¬(A + B).',
+  pins: createTwoInputGatePins(),
+  specification: LogicGateSpecification,
+  subcomponents: LogicGateSpecification.subcomponents,
+  defaultState: { inputA: false, inputB: false, outputY: true, powered: true },
+  dimensions: { width: 1.05, height: 0.35, depth: 0.58 },
+};
+
+export const XNORGateDefinition: ComponentDefinition = {
+  type: 'gate-xnor',
+  displayName: 'XNOR Gate (74HC266)',
+  category: 'logic',
+  description: 'Equivalence XNOR logic gate. Output Y is HIGH (1) when inputs are EQUAL (both 0 or both 1). Y = ¬(A ⊕ B).',
+  pins: createTwoInputGatePins(),
+  specification: LogicGateSpecification,
+  subcomponents: LogicGateSpecification.subcomponents,
+  defaultState: { inputA: false, inputB: false, outputY: true, powered: true },
+  dimensions: { width: 1.05, height: 0.35, depth: 0.58 },
+};
+
 // Register all definitions into ComponentRegistry
 export function registerAllComponents() {
   ComponentRegistry.register(ArduinoUnoDefinition);
@@ -1196,6 +1364,15 @@ export function registerAllComponents() {
 
   // Benchtop Instruments
   ComponentRegistry.register(OscilloscopeDefinition);
+
+  // Logic Gates (AND, OR, XOR, NOT, NAND, NOR, XNOR)
+  ComponentRegistry.register(ANDGateDefinition);
+  ComponentRegistry.register(ORGateDefinition);
+  ComponentRegistry.register(XORGateDefinition);
+  ComponentRegistry.register(NOTGateDefinition);
+  ComponentRegistry.register(NANDGateDefinition);
+  ComponentRegistry.register(NORGateDefinition);
+  ComponentRegistry.register(XNORGateDefinition);
 }
 
 // Call on startup

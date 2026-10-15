@@ -1355,3 +1355,60 @@ export const OscilloscopeSpecification: HardwareSpecification = {
     },
   ],
 };
+
+// 18. LOGIC GATES SPECIFICATIONS (74HC-Series High-Speed CMOS)
+export const LogicGateSpecification: HardwareSpecification = {
+  modelNumber: '74HC-SERIES',
+  manufacturer: 'Texas Instruments / Nexperia',
+  revision: 'High-Speed CMOS DIP',
+  datasheetUrl: 'https://www.ti.com/lit/ds/symlink/sn74hc08.pdf',
+  dimensions: {
+    widthMm: 19.3,
+    heightMm: 7.2,
+    depthMm: 6.4,
+    massGrams: 1.2,
+    mountingHolePitchMm: '2.54mm (0.1 inch) Standard Breadboard Lead Pitch',
+  },
+  electrical: {
+    operatingVoltage: '2V - 6V DC (5V Nominal)',
+    minVoltage: 2.0,
+    maxVoltage: 6.0,
+    logicLevel: '5V TTL / CMOS Compatible',
+    quiescentCurrentMa: 0.02,
+    maxCurrentDrawMa: 25,
+    powerRatingWatts: 0.5,
+  },
+  protocols: ['Digital Logic (HIGH: >3.5V, LOW: <1.5V)'],
+  mechanicalMounts: ['Standard 2.54mm Breadboard Sockets (0.3" row spacing)'],
+  features: [
+    'Standard 74HC-series High-Speed Silicon-Gate CMOS Architecture',
+    'Low Power Dissipation (20µA Max Quiescent Current)',
+    'High Noise Immunity (30% VCC Minimum)',
+    'Direct Drive Capability: Up to 10 LSTTL Loads',
+    'Symmetrical Output Impedance: ±4mA Balanced Drive',
+    'ESD Protection Exceeds 2000V Human Body Model (HBM)',
+  ],
+  subcomponents: [
+    {
+      id: 'sub_gate_silicon_die',
+      name: 'CMOS Logic Gate Silicon Core',
+      category: 'ic',
+      partNumber: '74HC-CORE',
+      manufacturer: 'Texas Instruments',
+      description: 'Silicon gate CMOS planar transistor array implementing logic gate function.',
+      status: 'nominal',
+      specifications: { propagationDelayNs: 9, maxFrequencyMhz: 50 },
+    },
+    {
+      id: 'sub_gate_leads',
+      name: 'Dual In-line Lead Frame',
+      category: 'chassis',
+      partNumber: 'DIP-LEADFRAME-TIN',
+      manufacturer: 'JEDEC',
+      description: 'Copper alloy lead frame with matte tin plating formatted for 2.54mm breadboard insertion.',
+      status: 'nominal',
+      specifications: { pitchMm: 2.54, rowSpacingMm: 7.62 },
+    },
+  ],
+};
+

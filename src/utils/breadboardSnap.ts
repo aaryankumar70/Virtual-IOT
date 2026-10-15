@@ -443,6 +443,124 @@ export function calculateComponentBreadboardPlacement(
       break;
     }
 
+    case 'gate-and':
+    case 'gate-or':
+    case 'gate-xor':
+    case 'gate-not':
+    case 'gate-nand':
+    case 'gate-nor':
+    case 'gate-xnor': {
+      const isOneInput = componentType === 'gate-not';
+      let c1 = centerCol - 1;
+      let c2 = centerCol;
+      let c3 = centerCol + 1;
+      if (c1 < 1) {
+        c1 = 1;
+        c2 = 2;
+        c3 = 3;
+      } else if (c3 > BREADBOARD_COLS) {
+        c3 = BREADBOARD_COLS;
+        c2 = BREADBOARD_COLS - 1;
+        c1 = BREADBOARD_COLS - 2;
+      }
+
+      // Input A in Col c1, Row D
+      targetHoles.push({
+        pinId: 'pin_in_a',
+        holeId: `row_${c1}_d`,
+        column: c1,
+        rowLabel: `Row ${c1} (D - Input A)`,
+        worldPos: {
+          x: bx + (BREADBOARD_X_OFFSET + (c1 - 1) * BREADBOARD_PITCH_X),
+          y: by + BREADBOARD_SURFACE_Y,
+          z: bz + BREADBOARD_ROW_Z['d'],
+        },
+      });
+
+      if (!isOneInput) {
+        // Input B in Col c2, Row D
+        targetHoles.push({
+          pinId: 'pin_in_b',
+          holeId: `row_${c2}_d`,
+          column: c2,
+          rowLabel: `Row ${c2} (D - Input B)`,
+          worldPos: {
+            x: bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X),
+            y: by + BREADBOARD_SURFACE_Y,
+            z: bz + BREADBOARD_ROW_Z['d'],
+          },
+        });
+
+        // VCC in Col c3, Row D
+        targetHoles.push({
+          pinId: 'pin_vcc',
+          holeId: `row_${c3}_d`,
+          column: c3,
+          rowLabel: `Row ${c3} (D - VCC 5V)`,
+          worldPos: {
+            x: bx + (BREADBOARD_X_OFFSET + (c3 - 1) * BREADBOARD_PITCH_X),
+            y: by + BREADBOARD_SURFACE_Y,
+            z: bz + BREADBOARD_ROW_Z['d'],
+          },
+        });
+      } else {
+        // NOT gate: VCC in Col c2, Row D
+        targetHoles.push({
+          pinId: 'pin_vcc',
+          holeId: `row_${c2}_d`,
+          column: c2,
+          rowLabel: `Row ${c2} (D - VCC 5V)`,
+          worldPos: {
+            x: bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X),
+            y: by + BREADBOARD_SURFACE_Y,
+            z: bz + BREADBOARD_ROW_Z['d'],
+          },
+        });
+      }
+
+      // Output Y in Col c1, Row G
+      targetHoles.push({
+        pinId: 'pin_out_y',
+        holeId: `row_${c1}_g`,
+        column: c1,
+        rowLabel: `Row ${c1} (G - Output Y)`,
+        worldPos: {
+          x: bx + (BREADBOARD_X_OFFSET + (c1 - 1) * BREADBOARD_PITCH_X),
+          y: by + BREADBOARD_SURFACE_Y,
+          z: bz + BREADBOARD_ROW_Z['g'],
+        },
+      });
+
+      // GND in Col c3 (or c2 for NOT), Row G
+      const gndCol = isOneInput ? c2 : c3;
+      targetHoles.push({
+        pinId: 'pin_gnd',
+        holeId: `row_${gndCol}_g`,
+        column: gndCol,
+        rowLabel: `Row ${gndCol} (G - GND 0V)`,
+        worldPos: {
+          x: bx + (BREADBOARD_X_OFFSET + (gndCol - 1) * BREADBOARD_PITCH_X),
+          y: by + BREADBOARD_SURFACE_Y,
+          z: bz + BREADBOARD_ROW_Z['g'],
+        },
+      });
+
+      snappedPosX = bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X);
+      snappedPosZ = bz; // centered over trough
+      spawnHeightOffset = 0.38;
+      const gateNames: Record<string, string> = {
+        'gate-and': 'AND Gate (74HC08)',
+        'gate-or': 'OR Gate (74HC32)',
+        'gate-xor': 'XOR Gate (74HC86)',
+        'gate-not': 'NOT Gate (74HC04)',
+        'gate-nand': 'NAND Gate (74HC00)',
+        'gate-nor': 'NOR Gate (74HC02)',
+        'gate-xnor': 'XNOR Gate (74HC266)',
+      };
+      label = `Plug ${gateNames[componentType] || 'Logic Gate'}: Across Center Trough (Cols ${c1}-${isOneInput ? c2 : c3})`;
+      break;
+    }
+
     default: {
       // General single-point or module snap
       const closest = getClosestBreadboardHole(breadboard, worldX, worldZ);

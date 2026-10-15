@@ -245,6 +245,12 @@ export const Workspace: React.FC = () => {
                     Add Breadboard
                   </button>
                   <button
+                    onClick={() => projectStore.loadLogicGateCircuit()}
+                    className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-xs text-white font-medium transition-colors shadow-xs"
+                  >
+                    Load Logic Gates Lab
+                  </button>
+                  <button
                     onClick={() => projectStore.loadOscilloscopeCircuit()}
                     className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-xs text-white font-medium transition-colors shadow-xs"
                   >

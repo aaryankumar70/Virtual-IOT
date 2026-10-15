@@ -17,6 +17,7 @@ import {
   GripVertical,
   Activity,
   CircuitBoard,
+  Binary,
 } from 'lucide-react';
 import { ComponentRegistry } from '../../core/registry/ComponentRegistry';
 import { createComponent } from '../../core/factories/componentFactory';
@@ -38,6 +39,13 @@ export function setActiveDraggedType(type: string | null, state: Record<string, 
 // Common breadboard prototyping components
 const BREADBOARD_COMPONENT_TYPES = [
   'breadboard',
+  'gate-and',
+  'gate-or',
+  'gate-xor',
+  'gate-not',
+  'gate-nand',
+  'gate-nor',
+  'gate-xnor',
   'resistor',
   'led',
   'capacitor-ceramic',
@@ -66,6 +74,7 @@ export const ComponentPalette: React.FC = () => {
 
   const categories = [
     { id: 'breadboard', label: 'Breadboard Essentials', icon: CircuitBoard, badge: 'Popular' },
+    { id: 'logic', label: 'Logic Gates (AND, OR, XOR)', icon: Binary, badge: 'New' },
     { id: 'all', label: 'All Components', icon: Boxes },
     { id: 'passive', label: 'Passives (R, C)', icon: Zap },
     { id: 'output', label: 'Outputs & LEDs', icon: Volume2 },
@@ -630,6 +639,26 @@ export const ComponentPalette: React.FC = () => {
               <h4 className="font-semibold text-slate-800 group-hover:text-blue-600">Arduino Uno LED & OLED Circuit</h4>
               <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
                 Arduino Uno connected via breadboard to 220Ω resistor, 5mm LED, and I2C OLED display.
+              </p>
+            </div>
+          </div>
+
+          {/* Example 3: Digital Logic Gates Lab */}
+          <div
+            id="example-logic-gates"
+            onClick={() => projectStore.loadLogicGateCircuit()}
+            className="p-3 rounded-lg border border-slate-200 hover:border-sky-400 bg-white hover:bg-sky-50/40 cursor-pointer transition-all flex items-start gap-3 shadow-2xs group"
+          >
+            <div className="p-2 rounded-md bg-sky-50 text-sky-600 group-hover:bg-sky-100/70 transition-colors">
+              <Binary size={18} />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h4 className="font-semibold text-slate-800 group-hover:text-sky-700">Digital Logic Gates Lab</h4>
+                <span className="text-[9px] bg-sky-100 text-sky-800 px-1.5 py-0.2 rounded font-mono font-medium">New</span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                74HC08 AND Gate & 74HC86 XOR Gate wired onto breadboard with live truth tables and output LED.
               </p>
             </div>
           </div>

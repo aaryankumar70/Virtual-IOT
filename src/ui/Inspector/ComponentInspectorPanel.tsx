@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Plus,
   Monitor,
+  Binary,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
@@ -18,6 +19,7 @@ import { ComponentGraphic } from '../ComponentLibrary/ComponentGraphic';
 import { PhysicalConnectionType } from '../../core/connections/Connection';
 import { createComponent } from '../../core/factories/componentFactory';
 import { HardwareSpecificationPanel } from './HardwareSpecificationPanel';
+import { LOGIC_GATES_INFO, evaluateGateOutput, LogicGateType } from '../../core/logic/logicGatesEngine';
 
 export const ComponentInspectorPanel: React.FC = () => {
   const viewState = useView();
@@ -800,6 +802,141 @@ export const ComponentInspectorPanel: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Logic Gate Controls & Live Truth Table */}
+              {['gate-and', 'gate-or', 'gate-xor', 'gate-not', 'gate-nand', 'gate-nor', 'gate-xnor'].includes(selectedComponent.type) && (() => {
+                const info = LOGIC_GATES_INFO[selectedComponent.type as LogicGateType];
+                const inputA = !!selectedComponent.state?.inputA;
+                const inputB = !!selectedComponent.state?.inputB;
+                const outputY = evaluateGateOutput(selectedComponent.type, inputA, inputB);
+
+                return (
+                  <div className="flex flex-col gap-3 p-3 rounded-lg bg-sky-50/70 border border-sky-200">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-sky-950 flex items-center gap-1.5">
+                        <Binary size={14} className="text-sky-600" />
+                        <span>{info.name} ({info.chipModel})</span>
+                      </span>
+                      <span className="text-[10.5px] font-mono font-bold text-sky-700 bg-sky-100/90 px-2 py-0.5 rounded border border-sky-200">
+                        {info.booleanEquation}
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-slate-600 leading-tight">
+                      {info.description}
+                    </p>
+
+                    {/* Interactive Input Toggles */}
+                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      {/* Input A */}
+                      <div className="bg-white p-2 rounded-lg border border-sky-100 flex flex-col gap-1">
+                        <div className="text-[10px] text-slate-400 font-semibold uppercase">Input A</div>
+                        <button
+                          onClick={() => {
+                            projectStore.updateComponentState(selectedComponent.id, { inputA: !inputA });
+                          }}
+                          className={`w-full py-1 rounded text-xs font-bold font-mono transition-colors cursor-pointer ${
+                            inputA
+                              ? 'bg-cyan-500 text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {inputA ? '1 (HIGH)' : '0 (LOW)'}
+                        </button>
+                      </div>
+
+                      {/* Input B (if 2-input gate) */}
+                      {info.inputsCount === 2 ? (
+                        <div className="bg-white p-2 rounded-lg border border-sky-100 flex flex-col gap-1">
+                          <div className="text-[10px] text-slate-400 font-semibold uppercase">Input B</div>
+                          <button
+                            onClick={() => {
+                              projectStore.updateComponentState(selectedComponent.id, { inputB: !inputB });
+                            }}
+                            className={`w-full py-1 rounded text-xs font-bold font-mono transition-colors cursor-pointer ${
+                              inputB
+                                ? 'bg-cyan-500 text-white shadow-xs'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            {inputB ? '1 (HIGH)' : '0 (LOW)'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="bg-white p-2 rounded-lg border border-sky-100 flex flex-col justify-center gap-0.5">
+                          <div className="text-[10px] text-slate-400 font-semibold uppercase">Gate Type</div>
+                          <div className="text-xs font-bold text-slate-700">1-Input Inverter</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Output Y Status Banner */}
+                    <div className="bg-white p-2.5 rounded-lg border border-sky-100 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-3 h-3 rounded-full ${outputY ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                        <span className="text-xs font-bold text-slate-800">Output Y:</span>
+                      </div>
+                      <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
+                        outputY
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          : 'bg-slate-100 text-slate-700 border border-slate-200'
+                      }`}>
+                        {outputY ? '1 (HIGH · 5V)' : '0 (LOW · 0V)'}
+                      </span>
+                    </div>
+
+                    {/* Live Truth Table */}
+                    <div className="space-y-1">
+                      <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                        Truth Table
+                      </div>
+                      <div className="overflow-hidden rounded border border-sky-200 bg-white">
+                        <table className="w-full text-center text-[10.5px] font-mono">
+                          <thead className="bg-sky-100/60 text-slate-700 font-bold border-b border-sky-200">
+                            <tr>
+                              <th className="py-1 px-2">A</th>
+                              {info.inputsCount === 2 && <th className="py-1 px-2">B</th>}
+                              <th className="py-1 px-2 text-emerald-700">Y</th>
+                              <th className="py-1 px-2 text-[9px] text-slate-400">State</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {info.truthTable.map((row, idx) => {
+                              const isActive = info.inputsCount === 2
+                                ? row.a === (inputA ? 1 : 0) && row.b === (inputB ? 1 : 0)
+                                : row.a === (inputA ? 1 : 0);
+
+                              return (
+                                <tr
+                                  key={idx}
+                                  className={`border-b border-slate-100 last:border-none transition-colors ${
+                                    isActive
+                                      ? 'bg-sky-200/70 font-bold text-sky-950'
+                                      : 'text-slate-600 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  <td className="py-1">{row.a}</td>
+                                  {info.inputsCount === 2 && <td className="py-1">{row.b}</td>}
+                                  <td className={`py-1 font-bold ${row.y === 1 ? 'text-emerald-600' : 'text-slate-500'}`}>
+                                    {row.y}
+                                  </td>
+                                  <td className="py-1 text-[9.5px]">
+                                    {isActive ? (
+                                      <span className="text-sky-700 font-bold">● Active</span>
+                                    ) : (
+                                      <span className="text-slate-300">-</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Section: Transform */}
           <div className="flex flex-col gap-2">

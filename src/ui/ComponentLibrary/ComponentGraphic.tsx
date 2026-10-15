@@ -654,6 +654,166 @@ export const ComponentGraphic: React.FC<Props> = ({ type, className = 'w-full h-
         </svg>
       );
 
+    case 'gate-and':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* IC Body */}
+          <rect x="24" y="24" width="112" height="72" rx="4" fill="#181b20" stroke="#334155" strokeWidth="2" />
+          {/* Notch & Dot */}
+          <path d="M24 54 A6 6 0 0 1 24 66" stroke="#475569" strokeWidth="2" fill="#0f172a" />
+          <circle cx="34" cy="36" r="3" fill="#64748b" />
+          {/* Title */}
+          <text x="68" y="40" fill="#94a3b8" fontSize="8" fontWeight="bold" fontFamily="monospace">74HC08</text>
+          <text x="114" y="40" fill="#38bdf8" fontSize="8" fontWeight="bold" fontFamily="sans-serif">AND</text>
+          {/* AND Symbol */}
+          <path d="M60 52 L80 52 A20 20 0 0 1 80 92 L60 92 Z" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" strokeWidth="2.5" />
+          <line x1="44" y1="62" x2="60" y2="62" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="44" y1="82" x2="60" y2="82" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="100" y1="72" x2="116" y2="72" stroke="#10b981" strokeWidth="2" />
+          {/* Pins */}
+          <rect x="18" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="84" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="84" width="6" height="5" fill="#cbd5e1" />
+        </svg>
+      );
+
+    case 'gate-or':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="24" y="24" width="112" height="72" rx="4" fill="#181b20" stroke="#334155" strokeWidth="2" />
+          <path d="M24 54 A6 6 0 0 1 24 66" stroke="#475569" strokeWidth="2" fill="#0f172a" />
+          <circle cx="34" cy="36" r="3" fill="#64748b" />
+          <text x="68" y="40" fill="#94a3b8" fontSize="8" fontWeight="bold" fontFamily="monospace">74HC32</text>
+          <text x="114" y="40" fill="#38bdf8" fontSize="8" fontWeight="bold" fontFamily="sans-serif">OR</text>
+          {/* OR Symbol */}
+          <path d="M58 52 Q76 53 100 72 Q76 91 58 92 Q68 72 58 52 Z" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" strokeWidth="2.5" />
+          <line x1="44" y1="62" x2="63" y2="62" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="44" y1="82" x2="63" y2="82" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="100" y1="72" x2="116" y2="72" stroke="#10b981" strokeWidth="2" />
+          <rect x="18" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="84" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="84" width="6" height="5" fill="#cbd5e1" />
+        </svg>
+      );
+
+    case 'gate-xor':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="24" y="24" width="112" height="72" rx="4" fill="#181b20" stroke="#334155" strokeWidth="2" />
+          <path d="M24 54 A6 6 0 0 1 24 66" stroke="#475569" strokeWidth="2" fill="#0f172a" />
+          <circle cx="34" cy="36" r="3" fill="#64748b" />
+          <text x="68" y="40" fill="#94a3b8" fontSize="8" fontWeight="bold" fontFamily="monospace">74HC86</text>
+          <text x="114" y="40" fill="#a855f7" fontSize="8" fontWeight="bold" fontFamily="sans-serif">XOR</text>
+          {/* XOR Symbol */}
+          <path d="M52 52 Q62 72 52 92" stroke="#a855f7" strokeWidth="2.5" fill="none" />
+          <path d="M58 52 Q76 53 100 72 Q76 91 58 92 Q68 72 58 52 Z" fill="rgba(168, 85, 247, 0.15)" stroke="#a855f7" strokeWidth="2.5" />
+          <line x1="42" y1="62" x2="56" y2="62" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="42" y1="82" x2="56" y2="82" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="100" y1="72" x2="116" y2="72" stroke="#10b981" strokeWidth="2" />
+          <rect x="18" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="84" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="84" width="6" height="5" fill="#cbd5e1" />
+        </svg>
+      );
+
+    case 'gate-not':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="24" y="24" width="112" height="72" rx="4" fill="#181b20" stroke="#334155" strokeWidth="2" />
+          <path d="M24 54 A6 6 0 0 1 24 66" stroke="#475569" strokeWidth="2" fill="#0f172a" />
+          <circle cx="34" cy="36" r="3" fill="#64748b" />
+          <text x="68" y="40" fill="#94a3b8" fontSize="8" fontWeight="bold" fontFamily="monospace">74HC04</text>
+          <text x="114" y="40" fill="#f59e0b" fontSize="8" fontWeight="bold" fontFamily="sans-serif">NOT</text>
+          {/* NOT Triangle + Bubble */}
+          <path d="M62 52 L92 72 L62 92 Z" fill="rgba(245, 158, 11, 0.15)" stroke="#f59e0b" strokeWidth="2.5" />
+          <circle cx="97" cy="72" r="4.5" fill="#181b20" stroke="#f59e0b" strokeWidth="2" />
+          <line x1="44" y1="72" x2="62" y2="72" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="102" y1="72" x2="116" y2="72" stroke="#10b981" strokeWidth="2" />
+          <rect x="18" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="84" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="84" width="6" height="5" fill="#cbd5e1" />
+        </svg>
+      );
+
+    case 'gate-nand':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="24" y="24" width="112" height="72" rx="4" fill="#181b20" stroke="#334155" strokeWidth="2" />
+          <path d="M24 54 A6 6 0 0 1 24 66" stroke="#475569" strokeWidth="2" fill="#0f172a" />
+          <circle cx="34" cy="36" r="3" fill="#64748b" />
+          <text x="68" y="40" fill="#94a3b8" fontSize="8" fontWeight="bold" fontFamily="monospace">74HC00</text>
+          <text x="110" y="40" fill="#06b6d4" fontSize="8" fontWeight="bold" fontFamily="sans-serif">NAND</text>
+          <path d="M58 52 L78 52 A20 20 0 0 1 78 92 L58 92 Z" fill="rgba(6, 182, 212, 0.15)" stroke="#06b6d4" strokeWidth="2.5" />
+          <circle cx="102" cy="72" r="4" fill="#181b20" stroke="#06b6d4" strokeWidth="2" />
+          <line x1="42" y1="62" x2="58" y2="62" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="42" y1="82" x2="58" y2="82" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="106" y1="72" x2="118" y2="72" stroke="#10b981" strokeWidth="2" />
+          <rect x="18" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="84" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="84" width="6" height="5" fill="#cbd5e1" />
+        </svg>
+      );
+
+    case 'gate-nor':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="24" y="24" width="112" height="72" rx="4" fill="#181b20" stroke="#334155" strokeWidth="2" />
+          <path d="M24 54 A6 6 0 0 1 24 66" stroke="#475569" strokeWidth="2" fill="#0f172a" />
+          <circle cx="34" cy="36" r="3" fill="#64748b" />
+          <text x="68" y="40" fill="#94a3b8" fontSize="8" fontWeight="bold" fontFamily="monospace">74HC02</text>
+          <text x="114" y="40" fill="#ec4899" fontSize="8" fontWeight="bold" fontFamily="sans-serif">NOR</text>
+          <path d="M56 52 Q74 53 96 72 Q74 91 56 92 Q66 72 56 52 Z" fill="rgba(236, 72, 153, 0.15)" stroke="#ec4899" strokeWidth="2.5" />
+          <circle cx="101" cy="72" r="4" fill="#181b20" stroke="#ec4899" strokeWidth="2" />
+          <line x1="42" y1="62" x2="61" y2="62" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="42" y1="82" x2="61" y2="82" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="105" y1="72" x2="118" y2="72" stroke="#10b981" strokeWidth="2" />
+          <rect x="18" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="84" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="84" width="6" height="5" fill="#cbd5e1" />
+        </svg>
+      );
+
+    case 'gate-xnor':
+      return (
+        <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="24" y="24" width="112" height="72" rx="4" fill="#181b20" stroke="#334155" strokeWidth="2" />
+          <path d="M24 54 A6 6 0 0 1 24 66" stroke="#475569" strokeWidth="2" fill="#0f172a" />
+          <circle cx="34" cy="36" r="3" fill="#64748b" />
+          <text x="68" y="40" fill="#94a3b8" fontSize="8" fontWeight="bold" fontFamily="monospace">74HC266</text>
+          <text x="110" y="40" fill="#8b5cf6" fontSize="8" fontWeight="bold" fontFamily="sans-serif">XNOR</text>
+          <path d="M50 52 Q60 72 50 92" stroke="#8b5cf6" strokeWidth="2.5" fill="none" />
+          <path d="M56 52 Q74 53 96 72 Q74 91 56 92 Q66 72 56 52 Z" fill="rgba(139, 92, 246, 0.15)" stroke="#8b5cf6" strokeWidth="2.5" />
+          <circle cx="101" cy="72" r="4" fill="#181b20" stroke="#8b5cf6" strokeWidth="2" />
+          <line x1="40" y1="62" x2="54" y2="62" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="40" y1="82" x2="54" y2="82" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="105" y1="72" x2="118" y2="72" stroke="#10b981" strokeWidth="2" />
+          <rect x="18" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="18" y="84" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="32" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="58" width="6" height="5" fill="#cbd5e1" />
+          <rect x="136" y="84" width="6" height="5" fill="#cbd5e1" />
+        </svg>
+      );
+
     default:
       return (
         <svg viewBox="0 0 160 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -33,6 +33,7 @@ import { TFTScreenMesh } from './Display/TFTScreenMesh';
 import { TM1637SegmentMesh } from './Display/TM1637SegmentMesh';
 import { FPVMonitorMesh } from './Display/FPVMonitorMesh';
 import { OscilloscopeMesh } from './Oscilloscope/OscilloscopeMesh';
+import { LogicGateMesh } from './LogicGates/LogicGateMesh';
 
 interface Props {
   component: VirtualComponent;
@@ -102,6 +103,14 @@ export const ComponentRenderer: React.FC<Props> = ({ component }) => {
       return <FPVMonitorMesh component={component} />;
     case 'oscilloscope':
       return <OscilloscopeMesh component={component} />;
+    case 'gate-and':
+    case 'gate-or':
+    case 'gate-xor':
+    case 'gate-not':
+    case 'gate-nand':
+    case 'gate-nor':
+    case 'gate-xnor':
+      return <LogicGateMesh component={component} />;
     default:
       return (
         <mesh position={[0, 0.5, 0]}>
