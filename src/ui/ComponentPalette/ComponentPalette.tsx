@@ -73,13 +73,13 @@ export const ComponentPalette: React.FC = () => {
   const [ledVariantColor, setLedVariantColor] = useState<string>('#ef4444'); // Red, Green, Blue, Yellow
 
   const categories = [
-    { id: 'breadboard', label: 'Breadboard Essentials', icon: CircuitBoard, badge: 'Popular' },
-    { id: 'logic', label: 'Logic Gates (AND, OR, XOR)', icon: Binary, badge: 'New' },
+    { id: 'breadboard', label: 'Breadboard Essentials', icon: CircuitBoard },
+    { id: 'logic', label: 'Logic Gates', icon: Binary },
     { id: 'all', label: 'All Components', icon: Boxes },
     { id: 'passive', label: 'Passives (R, C)', icon: Zap },
     { id: 'output', label: 'Outputs & LEDs', icon: Volume2 },
-    { id: 'input', label: 'Inputs & Switches', icon: Sliders },
-    { id: 'instrument', label: 'Test Instruments', icon: Activity },
+    { id: 'input', label: 'Switches & Inputs', icon: Sliders },
+    { id: 'instrument', label: 'Instruments', icon: Activity },
     { id: 'microcontroller', label: 'Microcontrollers', icon: Cpu },
     { id: 'prototyping', label: 'Prototyping', icon: Layers },
     { id: 'sensor', label: 'Sensors', icon: Radar },
@@ -451,11 +451,6 @@ export const ComponentPalette: React.FC = () => {
                       />
                       <span className="truncate">{cat.label}</span>
                     </div>
-                    {cat.badge && (
-                      <span className="text-[8.5px] bg-emerald-100 text-emerald-800 px-1 py-0.2 rounded font-medium">
-                        {cat.badge}
-                      </span>
-                    )}
                   </button>
                 );
               })}
@@ -486,11 +481,6 @@ export const ComponentPalette: React.FC = () => {
                         <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400">
                           <GripVertical size={13} />
                         </div>
-                        {isBreadboard && (
-                          <span className="absolute bottom-1 left-1 text-[8.5px] bg-emerald-100 text-emerald-800 font-mono px-1 py-0.2 rounded font-medium">
-                            Drop Target
-                          </span>
-                        )}
                       </div>
 
                       {/* Component Info */}

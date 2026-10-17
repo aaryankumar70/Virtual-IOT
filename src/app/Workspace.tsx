@@ -15,8 +15,9 @@ import { useProject, projectStore } from '../state/project/projectStore';
 import { useKeyboardShortcuts } from '../editor/shortcuts/KeyboardShortcuts';
 import { createComponent } from '../core/factories/componentFactory';
 import { historyManager, Commands } from '../editor/history/historyManager';
-import { Sparkles, Layers } from 'lucide-react';
+import { Sparkles, Layers, Cpu } from 'lucide-react';
 import { calculateComponentBreadboardPlacement } from '../utils/breadboardSnap';
+import { oscilloscopeStore } from '../state/oscilloscope/oscilloscopeStore';
 
 export const Workspace: React.FC = () => {
   const viewState = useView();
@@ -221,47 +222,72 @@ export const Workspace: React.FC = () => {
 
           {isEmpty && (
             <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center p-6 text-center select-none z-10">
-              <div className="max-w-md bg-white/95 border border-slate-200 p-6 rounded-xl shadow-lg backdrop-blur-sm pointer-events-auto flex flex-col items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
-                  <Sparkles size={20} />
+              <div className="max-w-lg bg-white/95 border border-slate-200/90 p-6 rounded-2xl shadow-xl backdrop-blur-md pointer-events-auto flex flex-col items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-2xs">
+                  <Cpu size={22} className="stroke-[2.2]" />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-800">
-                  Your laboratory is empty
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Drag a component from the library on the left into the 3D workspace to begin
-                  building your circuit, or load an example circuit.
-                </p>
-                <div className="flex items-center gap-2 pt-2">
+                <div className="space-y-1">
+                  <h3 className="text-base font-semibold text-slate-900 tracking-tight">
+                    Welcome to IOT Simulation Lab
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
+                    Drop components from the left sidebar into the 3D workspace to build, wire, and test circuits with real-time continuity checking.
+                  </p>
+                </div>
+
+                <div className="w-full pt-1 flex flex-col gap-2">
                   <button
                     onClick={() => {
                       const bb = createComponent('breadboard', { x: 0, y: 0, z: 0 });
                       historyManager.execute(Commands.addComponent(bb));
                       viewStore.selectComponent(bb.id);
                     }}
-                    className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-xs text-white font-medium transition-colors shadow-xs flex items-center gap-1.5"
+                    className="w-full py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <Layers size={13} />
-                    Add Breadboard
+                    <Layers size={14} />
+                    <span>Start Blank Breadboard Circuit</span>
                   </button>
-                  <button
-                    onClick={() => projectStore.loadLogicGateCircuit()}
-                    className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-xs text-white font-medium transition-colors shadow-xs"
-                  >
-                    Load Logic Gates Lab
-                  </button>
-                  <button
-                    onClick={() => projectStore.loadOscilloscopeCircuit()}
-                    className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-xs text-white font-medium transition-colors shadow-xs"
-                  >
-                    Load Oscilloscope Lab
-                  </button>
-                  <button
-                    onClick={() => projectStore.loadExampleCircuit()}
-                    className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-xs text-white font-medium transition-colors shadow-xs"
-                  >
-                    Load Demo Circuit
-                  </button>
+
+                  <div className="flex items-center gap-1.5 pt-1 text-[11px] text-slate-400">
+                    <span className="w-full h-px bg-slate-100" />
+                    <span className="shrink-0 px-1 font-medium">or explore pre-built labs</span>
+                    <span className="w-full h-px bg-slate-100" />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 pt-0.5">
+                    <button
+                      onClick={() => projectStore.loadLogicGateCircuit()}
+                      className="p-2 rounded-lg border border-slate-200 hover:border-sky-400 hover:bg-sky-50/50 bg-white text-left transition-all cursor-pointer group"
+                    >
+                      <div className="text-xs font-semibold text-slate-800 group-hover:text-sky-700 truncate">
+                        Logic Gates
+                      </div>
+                      <div className="text-[10px] text-slate-400 truncate">AND & XOR Gates</div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        projectStore.loadOscilloscopeCircuit();
+                        oscilloscopeStore.openOscilloscope();
+                      }}
+                      className="p-2 rounded-lg border border-slate-200 hover:border-amber-400 hover:bg-amber-50/50 bg-white text-left transition-all cursor-pointer group"
+                    >
+                      <div className="text-xs font-semibold text-slate-800 group-hover:text-amber-700 truncate">
+                        Oscilloscope
+                      </div>
+                      <div className="text-[10px] text-slate-400 truncate">DSO & RC Filter</div>
+                    </button>
+
+                    <button
+                      onClick={() => projectStore.loadExampleCircuit()}
+                      className="p-2 rounded-lg border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 bg-white text-left transition-all cursor-pointer group"
+                    >
+                      <div className="text-xs font-semibold text-slate-800 group-hover:text-emerald-700 truncate">
+                        Arduino Uno
+                      </div>
+                      <div className="text-[10px] text-slate-400 truncate">LED & OLED Circuit</div>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
