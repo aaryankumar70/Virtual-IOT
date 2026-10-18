@@ -23,6 +23,7 @@ import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
 import { historyManager, Commands } from '../../editor/history/historyManager';
 import { ContinuityHUD } from '../Continuity/ContinuityHUD';
+import { RealtimeSignalOverlay } from '../SignalVisualization/RealtimeSignalOverlay';
 
 export const ViewportOverlay: React.FC = () => {
   const viewState = useView();
@@ -718,28 +719,31 @@ export const ViewportOverlay: React.FC = () => {
       {/* Continuity Checker HUD */}
       <ContinuityHUD />
 
-      {/* Bottom Right Floating Quick Camera Navigation */}
-      <div className="absolute bottom-3 right-3 z-10 select-none pointer-events-auto flex flex-col gap-1 bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xs p-1 rounded-lg">
+      {/* Real-time Data Visualization Overlay (Recharts) */}
+      <RealtimeSignalOverlay />
+
+      {/* Quick Camera Navigation Controls (Top Right of 3D Canvas) */}
+      <div className="absolute top-3 right-3 z-10 select-none pointer-events-auto flex items-center gap-1 bg-white/95 backdrop-blur-sm border border-slate-200/90 shadow-2xs p-1 rounded-lg">
         <button
           onClick={() => viewStore.triggerCamera('frameAll')}
-          className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
+          className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
           title="Frame All (A)"
         >
-          <Maximize size={15} />
+          <Maximize size={14} />
         </button>
         <button
           onClick={() => viewStore.triggerCamera('focusSelected')}
-          className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
+          className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
           title="Focus Selected (F)"
         >
-          <Focus size={15} />
+          <Focus size={14} />
         </button>
         <button
           onClick={() => viewStore.triggerCamera('reset')}
-          className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
+          className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
           title="Reset Camera View"
         >
-          <RotateCcw size={15} />
+          <RotateCcw size={14} />
         </button>
       </div>
     </>

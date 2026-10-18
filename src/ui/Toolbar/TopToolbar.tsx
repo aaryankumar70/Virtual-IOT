@@ -20,6 +20,7 @@ import {
   Zap,
   Boxes,
   Sliders,
+  Waves,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
@@ -327,6 +328,30 @@ export const TopToolbar: React.FC = () => {
               className={oscState.isOpen ? 'animate-pulse text-amber-600' : 'text-slate-500'}
             />
             <span className="hidden sm:inline text-[11px]">Scope</span>
+          </button>
+
+          {/* Real-time Recharts Signal Visualization Button */}
+          <button
+            id="btn-tool-signal-monitor"
+            onClick={() => {
+              if (viewState.signalOverlayMinimized) {
+                viewStore.setSignalOverlayMinimized(false);
+              } else {
+                viewStore.toggleSignalOverlay();
+              }
+            }}
+            title="Real-time Signal Visualization (Recharts Waveforms & Voltage Levels)"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
+              viewState.signalOverlayOpen
+                ? 'bg-cyan-50 text-cyan-800 border-cyan-300 shadow-2xs font-semibold'
+                : 'bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50'
+            }`}
+          >
+            <Waves
+              size={14}
+              className={viewState.signalOverlayOpen ? 'text-cyan-600' : 'text-slate-500'}
+            />
+            <span className="hidden sm:inline text-[11px]">Signals</span>
           </button>
         </div>
 

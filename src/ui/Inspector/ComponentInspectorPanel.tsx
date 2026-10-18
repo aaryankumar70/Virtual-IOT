@@ -11,6 +11,7 @@ import {
   Plus,
   Monitor,
   Binary,
+  Activity,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
@@ -1303,11 +1304,23 @@ export const ComponentInspectorPanel: React.FC = () => {
           </>
           )}
 
-          {/* Delete Component Button */}
-          <div className="pt-2 mt-auto">
+          {/* Live Signal Analysis Button (Recharts) */}
+          <div className="pt-2 mt-auto flex flex-col gap-2">
+            <button
+              onClick={() => {
+                viewStore.setSignalOverlay(true);
+                viewStore.setSignalOverlayMinimized(false);
+              }}
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 text-cyan-800 text-xs font-medium transition-colors cursor-pointer shadow-2xs"
+            >
+              <Activity size={13} className="text-cyan-600" />
+              <span>Live Signals & Voltage (Recharts)</span>
+            </button>
+
+            {/* Delete Component Button */}
             <button
               onClick={handleDeleteComponent}
-              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-medium transition-colors"
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-medium transition-colors cursor-pointer"
             >
               <Trash2 size={13} />
               <span>Delete Component</span>

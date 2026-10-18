@@ -99,6 +99,8 @@ export interface ViewState {
   continuityProbeMode: boolean;
   probeSelectedPins: { componentId: string; pinId: string }[];
   probeResult: { isContinuous: boolean; isShortCircuit: boolean; resistanceEstimate: string; message: string } | null;
+  signalOverlayOpen: boolean;
+  signalOverlayMinimized: boolean;
 }
 
 let state: ViewState = {
@@ -134,6 +136,8 @@ let state: ViewState = {
   continuityProbeMode: false,
   probeSelectedPins: [],
   probeResult: null,
+  signalOverlayOpen: true,
+  signalOverlayMinimized: false,
 };
 
 const listeners = new Set<() => void>();
@@ -605,6 +609,26 @@ export const viewStore = {
 
   clearProbe() {
     state = { ...state, probeSelectedPins: [], probeResult: null };
+    notify();
+  },
+
+  toggleSignalOverlay() {
+    state = { ...state, signalOverlayOpen: !state.signalOverlayOpen };
+    notify();
+  },
+
+  setSignalOverlay(open: boolean) {
+    state = { ...state, signalOverlayOpen: open };
+    notify();
+  },
+
+  toggleSignalOverlayMinimized() {
+    state = { ...state, signalOverlayMinimized: !state.signalOverlayMinimized };
+    notify();
+  },
+
+  setSignalOverlayMinimized(minimized: boolean) {
+    state = { ...state, signalOverlayMinimized: minimized };
     notify();
   },
 };
