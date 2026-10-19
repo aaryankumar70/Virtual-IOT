@@ -21,6 +21,7 @@ import { PhysicalConnectionType } from '../../core/connections/Connection';
 import { createComponent } from '../../core/factories/componentFactory';
 import { HardwareSpecificationPanel } from './HardwareSpecificationPanel';
 import { LOGIC_GATES_INFO, evaluateGateOutput, LogicGateType } from '../../core/logic/logicGatesEngine';
+import { logicAnalyzerStore } from '../../state/logicAnalyzer/logicAnalyzerStore';
 
 export const ComponentInspectorPanel: React.FC = () => {
   const viewState = useView();
@@ -1304,8 +1305,8 @@ export const ComponentInspectorPanel: React.FC = () => {
           </>
           )}
 
-          {/* Live Signal Analysis Button (Recharts) */}
-          <div className="pt-2 mt-auto flex flex-col gap-2">
+          {/* Live Signal & Protocol Analysis Buttons */}
+          <div className="pt-2 mt-auto flex flex-col gap-1.5">
             <button
               onClick={() => {
                 viewStore.setSignalOverlay(true);
@@ -1317,10 +1318,24 @@ export const ComponentInspectorPanel: React.FC = () => {
               <span>Live Signals & Voltage (Recharts)</span>
             </button>
 
+            <button
+              onClick={() => {
+                const isI2C =
+                  selectedComponent.type === 'oled-display' ||
+                  selectedComponent.type === 'mpu6050-sensor' ||
+                  selectedComponent.type === 'lcd-1602';
+                logicAnalyzerStore.openLogicAnalyzer(isI2C ? 'i2c' : 'all');
+              }}
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 text-xs font-medium transition-colors cursor-pointer shadow-2xs"
+            >
+              <Binary size={13} className="text-blue-600" />
+              <span>Capture & Decode Bus (Logic Analyzer)</span>
+            </button>
+
             {/* Delete Component Button */}
             <button
               onClick={handleDeleteComponent}
-              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-medium transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-medium transition-colors cursor-pointer mt-1"
             >
               <Trash2 size={13} />
               <span>Delete Component</span>

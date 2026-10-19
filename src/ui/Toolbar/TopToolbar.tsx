@@ -21,10 +21,12 @@ import {
   Boxes,
   Sliders,
   Waves,
+  Binary,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
 import { oscilloscopeStore, useOscilloscope } from '../../state/oscilloscope/oscilloscopeStore';
+import { logicAnalyzerStore, useLogicAnalyzer } from '../../state/logicAnalyzer/logicAnalyzerStore';
 import { historyManager, Commands } from '../../editor/history/historyManager';
 import { serializeProject, deserializeProject } from '../../project/serialization/projectSchema';
 import { checkContinuity } from '../../core/circuit/continuityChecker';
@@ -33,6 +35,7 @@ export const TopToolbar: React.FC = () => {
   const viewState = useView();
   const projectState = useProject();
   const oscState = useOscilloscope();
+  const laState = useLogicAnalyzer();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const continuityReport = React.useMemo(() => {
@@ -352,6 +355,24 @@ export const TopToolbar: React.FC = () => {
               className={viewState.signalOverlayOpen ? 'text-cyan-600' : 'text-slate-500'}
             />
             <span className="hidden sm:inline text-[11px]">Signals</span>
+          </button>
+
+          {/* Logic Analyzer & Protocol Decoder Button */}
+          <button
+            id="btn-tool-logic-analyzer"
+            onClick={() => logicAnalyzerStore.toggleLogicAnalyzer()}
+            title="Digital Logic Analyzer & Protocol Decoder: I2C, SPI, UART (L)"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
+              laState.isOpen
+                ? 'bg-blue-50 text-blue-800 border-blue-300 shadow-2xs font-semibold'
+                : 'bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50'
+            }`}
+          >
+            <Binary
+              size={14}
+              className={laState.isOpen ? 'text-blue-600' : 'text-slate-500'}
+            />
+            <span className="hidden sm:inline text-[11px]">Logic</span>
           </button>
         </div>
 

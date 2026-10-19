@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
 import { oscilloscopeStore } from '../../state/oscilloscope/oscilloscopeStore';
+import { logicAnalyzerStore } from '../../state/logicAnalyzer/logicAnalyzerStore';
 import { historyManager, Commands } from '../history/historyManager';
 
 export function useKeyboardShortcuts() {
@@ -102,6 +103,12 @@ export function useKeyboardShortcuts() {
       // Oscilloscope modal toggle
       if (e.key === 'o' || e.key === 'O') {
         oscilloscopeStore.toggleOscilloscope();
+        return;
+      }
+
+      // Logic Analyzer modal toggle
+      if (e.key === 'l' || e.key === 'L') {
+        logicAnalyzerStore.toggleLogicAnalyzer();
         return;
       }
 
