@@ -82,7 +82,10 @@ export interface ViewState {
   breadboardSnapTarget: BreadboardSnapTargetState | null;
   physicalConnectMode: boolean;
   contextMenu: ContextMenuState | null;
-  cameraTrigger: { action: 'reset' | 'frameAll' | 'focusSelected'; timestamp: number } | null;
+  cameraTrigger: {
+    action: 'reset' | 'frameAll' | 'focusSelected' | 'top' | 'front' | 'isometric';
+    timestamp: number;
+  } | null;
   inspectorOpen: boolean;
   libraryOpen: boolean;
   activeTab: 'components' | 'projects' | 'examples';
@@ -453,7 +456,7 @@ export const viewStore = {
     notify();
   },
 
-  triggerCamera(action: 'reset' | 'frameAll' | 'focusSelected') {
+  triggerCamera(action: 'reset' | 'frameAll' | 'focusSelected' | 'top' | 'front' | 'isometric') {
     state = {
       ...state,
       cameraTrigger: { action, timestamp: Date.now() },

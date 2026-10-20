@@ -90,6 +90,54 @@ export const CameraController: React.FC = () => {
       targetLookAt.current.set(centerX, 0, centerZ);
       targetCamPos.current.set(centerX, span * 0.9, centerZ + span * 1.1);
       isTransitioning.current = true;
+    } else if (action === 'top') {
+      let centerX = 0, centerZ = 0;
+      if (projectState.components.length > 0) {
+        let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+        projectState.components.forEach((c) => {
+          minX = Math.min(minX, c.transform.position.x);
+          maxX = Math.max(maxX, c.transform.position.x);
+          minZ = Math.min(minZ, c.transform.position.z);
+          maxZ = Math.max(maxZ, c.transform.position.z);
+        });
+        centerX = (minX + maxX) / 2;
+        centerZ = (minZ + maxZ) / 2;
+      }
+      targetLookAt.current.set(centerX, 0, centerZ);
+      targetCamPos.current.set(centerX, 18, centerZ + 0.001);
+      isTransitioning.current = true;
+    } else if (action === 'front') {
+      let centerX = 0, centerZ = 0;
+      if (projectState.components.length > 0) {
+        let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+        projectState.components.forEach((c) => {
+          minX = Math.min(minX, c.transform.position.x);
+          maxX = Math.max(maxX, c.transform.position.x);
+          minZ = Math.min(minZ, c.transform.position.z);
+          maxZ = Math.max(maxZ, c.transform.position.z);
+        });
+        centerX = (minX + maxX) / 2;
+        centerZ = (minZ + maxZ) / 2;
+      }
+      targetLookAt.current.set(centerX, 1, centerZ);
+      targetCamPos.current.set(centerX, 4, centerZ + 15);
+      isTransitioning.current = true;
+    } else if (action === 'isometric') {
+      let centerX = 0, centerZ = 0;
+      if (projectState.components.length > 0) {
+        let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+        projectState.components.forEach((c) => {
+          minX = Math.min(minX, c.transform.position.x);
+          maxX = Math.max(maxX, c.transform.position.x);
+          minZ = Math.min(minZ, c.transform.position.z);
+          maxZ = Math.max(maxZ, c.transform.position.z);
+        });
+        centerX = (minX + maxX) / 2;
+        centerZ = (minZ + maxZ) / 2;
+      }
+      targetLookAt.current.set(centerX, 0, centerZ);
+      targetCamPos.current.set(centerX + 11, 11, centerZ + 11);
+      isTransitioning.current = true;
     }
   }, [viewState.cameraTrigger, projectState.components, viewState.selectedComponentIds]);
 

@@ -214,8 +214,19 @@ export const Workspace: React.FC = () => {
         >
           <Canvas
             shadows
+            dpr={[1, 2]}
             camera={{ position: [0, 10, 14], fov: 45, near: 0.1, far: 1000 }}
-            gl={{ antialias: true, alpha: false }}
+            gl={{
+              antialias: true,
+              alpha: false,
+              powerPreference: 'high-performance',
+            }}
+            onCreated={({ gl }) => {
+              gl.shadowMap.type = THREE.PCFSoftShadowMap;
+              gl.shadowMap.enabled = true;
+              gl.toneMapping = THREE.ACESFilmicToneMapping;
+              gl.toneMappingExposure = 1.05;
+            }}
           >
             <LabScene />
           </Canvas>

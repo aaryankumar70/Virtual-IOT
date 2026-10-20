@@ -723,18 +723,33 @@ export const ViewportOverlay: React.FC = () => {
       <RealtimeSignalOverlay />
 
       {/* Quick Camera Navigation Controls (Top Right of 3D Canvas) */}
-      <div className="absolute top-3 right-3 z-10 select-none pointer-events-auto flex items-center gap-1 bg-white/95 backdrop-blur-sm border border-slate-200/90 shadow-2xs p-1 rounded-lg">
+      <div className="absolute top-3 right-3 z-10 select-none pointer-events-auto flex items-center gap-1 bg-white/95 backdrop-blur-sm border border-slate-200/90 shadow-2xs p-1 rounded-lg text-xs">
+        <button
+          onClick={() => viewStore.triggerCamera('top')}
+          className="px-2 py-1 rounded text-[11px] font-medium hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+          title="Top Plan View (look straight down onto breadboard)"
+        >
+          Top
+        </button>
+        <button
+          onClick={() => viewStore.triggerCamera('isometric')}
+          className="px-2 py-1 rounded text-[11px] font-medium hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+          title="Isometric 3D View"
+        >
+          Iso
+        </button>
+        <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
         <button
           onClick={() => viewStore.triggerCamera('frameAll')}
           className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
-          title="Frame All (A)"
+          title="Frame All Components (A)"
         >
           <Maximize size={14} />
         </button>
         <button
           onClick={() => viewStore.triggerCamera('focusSelected')}
           className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
-          title="Focus Selected (F)"
+          title="Focus Selected Component (F)"
         >
           <Focus size={14} />
         </button>
