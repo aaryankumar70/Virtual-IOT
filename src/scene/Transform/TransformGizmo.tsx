@@ -6,6 +6,11 @@ import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
 import { historyManager, Commands } from '../../editor/history/historyManager';
 import { ComponentTransform } from '../../core/components/VirtualComponent';
+import {
+  BREADBOARD_SURFACE_Y,
+  findBreadboardPlacementForComponent,
+  snapToSceneGrid,
+} from '../../utils/breadboardSnap';
 
 interface Props {
   targetObject: THREE.Object3D | null;
@@ -40,23 +45,46 @@ export const TransformGizmo: React.FC<Props> = ({ targetObject, componentId }) =
     if (!isDraggingRef.current) return;
     isDraggingRef.current = false;
     viewStore.setIsTransforming(false);
+    viewStore.setBreadboardSnapTarget(null);
+
     if (comp && prevTransformRef.current && targetObject) {
       let posX = targetObject.position.x;
-      let posY = Math.max(0, targetObject.position.y); // keep resting above table
+      let posY = Math.max(0, targetObject.position.y);
       let posZ = targetObject.position.z;
 
-      if (viewState.snapToGrid) {
-        posX = Math.round(posX);
-        posY = Math.max(0, Math.round(posY));
-        posZ = Math.round(posZ);
+      const currentView = viewStore.getState();
+      const placement =
+        currentView.transformMode === 'translate'
+          ? findBreadboardPlacementForComponent(
+              projectStore.getState().components,
+              comp.type,
+              posX,
+              posZ,
+              comp.id
+            )
+          : null;
+
+      if (placement) {
+        posX = placement.snappedPosition.x;
+        posY = placement.snappedPosition.y;
+        posZ = placement.snappedPosition.z;
+        targetObject.position.set(posX, posY, posZ);
+      } else if (currentView.snapToGrid) {
+        posX = snapToSceneGrid(posX);
+        posZ = snapToSceneGrid(posZ);
+        if (Math.abs(posY - BREADBOARD_SURFACE_Y) < 0.05) {
+          posY = 0;
+        } else {
+          posY = Math.max(0, snapToSceneGrid(posY));
+        }
         targetObject.position.set(posX, posY, posZ);
       }
 
       const nextTransform: ComponentTransform = {
         position: {
-          x: Number(posX.toFixed(2)),
-          y: Number(posY.toFixed(2)),
-          z: Number(posZ.toFixed(2)),
+          x: Number(posX.toFixed(3)),
+          y: Number(posY.toFixed(3)),
+          z: Number(posZ.toFixed(3)),
         },
         rotation: {
           x: targetObject.rotation.x,
@@ -70,8 +98,17 @@ export const TransformGizmo: React.FC<Props> = ({ targetObject, componentId }) =
         },
       };
 
-      // Update project store
+      // Update project store and sync breadboard hole connections if translated
       projectStore.updateComponentTransform(comp.id, nextTransform);
+      if (currentView.transformMode === 'translate' && comp.type !== 'breadboard') {
+        projectStore.syncBreadboardConnectionsForComponent(comp.id, placement);
+        if (placement) {
+          viewStore.setConnectionFeedback({
+            message: `${placement.label} (Aligned)`,
+            severity: 'info',
+          });
+        }
+      }
 
       // Record in history for Undo/Redo
       historyManager.execute(
@@ -83,12 +120,52 @@ export const TransformGizmo: React.FC<Props> = ({ targetObject, componentId }) =
   const handleChange = () => {
     if (!isDraggingRef.current) return;
     if (targetObject && comp) {
+      let posX = targetObject.position.x;
+      let posY = Math.max(0, targetObject.position.y);
+      let posZ = targetObject.position.z;
+
+      const currentView = viewStore.getState();
+      if (currentView.transformMode === 'translate') {
+        const placement = findBreadboardPlacementForComponent(
+          projectStore.getState().components,
+          comp.type,
+          posX,
+          posZ,
+          comp.id
+        );
+
+        if (placement) {
+          posX = placement.snappedPosition.x;
+          posY = placement.snappedPosition.y;
+          posZ = placement.snappedPosition.z;
+          targetObject.position.set(posX, posY, posZ);
+          viewStore.setBreadboardSnapTarget({
+            breadboardId: placement.breadboardId,
+            holeId: placement.targetHoles[0]?.holeId || '',
+            position: placement.snappedPosition,
+            targetHoles: placement.targetHoles,
+            label: placement.label,
+            column: placement.column,
+          });
+        } else {
+          viewStore.setBreadboardSnapTarget(null);
+          if (currentView.snapToGrid) {
+            posX = snapToSceneGrid(posX);
+            posZ = snapToSceneGrid(posZ);
+            if (Math.abs(posY - BREADBOARD_SURFACE_Y) < 0.05) {
+              posY = 0;
+            }
+            targetObject.position.set(posX, posY, posZ);
+          }
+        }
+      }
+
       // Continuously sync live transform so wires and pins recompute while actively dragging
       projectStore.updateComponentTransform(comp.id, {
         position: {
-          x: targetObject.position.x,
-          y: targetObject.position.y,
-          z: targetObject.position.z,
+          x: Number(posX.toFixed(3)),
+          y: Number(posY.toFixed(3)),
+          z: Number(posZ.toFixed(3)),
         },
         rotation: {
           x: targetObject.rotation.x,

@@ -13,6 +13,12 @@ import { ProjectData } from '../../project/serialization/projectSchema';
 import { calculatePinWorldPosition } from '../../core/pins/pinPosition';
 import { calculateEndpointWorldPosition } from '../../core/connections/endpointPosition';
 import { viewStore } from '../view/viewStore';
+import {
+  BreadboardDropPlacement,
+  calculateComponentBreadboardPlacement,
+  getBreadboardColumnWorldX,
+  getBreadboardRowWorldZ,
+} from '../../utils/breadboardSnap';
 
 export interface ProjectState {
   metadata: {
@@ -293,6 +299,50 @@ export const projectStore = {
     this.disconnectEndpoint(componentId, pinId);
   },
 
+  /**
+   * Synchronizes a component's automatic breadboard-hole connections when moved onto,
+   * across, or off a breadboard in the 3D scene.
+   */
+  syncBreadboardConnectionsForComponent(
+    componentId: string,
+    placement: BreadboardDropPlacement | null
+  ) {
+    // 1. Remove any existing automatic breadboard insertion connections for this component
+    state = {
+      ...state,
+      connections: state.connections.filter(
+        (c) =>
+          !(
+            c.type === 'breadboard' &&
+            (c.source.componentId === componentId || c.target.componentId === componentId)
+          )
+      ),
+    };
+
+    // 2. If placed on a breadboard, create new breadboard hole connections for each lead
+    if (placement) {
+      placement.targetHoles.forEach((target) => {
+        this.addConnection(
+          {
+            componentId,
+            interfaceId: target.pinId,
+            type: 'pin',
+            pinId: target.pinId,
+          },
+          {
+            componentId: placement.breadboardId,
+            interfaceId: target.holeId,
+            type: 'breadboard-hole',
+            pinId: target.holeId,
+          },
+          'breadboard'
+        );
+      });
+    } else {
+      notify();
+    }
+  },
+
   loadProject(projectData: ProjectData) {
     state = {
       metadata: {
@@ -403,13 +453,27 @@ export const projectStore = {
     // 1. Breadboard in center
     const breadboard = createComponent('breadboard', { x: 0, y: 0, z: 0 });
     // 2. Arduino Uno on left
-    const arduino = createComponent('arduino-uno', { x: -4.6, y: 0, z: 0 });
+    const arduino = createComponent('arduino-uno', { x: -4.75, y: 0, z: 0 });
     // 3. Digital Storage Oscilloscope top/bench
-    const oscilloscope = createComponent('oscilloscope', { x: 0.8, y: 0, z: -3.6 });
-    // 4. 220Ω Resistor
-    const resistor = createComponent('resistor', { x: -0.5, y: 0.35, z: -0.2 });
-    // 5. Ceramic Capacitor (RC filter)
-    const capacitor = createComponent('capacitor-ceramic', { x: 0.8, y: 0.35, z: 0.2 });
+    const oscilloscope = createComponent('oscilloscope', { x: 0.75, y: 0, z: -3.5 });
+
+    // 4. 220Ω Resistor snapped into Breadboard Row C (Cols 14 to 18)
+    const resPlacement = calculateComponentBreadboardPlacement(
+      breadboard,
+      'resistor',
+      getBreadboardColumnWorldX(breadboard, 16),
+      getBreadboardRowWorldZ(breadboard, 'c')
+    )!;
+    const resistor = createComponent('resistor', resPlacement.snappedPosition);
+
+    // 5. Ceramic Capacitor snapped into Breadboard Row D (Cols 18 to 20)
+    const capPlacement = calculateComponentBreadboardPlacement(
+      breadboard,
+      'capacitor-ceramic',
+      getBreadboardColumnWorldX(breadboard, 19),
+      getBreadboardRowWorldZ(breadboard, 'd')
+    )!;
+    const capacitor = createComponent('capacitor-ceramic', capPlacement.snappedPosition);
 
     this.addComponent(breadboard);
     this.addComponent(arduino);
@@ -417,64 +481,46 @@ export const projectStore = {
     this.addComponent(resistor);
     this.addComponent(capacitor);
 
+    this.syncBreadboardConnectionsForComponent(resistor.id, resPlacement);
+    this.syncBreadboardConnectionsForComponent(capacitor.id, capPlacement);
+
     // Wires:
-    // 1. Arduino D9 (490Hz PWM) -> Breadboard Row 15 Hole A (Orange wire)
+    // 1. Arduino D9 (490Hz PWM) -> Breadboard Row 14 Hole A (Orange wire)
     this.addConnection(
       { componentId: arduino.id, pinId: 'd9' },
-      { componentId: breadboard.id, pinId: 'row_15_a' },
+      { componentId: breadboard.id, pinId: 'row_14_a' },
       '#f97316'
     );
 
-    // 2. Breadboard Row 15 Hole B -> Resistor Lead 1
+    // 2. Capacitor Lead 2 (Row 20E) -> Breadboard Bottom GND Rail (-)
     this.addConnection(
-      { componentId: breadboard.id, pinId: 'row_15_b' },
-      { componentId: resistor.id, pinId: 'pin1' },
-      '#eab308'
-    );
-
-    // 3. Resistor Lead 2 -> Breadboard Row 18 Hole A
-    this.addConnection(
-      { componentId: resistor.id, pinId: 'pin2' },
-      { componentId: breadboard.id, pinId: 'row_18_a' },
-      '#eab308'
-    );
-
-    // 4. Capacitor Lead 1 -> Breadboard Row 18 Hole B
-    this.addConnection(
-      { componentId: capacitor.id, pinId: 'pin1' },
-      { componentId: breadboard.id, pinId: 'row_18_b' },
-      '#38bdf8'
-    );
-
-    // 5. Capacitor Lead 2 -> Breadboard Bottom GND Rail (-)
-    this.addConnection(
-      { componentId: capacitor.id, pinId: 'pin2' },
-      { componentId: breadboard.id, pinId: 'rail_bot_minus_15' },
+      { componentId: breadboard.id, pinId: 'row_20_e' },
+      { componentId: breadboard.id, pinId: 'rail_bot_minus_20' },
       '#1e293b'
     );
 
-    // 6. Arduino GND -> Breadboard Bottom GND Rail (-)
+    // 3. Arduino GND -> Breadboard Bottom GND Rail (-)
     this.addConnection(
       { componentId: arduino.id, pinId: 'gnd_1' },
       { componentId: breadboard.id, pinId: 'rail_bot_minus_1' },
       '#1e293b'
     );
 
-    // 7. Oscilloscope CH1 Probe -> Breadboard Row 18 Hole C (Filtered RC analog signal! Yellow wire)
+    // 4. Oscilloscope CH1 Probe -> Breadboard Row 18 Hole A (Filtered RC node! Yellow wire)
     this.addConnection(
       { componentId: oscilloscope.id, pinId: 'ch1_probe' },
-      { componentId: breadboard.id, pinId: 'row_18_c' },
+      { componentId: breadboard.id, pinId: 'row_18_a' },
       '#facc15'
     );
 
-    // 8. Oscilloscope CH2 Probe -> Arduino D3 (Raw 490Hz PWM! Cyan wire)
+    // 5. Oscilloscope CH2 Probe -> Arduino D3 (Raw 490Hz PWM! Cyan wire)
     this.addConnection(
       { componentId: oscilloscope.id, pinId: 'ch2_probe' },
       { componentId: arduino.id, pinId: 'd3' },
       '#06b6d4'
     );
 
-    // 9. Oscilloscope GND Clip -> Breadboard Bottom GND Rail (-)
+    // 6. Oscilloscope GND Clip -> Breadboard Bottom GND Rail (-)
     this.addConnection(
       { componentId: oscilloscope.id, pinId: 'gnd_probe' },
       { componentId: breadboard.id, pinId: 'rail_bot_minus_25' },
@@ -490,41 +536,49 @@ export const projectStore = {
     const breadboard = createComponent('breadboard', { x: 0, y: 0, z: 0 });
     this.addComponent(breadboard);
 
-    // 2. AND Gate in columns 8, 9, 10
-    const andGate = createComponent('gate-and', { x: -1.375, y: 0.38, z: 0 }, { inputA: true, inputB: true });
+    // 2. AND Gate centered at Column 9 (spans Columns 8, 9, 10 across Row D & Row G)
+    const andPlacement = calculateComponentBreadboardPlacement(
+      breadboard,
+      'gate-and',
+      getBreadboardColumnWorldX(breadboard, 9),
+      0
+    )!;
+    const andGate = createComponent('gate-and', andPlacement.snappedPosition, { inputA: true, inputB: true });
     this.addComponent(andGate);
+    this.syncBreadboardConnectionsForComponent(andGate.id, andPlacement);
 
-    // Plug AND gate pins into breadboard holes
-    this.addConnection({ componentId: andGate.id, pinId: 'pin_in_a' }, { componentId: breadboard.id, pinId: 'row_8_d' }, 'breadboard');
-    this.addConnection({ componentId: andGate.id, pinId: 'pin_in_b' }, { componentId: breadboard.id, pinId: 'row_9_d' }, 'breadboard');
-    this.addConnection({ componentId: andGate.id, pinId: 'pin_vcc' }, { componentId: breadboard.id, pinId: 'row_10_d' }, 'breadboard');
-    this.addConnection({ componentId: andGate.id, pinId: 'pin_out_y' }, { componentId: breadboard.id, pinId: 'row_8_g' }, 'breadboard');
-    this.addConnection({ componentId: andGate.id, pinId: 'pin_gnd' }, { componentId: breadboard.id, pinId: 'row_10_g' }, 'breadboard');
-
-    // 3. XOR Gate in columns 18, 19, 20
-    const xorGate = createComponent('gate-xor', { x: 1.125, y: 0.38, z: 0 }, { inputA: true, inputB: false });
+    // 3. XOR Gate centered at Column 19 (spans Columns 18, 19, 20 across Row D & Row G)
+    const xorPlacement = calculateComponentBreadboardPlacement(
+      breadboard,
+      'gate-xor',
+      getBreadboardColumnWorldX(breadboard, 19),
+      0
+    )!;
+    const xorGate = createComponent('gate-xor', xorPlacement.snappedPosition, { inputA: true, inputB: false });
     this.addComponent(xorGate);
+    this.syncBreadboardConnectionsForComponent(xorGate.id, xorPlacement);
 
-    // Plug XOR gate pins into breadboard holes
-    this.addConnection({ componentId: xorGate.id, pinId: 'pin_in_a' }, { componentId: breadboard.id, pinId: 'row_18_d' }, 'breadboard');
-    this.addConnection({ componentId: xorGate.id, pinId: 'pin_in_b' }, { componentId: breadboard.id, pinId: 'row_19_d' }, 'breadboard');
-    this.addConnection({ componentId: xorGate.id, pinId: 'pin_vcc' }, { componentId: breadboard.id, pinId: 'row_20_d' }, 'breadboard');
-    this.addConnection({ componentId: xorGate.id, pinId: 'pin_out_y' }, { componentId: breadboard.id, pinId: 'row_18_g' }, 'breadboard');
-    this.addConnection({ componentId: xorGate.id, pinId: 'pin_gnd' }, { componentId: breadboard.id, pinId: 'row_20_g' }, 'breadboard');
-
-    // 4. Power supply / rails: wire top rail (+) to VCC
+    // 4. Power supply / rails: wire top rail (+) to VCC (Cols 10 & 20)
     this.addConnection({ componentId: breadboard.id, pinId: 'rail_top_plus_10' }, { componentId: breadboard.id, pinId: 'row_10_b' }, '#ef4444');
     this.addConnection({ componentId: breadboard.id, pinId: 'rail_top_plus_20' }, { componentId: breadboard.id, pinId: 'row_20_b' }, '#ef4444');
 
-    // Wire bottom rail (-) to GND
+    // Wire bottom rail (-) to GND (Cols 10 & 20)
     this.addConnection({ componentId: breadboard.id, pinId: 'rail_bot_minus_10' }, { componentId: breadboard.id, pinId: 'row_10_i' }, '#1e293b');
     this.addConnection({ componentId: breadboard.id, pinId: 'rail_bot_minus_20' }, { componentId: breadboard.id, pinId: 'row_20_i' }, '#1e293b');
 
-    // 5. Green LED on AND gate output (row 8)
-    const led = createComponent('led', { x: -1.375, y: 0.35, z: 1.1 }, { color: '#10b981' });
+    // 5. Green LED snapped into Row I (Anode in Col 8, Cathode in Col 9)
+    const ledPlacement = calculateComponentBreadboardPlacement(
+      breadboard,
+      'led',
+      getBreadboardColumnWorldX(breadboard, 8),
+      getBreadboardRowWorldZ(breadboard, 'i')
+    )!;
+    const led = createComponent('led', ledPlacement.snappedPosition, { color: '#10b981' });
     this.addComponent(led);
-    this.addConnection({ componentId: led.id, pinId: 'anode' }, { componentId: breadboard.id, pinId: 'row_8_i' }, 'breadboard');
-    this.addConnection({ componentId: led.id, pinId: 'cathode' }, { componentId: breadboard.id, pinId: 'rail_bot_minus_8' }, 'breadboard');
+    this.syncBreadboardConnectionsForComponent(led.id, ledPlacement);
+
+    // Connect LED Cathode (Row 9J) to Bottom GND Rail (-)
+    this.addConnection({ componentId: breadboard.id, pinId: 'row_9_j' }, { componentId: breadboard.id, pinId: 'rail_bot_minus_9' }, '#1e293b');
 
     viewStore.setContinuityMode(true);
     viewStore.selectComponent(andGate.id);

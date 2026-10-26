@@ -74,12 +74,12 @@ export const ArduinoNanoMesh: React.FC<ComponentMeshProps> = ({ component }) => 
         </mesh>
       ))}
 
-      {/* Header Pin Strips (Dual 15-pin Rows at Z = -0.75 and Z = +0.75) */}
-      {[-0.75, 0.75].map((zPos, rowIdx) => (
+      {/* Header Pin Strips (Dual 15-pin Rows at Z = -0.66 and Z = +0.66 aligning with Breadboard Row B & I) */}
+      {[-0.66, 0.66].map((zPos, rowIdx) => (
         <group key={rowIdx} position={[0, 0.1, zPos]}>
           {/* Black plastic spacer block */}
-          <mesh position={[0, 0.06, 0]}>
-            <boxGeometry args={[3.8, 0.14, 0.22]} />
+          <mesh position={[0, -0.02, 0]}>
+            <boxGeometry args={[3.8, 0.12, 0.2]} />
             <meshStandardMaterial color="#18181b" roughness={0.7} />
           </mesh>
         </group>

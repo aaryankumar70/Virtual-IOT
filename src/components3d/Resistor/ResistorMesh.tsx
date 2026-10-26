@@ -42,52 +42,62 @@ export const ResistorMesh: React.FC<ComponentMeshProps> = ({ component }) => {
   return (
     <group>
       {/* Ceramic/Carbon Beige Body */}
-      <mesh position={[0, 0.22, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.22, 0.22, 0.9, 20]} />
+      <mesh position={[0, 0.26, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.16, 0.16, 0.56, 20]} />
         <meshStandardMaterial color="#e2c092" roughness={0.6} />
       </mesh>
 
       {/* Body Bulb Ends */}
-      <mesh position={[-0.45, 0.22, 0]} castShadow>
-        <sphereGeometry args={[0.23, 16, 16]} />
+      <mesh position={[-0.28, 0.26, 0]} castShadow>
+        <sphereGeometry args={[0.17, 16, 16]} />
         <meshStandardMaterial color="#e2c092" roughness={0.6} />
       </mesh>
-      <mesh position={[0.45, 0.22, 0]} castShadow>
-        <sphereGeometry args={[0.23, 16, 16]} />
+      <mesh position={[0.28, 0.26, 0]} castShadow>
+        <sphereGeometry args={[0.17, 16, 16]} />
         <meshStandardMaterial color="#e2c092" roughness={0.6} />
       </mesh>
 
       {/* Color Bands (Band 1, Band 2, Multiplier, Tolerance Gold) */}
       {/* Band 1 */}
-      <mesh position={[-0.3, 0.22, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.23, 0.23, 0.08, 20]} />
+      <mesh position={[-0.2, 0.26, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.17, 0.17, 0.055, 20]} />
         <meshStandardMaterial color={band1} roughness={0.5} />
       </mesh>
       {/* Band 2 */}
-      <mesh position={[-0.1, 0.22, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.23, 0.23, 0.08, 20]} />
+      <mesh position={[-0.07, 0.26, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.17, 0.17, 0.055, 20]} />
         <meshStandardMaterial color={band2} roughness={0.5} />
       </mesh>
       {/* Band 3: Multiplier */}
-      <mesh position={[0.1, 0.22, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.23, 0.23, 0.08, 20]} />
+      <mesh position={[0.07, 0.26, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.17, 0.17, 0.055, 20]} />
         <meshStandardMaterial color={band3} roughness={0.5} />
       </mesh>
       {/* Band 4: Gold (±5% Tolerance) */}
-      <mesh position={[0.3, 0.22, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.23, 0.23, 0.08, 20]} />
+      <mesh position={[0.2, 0.26, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.17, 0.17, 0.055, 20]} />
         <meshStandardMaterial color="#d69e2e" metalness={0.8} roughness={0.3} />
       </mesh>
 
-      {/* Left Wire Lead */}
-      <mesh position={[-0.7, 0.2, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.035, 0.035, 0.5, 12]} />
+      {/* Left Horizontal Axial Lead (out to x = -0.50) */}
+      <mesh position={[-0.4, 0.26, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.22, 12]} />
+        <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
+      </mesh>
+      {/* Left Vertical Bent Lead (drops straight into breadboard hole at x = -0.50) */}
+      <mesh position={[-0.5, 0.16, 0]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.22, 12]} />
         <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
       </mesh>
 
-      {/* Right Wire Lead */}
-      <mesh position={[0.7, 0.2, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.035, 0.035, 0.5, 12]} />
+      {/* Right Horizontal Axial Lead (out to x = +0.50) */}
+      <mesh position={[0.4, 0.26, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.22, 12]} />
+        <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
+      </mesh>
+      {/* Right Vertical Bent Lead (drops straight into breadboard hole at x = +0.50) */}
+      <mesh position={[0.5, 0.16, 0]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.22, 12]} />
         <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
       </mesh>
 

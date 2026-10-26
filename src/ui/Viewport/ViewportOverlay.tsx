@@ -669,9 +669,17 @@ export const ViewportOverlay: React.FC = () => {
 
       {/* Bottom Left Status Pill */}
       <div className="absolute bottom-3 left-3 z-10 select-none pointer-events-none flex items-center gap-2 bg-white/90 backdrop-blur-xs border border-slate-200 shadow-2xs px-2.5 py-1 rounded-md text-[11px] text-slate-500 font-mono">
-        <span>Grid: 1.0mm</span>
+        <span>Grid: 2.54mm (0.1")</span>
         <span>·</span>
         <span>Snap: {viewState.snapToGrid ? 'On' : 'Off'}</span>
+        {viewState.breadboardSnapTarget && (
+          <>
+            <span>·</span>
+            <span className="text-emerald-600 font-semibold">
+              {viewState.breadboardSnapTarget.label}
+            </span>
+          </>
+        )}
         {viewState.isFreeMoving && (
           <>
             <span>·</span>

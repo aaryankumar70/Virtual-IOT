@@ -118,10 +118,10 @@ export const ArduinoUnoDefinition: ComponentDefinition = {
   dimensions: { width: 6.86, height: 0.4, depth: 5.34 },
 };
 
-// 2. LED
+// 2. LED (1-column pitch = 0.25 units between Anode and Cathode)
 const ledPins: VirtualPin[] = [
-  { id: 'anode', name: 'Anode (+)', type: 'power', direction: 'input', localPosition: { x: -0.22, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'cathode', name: 'Cathode (-)', type: 'ground', direction: 'output', localPosition: { x: 0.22, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'anode', name: 'Anode (+)', type: 'power', direction: 'input', localPosition: { x: -0.125, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'cathode', name: 'Cathode (-)', type: 'ground', direction: 'output', localPosition: { x: 0.125, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
 ];
 
 export const LEDDefinition: ComponentDefinition = {
@@ -131,13 +131,13 @@ export const LEDDefinition: ComponentDefinition = {
   description: 'Light-emitting diode with standard 5mm diffused epoxy dome and anode/cathode leads.',
   pins: ledPins,
   defaultState: { lit: false, color: '#ef4444' },
-  dimensions: { width: 0.9, height: 1.4, depth: 0.9 },
+  dimensions: { width: 0.7, height: 1.4, depth: 0.7 },
 };
 
-// 3. RESISTOR
+// 3. RESISTOR (4-column pitch = 4 * 0.25 = 1.00 unit between Lead 1 and Lead 2)
 const resistorPins: VirtualPin[] = [
-  { id: 'pin1', name: 'Lead 1', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.9, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'pin2', name: 'Lead 2', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.9, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'pin1', name: 'Lead 1', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.5, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'pin2', name: 'Lead 2', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.5, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
 ];
 
 export const ResistorDefinition: ComponentDefinition = {
@@ -147,13 +147,13 @@ export const ResistorDefinition: ComponentDefinition = {
   description: '1/4W axial carbon film resistor for current limiting and voltage division.',
   pins: resistorPins,
   defaultState: { resistance: 220 },
-  dimensions: { width: 2.0, height: 0.45, depth: 0.45 },
+  dimensions: { width: 1.2, height: 0.45, depth: 0.45 },
 };
 
-// 3B. ELECTROLYTIC CAPACITOR
+// 3B. ELECTROLYTIC CAPACITOR (1-column pitch = 0.25 units between Anode and Cathode)
 const capacitorPins: VirtualPin[] = [
-  { id: 'anode', name: 'Anode (+)', type: 'power', direction: 'input', localPosition: { x: -0.22, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'cathode', name: 'Cathode (-)', type: 'ground', direction: 'output', localPosition: { x: 0.22, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'anode', name: 'Anode (+)', type: 'power', direction: 'input', localPosition: { x: -0.125, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'cathode', name: 'Cathode (-)', type: 'ground', direction: 'output', localPosition: { x: 0.125, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
 ];
 
 export const CapacitorDefinition: ComponentDefinition = {
@@ -165,13 +165,13 @@ export const CapacitorDefinition: ComponentDefinition = {
   specification: CapacitorSpecification,
   subcomponents: CapacitorSpecification.subcomponents,
   defaultState: { capacitance: '100µF', voltageRating: '25V' },
-  dimensions: { width: 0.8, height: 1.2, depth: 0.8 },
+  dimensions: { width: 0.65, height: 1.2, depth: 0.65 },
 };
 
-// 3C. CERAMIC DISC CAPACITOR
+// 3C. CERAMIC DISC CAPACITOR (2-column pitch = 2 * 0.25 = 0.50 units between Lead 1 and Lead 2)
 const ceramicCapacitorPins: VirtualPin[] = [
-  { id: 'pin1', name: 'Lead 1', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.25, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'pin2', name: 'Lead 2', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.25, y: 0.18, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'pin1', name: 'Lead 1', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.25, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'pin2', name: 'Lead 2', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.25, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
 ];
 
 export const CeramicCapacitorDefinition: ComponentDefinition = {
@@ -393,12 +393,12 @@ export const ESP32Definition: ComponentDefinition = {
   dimensions: { width: 3.2, height: 0.4, depth: 5.2 },
 };
 
-// 6. PUSH BUTTON
+// 6. PUSH BUTTON (2-column pitch x = ±0.25, straddling center trough z = ±0.22 Row D & Row G)
 const buttonPins: VirtualPin[] = [
-  { id: '1a', name: 'Pin 1A', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.55, y: 0.2, z: -0.4 }, connectorStyle: 'lead-tip' },
-  { id: '1b', name: 'Pin 1B', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.55, y: 0.2, z: -0.4 }, connectorStyle: 'lead-tip' },
-  { id: '2a', name: 'Pin 2A', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.55, y: 0.2, z: 0.4 }, connectorStyle: 'lead-tip' },
-  { id: '2b', name: 'Pin 2B', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.55, y: 0.2, z: 0.4 }, connectorStyle: 'lead-tip' },
+  { id: '1a', name: 'Pin 1A', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.25, y: 0.08, z: -0.22 }, connectorStyle: 'lead-tip' },
+  { id: '1b', name: 'Pin 1B', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.25, y: 0.08, z: -0.22 }, connectorStyle: 'lead-tip' },
+  { id: '2a', name: 'Pin 2A', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.25, y: 0.08, z: 0.22 }, connectorStyle: 'lead-tip' },
+  { id: '2b', name: 'Pin 2B', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.25, y: 0.08, z: 0.22 }, connectorStyle: 'lead-tip' },
 ];
 
 export const PushButtonDefinition: ComponentDefinition = {
@@ -408,13 +408,13 @@ export const PushButtonDefinition: ComponentDefinition = {
   description: '6x6mm SPST momentary tactile switch with 4 breadboard-friendly pins.',
   pins: buttonPins,
   defaultState: { pressed: false },
-  dimensions: { width: 1.4, height: 0.8, depth: 1.4 },
+  dimensions: { width: 0.8, height: 0.6, depth: 0.8 },
 };
 
-// 7. BUZZER
+// 7. BUZZER (2-column pitch x = ±0.25 = 0.50 units between Positive and Negative)
 const buzzerPins: VirtualPin[] = [
-  { id: 'pos', name: 'Positive (+)', type: 'power', direction: 'input', localPosition: { x: -0.4, y: 0.15, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'neg', name: 'Negative (-)', type: 'ground', direction: 'output', localPosition: { x: 0.4, y: 0.15, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'pos', name: 'Positive (+)', type: 'power', direction: 'input', localPosition: { x: -0.25, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'neg', name: 'Negative (-)', type: 'ground', direction: 'output', localPosition: { x: 0.25, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
 ];
 
 export const BuzzerDefinition: ComponentDefinition = {
@@ -424,7 +424,7 @@ export const BuzzerDefinition: ComponentDefinition = {
   description: 'Electromagnetic active/passive audio transducer for audible frequency alerts.',
   pins: buzzerPins,
   defaultState: { active: false, frequency: 440 },
-  dimensions: { width: 1.6, height: 1.1, depth: 1.6 },
+  dimensions: { width: 1.2, height: 1.0, depth: 1.2 },
 };
 
 // 8. RASPBERRY PI
@@ -489,12 +489,12 @@ export const RaspberryPiDefinition: ComponentDefinition = {
   dimensions: { width: 8.5, height: 1.2, depth: 5.6 },
 };
 
-// 9. RGB LED
+// 9. RGB LED (4 consecutive columns spaced at 0.25 pitch: -0.375, -0.125, 0.125, 0.375)
 const rgbLedPins: VirtualPin[] = [
-  { id: 'red', name: 'Red Anode', type: 'power', direction: 'input', localPosition: { x: -0.3, y: 0.2, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'cathode', name: 'Common Cathode (-)', type: 'ground', direction: 'power', localPosition: { x: -0.1, y: 0.2, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'green', name: 'Green Anode', type: 'power', direction: 'input', localPosition: { x: 0.1, y: 0.2, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'blue', name: 'Blue Anode', type: 'power', direction: 'input', localPosition: { x: 0.3, y: 0.2, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'red', name: 'Red Anode', type: 'power', direction: 'input', localPosition: { x: -0.375, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'cathode', name: 'Common Cathode (-)', type: 'ground', direction: 'power', localPosition: { x: -0.125, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'green', name: 'Green Anode', type: 'power', direction: 'input', localPosition: { x: 0.125, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'blue', name: 'Blue Anode', type: 'power', direction: 'input', localPosition: { x: 0.375, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
 ];
 
 export const LEDRGBDefinition: ComponentDefinition = {
@@ -504,15 +504,15 @@ export const LEDRGBDefinition: ComponentDefinition = {
   description: 'Four-terminal tri-color diffused RGB LED with independent red, green, and blue color channels.',
   pins: rgbLedPins,
   defaultState: { r: 255, g: 0, b: 128 },
-  dimensions: { width: 1.0, height: 1.4, depth: 1.0 },
+  dimensions: { width: 1.0, height: 1.4, depth: 0.8 },
 };
 
-// 10. ULTRASONIC SENSOR (HC-SR04)
+// 10. ULTRASONIC SENSOR (HC-SR04 - 4 header pins at 0.25 pitch: -0.375, -0.125, 0.125, 0.375)
 const ultrasonicPins: VirtualPin[] = [
-  { id: 'vcc', name: 'VCC (5V)', type: 'power', direction: 'power', localPosition: { x: -0.45, y: -0.3, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'trig', name: 'Trig', type: 'digital', direction: 'input', localPosition: { x: -0.15, y: -0.3, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'echo', name: 'Echo', type: 'digital', direction: 'output', localPosition: { x: 0.15, y: -0.3, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: 0.45, y: -0.3, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'vcc', name: 'VCC (5V)', type: 'power', direction: 'power', localPosition: { x: -0.375, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'trig', name: 'Trig', type: 'digital', direction: 'input', localPosition: { x: -0.125, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'echo', name: 'Echo', type: 'digital', direction: 'output', localPosition: { x: 0.125, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: 0.375, y: 0.08, z: 0.0 }, connectorStyle: 'lead-tip' },
 ];
 
 export const UltrasonicSensorDefinition: ComponentDefinition = {
@@ -527,11 +527,11 @@ export const UltrasonicSensorDefinition: ComponentDefinition = {
   dimensions: { width: 4.5, height: 2.0, depth: 1.5 },
 };
 
-// 11. TEMPERATURE SENSOR (TMP36)
+// 11. TEMPERATURE SENSOR (TMP36 - 3 leads at 0.25 pitch: -0.25, 0.0, 0.25)
 const tempPins: VirtualPin[] = [
-  { id: 'vcc', name: 'Vs (2.7-5.5V)', type: 'power', direction: 'power', localPosition: { x: -0.25, y: 0.15, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'vout', name: 'Vout (Analog)', type: 'analog', direction: 'output', localPosition: { x: 0.0, y: 0.15, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: 0.25, y: 0.15, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'vcc', name: 'Vs (2.7-5.5V)', type: 'power', direction: 'power', localPosition: { x: -0.25, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'vout', name: 'Vout (Analog)', type: 'analog', direction: 'output', localPosition: { x: 0.0, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: 0.25, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
 ];
 
 export const TemperatureSensorDefinition: ComponentDefinition = {
@@ -544,11 +544,11 @@ export const TemperatureSensorDefinition: ComponentDefinition = {
   dimensions: { width: 0.8, height: 1.2, depth: 0.8 },
 };
 
-// 12. SERVO MOTOR (SG90)
+// 12. SERVO MOTOR (SG90 - 3 pins at 0.25 pitch: -0.25, 0.0, 0.25)
 const servoPins: VirtualPin[] = [
-  { id: 'gnd', name: 'GND (Brown)', type: 'ground', direction: 'power', localPosition: { x: -0.2, y: 0.15, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'vcc', name: 'VCC 5V (Red)', type: 'power', direction: 'power', localPosition: { x: 0.0, y: 0.15, z: 0.0 }, connectorStyle: 'lead-tip' },
-  { id: 'sig', name: 'PWM Signal (Orange)', type: 'pwm', direction: 'input', localPosition: { x: 0.2, y: 0.15, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'gnd', name: 'GND (Brown)', type: 'ground', direction: 'power', localPosition: { x: -0.25, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'vcc', name: 'VCC 5V (Red)', type: 'power', direction: 'power', localPosition: { x: 0.0, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'sig', name: 'PWM Signal (Orange)', type: 'pwm', direction: 'input', localPosition: { x: 0.25, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
 ];
 
 export const ServoMotorDefinition: ComponentDefinition = {
@@ -613,12 +613,12 @@ export const DCPowerSupplyDefinition: ComponentDefinition = {
   dimensions: { width: 2.5, height: 1.6, depth: 2.2 },
 };
 
-// 15. DHT11 SENSOR MODULE (With 4-Pin Male Header)
+// 15. DHT11 SENSOR MODULE (With 4-Pin Male Header at 0.25 pitch)
 const dht11Pins: VirtualPin[] = [
-  { id: 'vcc', name: 'VCC (3-5V)', type: 'power', direction: 'power', localPosition: { x: -0.45, y: 0.35, z: 0.45 }, connectorStyle: 'lead-tip' },
-  { id: 'data', name: 'DATA', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.15, y: 0.35, z: 0.45 }, connectorStyle: 'lead-tip' },
-  { id: 'nc', name: 'NC', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.15, y: 0.35, z: 0.45 }, connectorStyle: 'lead-tip' },
-  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: 0.45, y: 0.35, z: 0.45 }, connectorStyle: 'lead-tip' },
+  { id: 'vcc', name: 'VCC (3-5V)', type: 'power', direction: 'power', localPosition: { x: -0.375, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'data', name: 'DATA', type: 'digital', direction: 'bidirectional', localPosition: { x: -0.125, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'nc', name: 'NC', type: 'digital', direction: 'bidirectional', localPosition: { x: 0.125, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
+  { id: 'gnd', name: 'GND', type: 'ground', direction: 'power', localPosition: { x: 0.375, y: 0.11, z: 0.0 }, connectorStyle: 'lead-tip' },
 ];
 
 const dht11Connectors: VirtualConnector[] = [
@@ -824,22 +824,22 @@ const nanoConnectors: VirtualConnector[] = [
 ];
 
 const nanoPins: VirtualPin[] = [
-  // Left 15 pins (Z = -0.75)
+  // Left 15 pins (Z = -0.66, aligns with Breadboard Row B)
   ...['d1', 'd0', 'rst1', 'gnd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'd9', 'd10', 'd11', 'd12'].map((name, i) => ({
     id: name,
     name: name.toUpperCase(),
     type: (name.startsWith('d3') || name.startsWith('d5') || name.startsWith('d6') || name.startsWith('d9') || name.startsWith('d10') || name.startsWith('d11') ? 'pwm' : name.startsWith('gnd') ? 'ground' : 'digital') as any,
     direction: (name.startsWith('gnd') ? 'power' : 'bidirectional') as any,
-    localPosition: { x: -1.75 + i * 0.25, y: 0.25, z: -0.75 },
+    localPosition: { x: -1.75 + i * 0.25, y: 0.08, z: -0.66 },
     connectorStyle: 'header-pin' as const,
   })),
-  // Right 15 pins (Z = +0.75)
+  // Right 15 pins (Z = +0.66, aligns with Breadboard Row I)
   ...['d13', '3v3', 'ref', 'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', '5v', 'rst2', 'gnd2', 'vin'].map((name, i) => ({
     id: name,
     name: name.toUpperCase(),
     type: (name.startsWith('a') ? 'analog' : name === '5v' || name === '3v3' || name === 'vin' ? 'power' : name.startsWith('gnd') ? 'ground' : 'digital') as any,
     direction: (name === '5v' || name === '3v3' || name === 'vin' || name.startsWith('gnd') ? 'power' : 'bidirectional') as any,
-    localPosition: { x: -1.75 + i * 0.25, y: 0.25, z: 0.75 },
+    localPosition: { x: -1.75 + i * 0.25, y: 0.08, z: 0.66 },
     connectorStyle: 'header-pin' as const,
   })),
 ];

@@ -5,6 +5,11 @@ import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
 import { historyManager, Commands } from '../../editor/history/historyManager';
 import { ComponentTransform } from '../../core/components/VirtualComponent';
+import {
+  BREADBOARD_SURFACE_Y,
+  findBreadboardPlacementForComponent,
+  snapToSceneGrid,
+} from '../../utils/breadboardSnap';
 
 const GROUND_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 const _intersect = new THREE.Vector3();
@@ -12,7 +17,7 @@ const _intersect = new THREE.Vector3();
 export const FreeMoveController: React.FC = () => {
   const { raycaster, gl } = useThree();
   const viewState = useView();
-  const projectState = useProject();
+  useProject();
 
   const isShiftPressed = useRef<boolean>(false);
   const initialHitPoint = useRef<THREE.Vector3 | null>(null);
@@ -31,6 +36,24 @@ export const FreeMoveController: React.FC = () => {
             rotation: { ...comp.transform.rotation },
             scale: { ...comp.transform.scale },
           };
+
+          if (comp.type !== 'breadboard') {
+            const placement = findBreadboardPlacementForComponent(
+              currentComponents,
+              comp.type,
+              comp.transform.position.x,
+              comp.transform.position.z,
+              comp.id
+            );
+            projectStore.syncBreadboardConnectionsForComponent(comp.id, placement);
+            if (placement && initialTransforms.current.size === 1) {
+              viewStore.setConnectionFeedback({
+                message: `${placement.label} (Aligned)`,
+                severity: 'info',
+              });
+            }
+          }
+
           historyManager.execute(
             Commands.transformComponent(compId, prevTransform, nextTransform)
           );
@@ -38,6 +61,7 @@ export const FreeMoveController: React.FC = () => {
       });
     }
 
+    viewStore.setBreadboardSnapTarget(null);
     viewStore.setIsFreeMoving(false);
     initialHitPoint.current = null;
     initialTransforms.current.clear();
@@ -54,6 +78,7 @@ export const FreeMoveController: React.FC = () => {
       });
     }
 
+    viewStore.setBreadboardSnapTarget(null);
     viewStore.setIsFreeMoving(false);
     initialHitPoint.current = null;
     initialTransforms.current.clear();
@@ -152,23 +177,57 @@ export const FreeMoveController: React.FC = () => {
       hasMoved.current = true;
     }
 
+    const currentComponents = projectStore.getState().components;
+    const isSingleMove = initialTransforms.current.size === 1;
+
     // Apply movement delta to each selected component
     initialTransforms.current.forEach((prevTransform, compId) => {
-      let targetX = prevTransform.position.x + deltaX;
-      let targetZ = prevTransform.position.z + deltaZ;
+      const comp = currentComponents.find((c) => c.id === compId);
+      const rawX = prevTransform.position.x + deltaX;
+      const rawZ = prevTransform.position.z + deltaZ;
 
-      if (viewState.snapToGrid) {
-        targetX = Math.round(targetX);
-        targetZ = Math.round(targetZ);
-      } else {
-        targetX = Number(targetX.toFixed(2));
-        targetZ = Number(targetZ.toFixed(2));
+      const placement = comp
+        ? findBreadboardPlacementForComponent(
+            currentComponents,
+            comp.type,
+            rawX,
+            rawZ,
+            comp.id
+          )
+        : null;
+
+      if (placement) {
+        if (isSingleMove) {
+          viewStore.setBreadboardSnapTarget({
+            breadboardId: placement.breadboardId,
+            holeId: placement.targetHoles[0]?.holeId || '',
+            position: placement.snappedPosition,
+            targetHoles: placement.targetHoles,
+            label: placement.label,
+            column: placement.column,
+          });
+        }
+        projectStore.updateComponentTransform(compId, {
+          position: { ...placement.snappedPosition },
+        });
+        return;
       }
+
+      if (isSingleMove) {
+        viewStore.setBreadboardSnapTarget(null);
+      }
+
+      const targetX = viewState.snapToGrid ? snapToSceneGrid(rawX) : Number(rawX.toFixed(2));
+      const targetZ = viewState.snapToGrid ? snapToSceneGrid(rawZ) : Number(rawZ.toFixed(2));
+      const targetY =
+        Math.abs(prevTransform.position.y - BREADBOARD_SURFACE_Y) < 0.05
+          ? 0
+          : prevTransform.position.y;
 
       projectStore.updateComponentTransform(compId, {
         position: {
           x: targetX,
-          y: prevTransform.position.y,
+          y: targetY,
           z: targetZ,
         },
       });

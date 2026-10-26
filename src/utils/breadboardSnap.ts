@@ -30,7 +30,8 @@ export interface BreadboardDropPlacement {
 
 // Breadboard half-size geometric constants matching componentDefinitions.ts
 export const BREADBOARD_COLS = 30;
-export const BREADBOARD_PITCH_X = 0.25;
+export const BREADBOARD_PITCH_X = 0.25; // Standard 2.54mm (0.1") pitch in 3D scene units
+export const SCENE_GRID_STEP = BREADBOARD_PITCH_X; // Global 3D scene grid step aligned to breadboard pitch
 export const BREADBOARD_X_OFFSET = -((BREADBOARD_COLS - 1) * BREADBOARD_PITCH_X) / 2; // -3.625
 
 export const BREADBOARD_ROW_Z: Record<string, number> = {
@@ -54,7 +55,34 @@ export const BREADBOARD_ROW_Z: Record<string, number> = {
   rail_bot_minus: 1.72,
 };
 
+export const BREADBOARD_TERMINAL_ROWS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'] as const;
+
 export const BREADBOARD_SURFACE_Y = 0.43;
+
+/**
+ * Snaps any scalar coordinate to the 2.54mm (0.25 unit) laboratory grid pitch.
+ */
+export function snapToSceneGrid(value: number, step: number = SCENE_GRID_STEP): number {
+  return Number((Math.round(value / step) * step).toFixed(3));
+}
+
+/**
+ * Helper to compute the exact world X of a breadboard column (1..30).
+ */
+export function getBreadboardColumnWorldX(breadboard: VirtualComponent, column: number): number {
+  const clampedCol = Math.max(1, Math.min(BREADBOARD_COLS, column));
+  return Number(
+    (breadboard.transform.position.x + BREADBOARD_X_OFFSET + (clampedCol - 1) * BREADBOARD_PITCH_X).toFixed(3)
+  );
+}
+
+/**
+ * Helper to compute the exact world Z of a breadboard row ('a'..'j' or rail).
+ */
+export function getBreadboardRowWorldZ(breadboard: VirtualComponent, rowKey: string): number {
+  const zOff = BREADBOARD_ROW_Z[rowKey] ?? 0;
+  return Number((breadboard.transform.position.z + zOff).toFixed(3));
+}
 
 /**
  * Checks if a world position (x, z) falls within the breadboard bounding bounds.
@@ -63,14 +91,32 @@ export function isPointOverBreadboard(
   breadboard: VirtualComponent,
   worldX: number,
   worldZ: number,
-  padding: number = 0.4
+  padding: number = 0.45
 ): boolean {
   const bx = breadboard.transform.position.x;
   const bz = breadboard.transform.position.z;
   const halfW = 4.2 + padding; // body width ~8.4
-  const halfD = 2.2 + padding; // body depth ~4.2
+  const halfD = 2.1 + padding; // body depth ~4.2
 
   return Math.abs(worldX - bx) <= halfW && Math.abs(worldZ - bz) <= halfD;
+}
+
+/**
+ * Finds the nearest breadboard terminal row ('a'..'j') for a given localZ coordinate.
+ */
+export function getClosestTerminalRowLetter(localZ: number): string {
+  let bestRow = localZ < 0 ? 'c' : 'h';
+  let minDist = Infinity;
+
+  for (const letter of BREADBOARD_TERMINAL_ROWS) {
+    const rowZ = BREADBOARD_ROW_Z[letter];
+    const dist = Math.abs(localZ - rowZ);
+    if (dist < minDist) {
+      minDist = dist;
+      bestRow = letter;
+    }
+  }
+  return bestRow;
 }
 
 /**
@@ -147,8 +193,41 @@ export function getClosestBreadboardHole(
 }
 
 /**
+ * Searches all breadboards in the scene and computes the exact hole-snapped placement
+ * if the given world coordinates fall over a breadboard.
+ */
+export function findBreadboardPlacementForComponent(
+  components: VirtualComponent[],
+  componentType: string,
+  worldX: number,
+  worldZ: number,
+  excludeComponentId?: string
+): BreadboardDropPlacement | null {
+  if (componentType === 'breadboard') return null;
+
+  const breadboards = components.filter(
+    (c) => c.type === 'breadboard' && c.id !== excludeComponentId
+  );
+
+  for (const breadboard of breadboards) {
+    const placement = calculateComponentBreadboardPlacement(
+      breadboard,
+      componentType,
+      worldX,
+      worldZ
+    );
+    if (placement) {
+      return placement;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Calculates optimal lead placement and component world positioning when dropping
- * an electronics component onto the breadboard.
+ * or moving an electronics component onto a breadboard.
+ * Every pin's localPosition + snappedPosition matches targetHoles[i].worldPos with 0.000mm precision.
  */
 export function calculateComponentBreadboardPlacement(
   breadboard: VirtualComponent,
@@ -167,23 +246,38 @@ export function calculateComponentBreadboardPlacement(
   const localX = worldX - bx;
   const localZ = worldZ - bz;
 
-  // Determine closest column
+  // Determine closest column (1..30)
   const colIndexRaw = Math.round((localX - BREADBOARD_X_OFFSET) / BREADBOARD_PITCH_X);
   const centerCol = Math.max(1, Math.min(BREADBOARD_COLS, colIndexRaw + 1));
 
-  // Determine terminal bank (top A-E vs bottom F-J vs rails)
-  const isTopSide = localZ < 0;
-  const defaultBankLetter = isTopSide ? 'c' : 'h';
+  // Determine closest terminal row letter ('a'..'e' on top bank, 'f'..'j' on bottom bank)
+  const bankRow = getClosestTerminalRowLetter(localZ);
+  const isTopSide = ['a', 'b', 'c', 'd', 'e'].includes(bankRow);
 
   const targetHoles: BreadboardLeadTarget[] = [];
-  let snappedPosX = bx + (BREADBOARD_X_OFFSET + (centerCol - 1) * BREADBOARD_PITCH_X);
-  let snappedPosZ = bz + BREADBOARD_ROW_Z[defaultBankLetter];
-  let spawnHeightOffset = 0.28;
+  let snappedPosX = getBreadboardColumnWorldX(breadboard, centerCol);
+  let snappedPosZ = getBreadboardRowWorldZ(breadboard, bankRow);
+  let spawnHeightOffset = 0.32;
   let label = '';
+
+  const makeHoleTarget = (pinId: string, col: number, rowLetter: string, customSuffix?: string): BreadboardLeadTarget => {
+    const holeId = `row_${col}_${rowLetter}`;
+    return {
+      pinId,
+      holeId,
+      column: col,
+      rowLabel: `Row ${col}${rowLetter.toUpperCase()}${customSuffix ? ` (${customSuffix})` : ''}`,
+      worldPos: {
+        x: getBreadboardColumnWorldX(breadboard, col),
+        y: Number((by + BREADBOARD_SURFACE_Y).toFixed(3)),
+        z: getBreadboardRowWorldZ(breadboard, rowLetter),
+      },
+    };
+  };
 
   switch (componentType) {
     case 'resistor': {
-      // Resistor has lead span of ~1.8 units (about 4 columns: centerCol - 2 to centerCol + 2)
+      // Resistor has exact 4-column lead span: pin1 at x = -0.50, pin2 at x = +0.50 (4 * 0.25 = 1.00 unit)
       let c1 = centerCol - 2;
       let c2 = centerCol + 2;
       if (c1 < 1) {
@@ -194,72 +288,61 @@ export function calculateComponentBreadboardPlacement(
         c1 = BREADBOARD_COLS - 4;
       }
 
-      // Check if dropped near the center trough: can span across the center divider instead!
-      if (Math.abs(localZ) < 0.35) {
-        // Vertical resistor straddling center trough: Pin 1 in Row C (top), Pin 2 in Row H (bottom)
-        const hole1Id = `row_${centerCol}_c`;
-        const hole2Id = `row_${centerCol}_h`;
-        targetHoles.push({
-          pinId: 'pin1',
-          holeId: hole1Id,
-          column: centerCol,
-          rowLabel: `Row ${centerCol} (C)`,
-          worldPos: {
-            x: bx + (BREADBOARD_X_OFFSET + (centerCol - 1) * BREADBOARD_PITCH_X),
-            y: by + BREADBOARD_SURFACE_Y,
-            z: bz + BREADBOARD_ROW_Z['c'],
-          },
-        });
-        targetHoles.push({
-          pinId: 'pin2',
-          holeId: hole2Id,
-          column: centerCol,
-          rowLabel: `Row ${centerCol} (H)`,
-          worldPos: {
-            x: bx + (BREADBOARD_X_OFFSET + (centerCol - 1) * BREADBOARD_PITCH_X),
-            y: by + BREADBOARD_SURFACE_Y,
-            z: bz + BREADBOARD_ROW_Z['h'],
-          },
-        });
-        snappedPosZ = bz; // centered in trough
-        label = `Plug Resistor: Row ${centerCol} (C to H across divider)`;
-      } else {
-        // Horizontal resistor along bank
-        const bankRow = defaultBankLetter;
-        const hole1Id = `row_${c1}_${bankRow}`;
-        const hole2Id = `row_${c2}_${bankRow}`;
-        targetHoles.push({
-          pinId: 'pin1',
-          holeId: hole1Id,
-          column: c1,
-          rowLabel: `Row ${c1} (${bankRow.toUpperCase()})`,
-          worldPos: {
-            x: bx + (BREADBOARD_X_OFFSET + (c1 - 1) * BREADBOARD_PITCH_X),
-            y: by + BREADBOARD_SURFACE_Y,
-            z: bz + BREADBOARD_ROW_Z[bankRow],
-          },
-        });
-        targetHoles.push({
-          pinId: 'pin2',
-          holeId: hole2Id,
-          column: c2,
-          rowLabel: `Row ${c2} (${bankRow.toUpperCase()})`,
-          worldPos: {
-            x: bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X),
-            y: by + BREADBOARD_SURFACE_Y,
-            z: bz + BREADBOARD_ROW_Z[bankRow],
-          },
-        });
-        snappedPosX = (targetHoles[0].worldPos.x + targetHoles[1].worldPos.x) / 2;
-        label = `Plug Resistor: Row ${c1} & Row ${c2} (Bank ${isTopSide ? 'A-E' : 'F-J'})`;
-      }
-      spawnHeightOffset = 0.32;
+      const t1 = makeHoleTarget('pin1', c1, bankRow, 'Lead 1');
+      const t2 = makeHoleTarget('pin2', c2, bankRow, 'Lead 2');
+      targetHoles.push(t1, t2);
+
+      snappedPosX = (t1.worldPos.x + t2.worldPos.x) / 2;
+      snappedPosZ = t1.worldPos.z;
+      spawnHeightOffset = 0.32; // pin.y = 0.11 -> 0.32 + 0.11 = 0.43 = BREADBOARD_SURFACE_Y
+      label = `Snap Resistor: Hole ${c1}${bankRow.toUpperCase()} & Hole ${c2}${bankRow.toUpperCase()} (Bank ${isTopSide ? 'A-E' : 'F-J'})`;
       break;
     }
 
-    case 'led':
+    case 'led': {
+      // LED has exact 1-column lead span: anode at x = -0.125, cathode at x = +0.125 (1 * 0.25 = 0.25 units)
+      let c1 = centerCol;
+      let c2 = centerCol + 1;
+      if (c2 > BREADBOARD_COLS) {
+        c2 = BREADBOARD_COLS;
+        c1 = BREADBOARD_COLS - 1;
+      }
+
+      const t1 = makeHoleTarget('anode', c1, bankRow, 'Anode +');
+      const t2 = makeHoleTarget('cathode', c2, bankRow, 'Cathode -');
+      targetHoles.push(t1, t2);
+
+      snappedPosX = (t1.worldPos.x + t2.worldPos.x) / 2;
+      snappedPosZ = t1.worldPos.z;
+      spawnHeightOffset = 0.35; // pin.y = 0.08 -> 0.35 + 0.08 = 0.43 = BREADBOARD_SURFACE_Y
+      label = `Snap LED: Anode -> ${c1}${bankRow.toUpperCase()} · Cathode -> ${c2}${bankRow.toUpperCase()}`;
+      break;
+    }
+
     case 'led-rgb': {
-      // LED leads span 1 column or 2 columns
+      // RGB LED has 4 leads spaced at 0.25: red (-0.375), cathode (-0.125), green (+0.125), blue (+0.375)
+      let c1 = centerCol - 1;
+      if (c1 < 1) c1 = 1;
+      if (c1 + 3 > BREADBOARD_COLS) c1 = BREADBOARD_COLS - 3;
+      const c2 = c1 + 1;
+      const c3 = c1 + 2;
+      const c4 = c1 + 3;
+
+      const t1 = makeHoleTarget('red', c1, bankRow, 'R');
+      const t2 = makeHoleTarget('cathode', c2, bankRow, 'GND');
+      const t3 = makeHoleTarget('green', c3, bankRow, 'G');
+      const t4 = makeHoleTarget('blue', c4, bankRow, 'B');
+      targetHoles.push(t1, t2, t3, t4);
+
+      snappedPosX = (t1.worldPos.x + t4.worldPos.x) / 2;
+      snappedPosZ = t1.worldPos.z;
+      spawnHeightOffset = 0.35; // pin.y = 0.08 -> 0.35 + 0.08 = 0.43
+      label = `Snap RGB LED: Holes ${c1}${bankRow.toUpperCase()}–${c4}${bankRow.toUpperCase()}`;
+      break;
+    }
+
+    case 'capacitor': {
+      // Electrolytic capacitor has 1-column lead span: anode at x = -0.125, cathode at x = +0.125
       let c1 = centerCol;
       let c2 = centerCol + 1;
       if (c2 > BREADBOARD_COLS) {
@@ -267,144 +350,19 @@ export function calculateComponentBreadboardPlacement(
         c1 = BREADBOARD_COLS - 1;
       }
 
-      const bankRow = defaultBankLetter;
-      const hole1Id = `row_${c1}_${bankRow}`;
-      const hole2Id = `row_${c2}_${bankRow}`;
+      const t1 = makeHoleTarget('anode', c1, bankRow, '+');
+      const t2 = makeHoleTarget('cathode', c2, bankRow, '-');
+      targetHoles.push(t1, t2);
 
-      targetHoles.push({
-        pinId: 'anode',
-        holeId: hole1Id,
-        column: c1,
-        rowLabel: `Row ${c1} (${bankRow.toUpperCase()})`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c1 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z[bankRow],
-        },
-      });
-      targetHoles.push({
-        pinId: 'cathode',
-        holeId: hole2Id,
-        column: c2,
-        rowLabel: `Row ${c2} (${bankRow.toUpperCase()})`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z[bankRow],
-        },
-      });
-
-      snappedPosX = (targetHoles[0].worldPos.x + targetHoles[1].worldPos.x) / 2;
-      spawnHeightOffset = 0.35;
-      label = `Plug LED: Anode -> Row ${c1} · Cathode -> Row ${c2}`;
+      snappedPosX = (t1.worldPos.x + t2.worldPos.x) / 2;
+      snappedPosZ = t1.worldPos.z;
+      spawnHeightOffset = 0.32; // pin.y = 0.11 -> 0.32 + 0.11 = 0.43
+      label = `Snap Capacitor: ${c1}${bankRow.toUpperCase()} (+) & ${c2}${bankRow.toUpperCase()} (-)`;
       break;
     }
 
-    case 'capacitor':
     case 'capacitor-ceramic': {
-      let c1 = centerCol;
-      let c2 = centerCol + 1;
-      if (c2 > BREADBOARD_COLS) {
-        c2 = BREADBOARD_COLS;
-        c1 = BREADBOARD_COLS - 1;
-      }
-
-      const bankRow = defaultBankLetter;
-      const hole1Id = `row_${c1}_${bankRow}`;
-      const hole2Id = `row_${c2}_${bankRow}`;
-
-      targetHoles.push({
-        pinId: componentType === 'capacitor' ? 'anode' : 'pin1',
-        holeId: hole1Id,
-        column: c1,
-        rowLabel: `Row ${c1} (${bankRow.toUpperCase()})`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c1 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z[bankRow],
-        },
-      });
-      targetHoles.push({
-        pinId: componentType === 'capacitor' ? 'cathode' : 'pin2',
-        holeId: hole2Id,
-        column: c2,
-        rowLabel: `Row ${c2} (${bankRow.toUpperCase()})`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z[bankRow],
-        },
-      });
-
-      snappedPosX = (targetHoles[0].worldPos.x + targetHoles[1].worldPos.x) / 2;
-      spawnHeightOffset = 0.32;
-      label = `Plug Capacitor: Row ${c1} & Row ${c2} (${bankRow.toUpperCase()})`;
-      break;
-    }
-
-    case 'push-button': {
-      // Tactile button straddles the center IC trough
-      let c1 = centerCol;
-      let c2 = centerCol + 1;
-      if (c2 > BREADBOARD_COLS) {
-        c2 = BREADBOARD_COLS;
-        c1 = BREADBOARD_COLS - 1;
-      }
-
-      // Top legs in Row D, bottom legs in Row G
-      targetHoles.push({
-        pinId: 'pin1',
-        holeId: `row_${c1}_d`,
-        column: c1,
-        rowLabel: `Row ${c1} (D)`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c1 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z['d'],
-        },
-      });
-      targetHoles.push({
-        pinId: 'pin2',
-        holeId: `row_${c2}_d`,
-        column: c2,
-        rowLabel: `Row ${c2} (D)`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z['d'],
-        },
-      });
-      targetHoles.push({
-        pinId: 'pin3',
-        holeId: `row_${c1}_g`,
-        column: c1,
-        rowLabel: `Row ${c1} (G)`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c1 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z['g'],
-        },
-      });
-      targetHoles.push({
-        pinId: 'pin4',
-        holeId: `row_${c2}_g`,
-        column: c2,
-        rowLabel: `Row ${c2} (G)`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z['g'],
-        },
-      });
-
-      snappedPosX = (targetHoles[0].worldPos.x + targetHoles[1].worldPos.x) / 2;
-      snappedPosZ = bz; // centered on the IC trough
-      spawnHeightOffset = 0.35;
-      label = `Plug Push Button: Rows ${c1} & ${c2} (Across Center Trough)`;
-      break;
-    }
-
-    case 'buzzer': {
+      // Ceramic capacitor has 2-column lead span: pin1 at x = -0.25, pin2 at x = +0.25 (2 * 0.25 = 0.50 units)
       let c1 = centerCol - 1;
       let c2 = centerCol + 1;
       if (c1 < 1) {
@@ -414,32 +372,144 @@ export function calculateComponentBreadboardPlacement(
         c2 = BREADBOARD_COLS;
         c1 = BREADBOARD_COLS - 2;
       }
-      const bankRow = defaultBankLetter;
-      targetHoles.push({
-        pinId: 'vcc',
-        holeId: `row_${c1}_${bankRow}`,
-        column: c1,
-        rowLabel: `Row ${c1} (${bankRow.toUpperCase()})`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c1 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z[bankRow],
-        },
+
+      const t1 = makeHoleTarget('pin1', c1, bankRow, 'Lead 1');
+      const t2 = makeHoleTarget('pin2', c2, bankRow, 'Lead 2');
+      targetHoles.push(t1, t2);
+
+      snappedPosX = (t1.worldPos.x + t2.worldPos.x) / 2;
+      snappedPosZ = t1.worldPos.z;
+      spawnHeightOffset = 0.32; // pin.y = 0.11 -> 0.32 + 0.11 = 0.43
+      label = `Snap Ceramic Cap: Holes ${c1}${bankRow.toUpperCase()} & ${c2}${bankRow.toUpperCase()}`;
+      break;
+    }
+
+    case 'push-button': {
+      // Tactile button straddles center IC trough (Row D z = -0.22 & Row G z = +0.22) with 2-column X span (x = ±0.25)
+      let c1 = centerCol - 1;
+      let c2 = centerCol + 1;
+      if (c1 < 1) {
+        c1 = 1;
+        c2 = 3;
+      } else if (c2 > BREADBOARD_COLS) {
+        c2 = BREADBOARD_COLS;
+        c1 = BREADBOARD_COLS - 2;
+      }
+
+      const t1a = makeHoleTarget('1a', c1, 'd', '1A');
+      const t1b = makeHoleTarget('1b', c2, 'd', '1B');
+      const t2a = makeHoleTarget('2a', c1, 'g', '2A');
+      const t2b = makeHoleTarget('2b', c2, 'g', '2B');
+      targetHoles.push(t1a, t1b, t2a, t2b);
+
+      snappedPosX = (t1a.worldPos.x + t1b.worldPos.x) / 2;
+      snappedPosZ = bz; // centered on IC trough
+      spawnHeightOffset = 0.35; // pin.y = 0.08 -> 0.35 + 0.08 = 0.43
+      label = `Snap Push Button: Holes ${c1}D/${c2}D & ${c1}G/${c2}G (Across Center Trough)`;
+      break;
+    }
+
+    case 'buzzer': {
+      // Buzzer has 2-column lead span: pos at x = -0.25, neg at x = +0.25
+      let c1 = centerCol - 1;
+      let c2 = centerCol + 1;
+      if (c1 < 1) {
+        c1 = 1;
+        c2 = 3;
+      } else if (c2 > BREADBOARD_COLS) {
+        c2 = BREADBOARD_COLS;
+        c1 = BREADBOARD_COLS - 2;
+      }
+
+      const tPos = makeHoleTarget('pos', c1, bankRow, '+');
+      const tNeg = makeHoleTarget('neg', c2, bankRow, '-');
+      targetHoles.push(tPos, tNeg);
+
+      snappedPosX = (tPos.worldPos.x + tNeg.worldPos.x) / 2;
+      snappedPosZ = tPos.worldPos.z;
+      spawnHeightOffset = 0.35; // pin.y = 0.08 -> 0.35 + 0.08 = 0.43
+      label = `Snap Buzzer: ${c1}${bankRow.toUpperCase()} (+) & ${c2}${bankRow.toUpperCase()} (-)`;
+      break;
+    }
+
+    case 'temperature-sensor':
+    case 'servo-motor': {
+      // 3-pin components at 0.25 pitch: x = -0.25, 0.0, +0.25
+      let c1 = centerCol - 1;
+      let c2 = centerCol;
+      let c3 = centerCol + 1;
+      if (c1 < 1) {
+        c1 = 1;
+        c2 = 2;
+        c3 = 3;
+      } else if (c3 > BREADBOARD_COLS) {
+        c3 = BREADBOARD_COLS;
+        c2 = BREADBOARD_COLS - 1;
+        c1 = BREADBOARD_COLS - 2;
+      }
+
+      const pinIds = componentType === 'temperature-sensor' ? ['vcc', 'vout', 'gnd'] : ['gnd', 'vcc', 'sig'];
+      const t1 = makeHoleTarget(pinIds[0], c1, bankRow);
+      const t2 = makeHoleTarget(pinIds[1], c2, bankRow);
+      const t3 = makeHoleTarget(pinIds[2], c3, bankRow);
+      targetHoles.push(t1, t2, t3);
+
+      snappedPosX = t2.worldPos.x;
+      snappedPosZ = t2.worldPos.z;
+      spawnHeightOffset = 0.32; // pin.y = 0.11 -> 0.32 + 0.11 = 0.43
+      label = `Snap ${componentType === 'temperature-sensor' ? 'TMP36 Sensor' : 'Servo Header'}: Holes ${c1}${bankRow.toUpperCase()}–${c3}${bankRow.toUpperCase()}`;
+      break;
+    }
+
+    case 'ultrasonic-sensor':
+    case 'dht11-sensor': {
+      // 4-pin sensors at 0.25 pitch: x = -0.375, -0.125, 0.125, 0.375
+      let c1 = centerCol - 1;
+      if (c1 < 1) c1 = 1;
+      if (c1 + 3 > BREADBOARD_COLS) c1 = BREADBOARD_COLS - 3;
+      const c2 = c1 + 1;
+      const c3 = c1 + 2;
+      const c4 = c1 + 3;
+
+      const pinIds =
+        componentType === 'ultrasonic-sensor'
+          ? ['vcc', 'trig', 'echo', 'gnd']
+          : ['vcc', 'data', 'nc', 'gnd'];
+
+      const t1 = makeHoleTarget(pinIds[0], c1, bankRow);
+      const t2 = makeHoleTarget(pinIds[1], c2, bankRow);
+      const t3 = makeHoleTarget(pinIds[2], c3, bankRow);
+      const t4 = makeHoleTarget(pinIds[3], c4, bankRow);
+      targetHoles.push(t1, t2, t3, t4);
+
+      snappedPosX = (t1.worldPos.x + t4.worldPos.x) / 2;
+      snappedPosZ = t1.worldPos.z;
+      spawnHeightOffset = componentType === 'ultrasonic-sensor' ? 0.35 : 0.32;
+      label = `Snap ${componentType === 'ultrasonic-sensor' ? 'HC-SR04' : 'DHT11'}: Holes ${c1}${bankRow.toUpperCase()}–${c4}${bankRow.toUpperCase()}`;
+      break;
+    }
+
+    case 'arduino-nano': {
+      // Arduino Nano straddles center trough: 15 pins in Row B (z = -0.66) and 15 pins in Row I (z = +0.66)
+      let startCol = centerCol - 7;
+      if (startCol < 1) startCol = 1;
+      if (startCol + 14 > BREADBOARD_COLS) startCol = BREADBOARD_COLS - 14;
+
+      const topNames = ['d1', 'd0', 'rst1', 'gnd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'd9', 'd10', 'd11', 'd12'];
+      const botNames = ['d13', '3v3', 'ref', 'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', '5v', 'rst2', 'gnd2', 'vin'];
+
+      topNames.forEach((pinId, idx) => {
+        targetHoles.push(makeHoleTarget(pinId, startCol + idx, 'b', pinId.toUpperCase()));
       });
-      targetHoles.push({
-        pinId: 'gnd',
-        holeId: `row_${c2}_${bankRow}`,
-        column: c2,
-        rowLabel: `Row ${c2} (${bankRow.toUpperCase()})`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z[bankRow],
-        },
+      botNames.forEach((pinId, idx) => {
+        targetHoles.push(makeHoleTarget(pinId, startCol + idx, 'i', pinId.toUpperCase()));
       });
-      snappedPosX = (targetHoles[0].worldPos.x + targetHoles[1].worldPos.x) / 2;
-      spawnHeightOffset = 0.45;
-      label = `Plug Buzzer: Row ${c1} (+) & Row ${c2} (-)`;
+
+      const midCol = startCol + 7; // i=7 corresponds to localX = 0
+      snappedPosX = getBreadboardColumnWorldX(breadboard, midCol);
+      snappedPosZ = bz;
+      spawnHeightOffset = 0.35; // pin.y = 0.08 -> 0.35 + 0.08 = 0.43
+      label = `Snap Arduino Nano: Columns ${startCol}–${startCol + 14} (Rows B & I)`;
       break;
     }
 
@@ -464,90 +534,26 @@ export function calculateComponentBreadboardPlacement(
         c1 = BREADBOARD_COLS - 2;
       }
 
-      // Input A in Col c1, Row D
-      targetHoles.push({
-        pinId: 'pin_in_a',
-        holeId: `row_${c1}_d`,
-        column: c1,
-        rowLabel: `Row ${c1} (D - Input A)`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c1 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z['d'],
-        },
-      });
+      // Input A in Col c1, Row D (localX = -0.25, localZ = -0.22)
+      targetHoles.push(makeHoleTarget('pin_in_a', c1, 'd', 'Input A'));
 
       if (!isOneInput) {
-        // Input B in Col c2, Row D
-        targetHoles.push({
-          pinId: 'pin_in_b',
-          holeId: `row_${c2}_d`,
-          column: c2,
-          rowLabel: `Row ${c2} (D - Input B)`,
-          worldPos: {
-            x: bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X),
-            y: by + BREADBOARD_SURFACE_Y,
-            z: bz + BREADBOARD_ROW_Z['d'],
-          },
-        });
-
-        // VCC in Col c3, Row D
-        targetHoles.push({
-          pinId: 'pin_vcc',
-          holeId: `row_${c3}_d`,
-          column: c3,
-          rowLabel: `Row ${c3} (D - VCC 5V)`,
-          worldPos: {
-            x: bx + (BREADBOARD_X_OFFSET + (c3 - 1) * BREADBOARD_PITCH_X),
-            y: by + BREADBOARD_SURFACE_Y,
-            z: bz + BREADBOARD_ROW_Z['d'],
-          },
-        });
-      } else {
-        // NOT gate: VCC in Col c2, Row D
-        targetHoles.push({
-          pinId: 'pin_vcc',
-          holeId: `row_${c2}_d`,
-          column: c2,
-          rowLabel: `Row ${c2} (D - VCC 5V)`,
-          worldPos: {
-            x: bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X),
-            y: by + BREADBOARD_SURFACE_Y,
-            z: bz + BREADBOARD_ROW_Z['d'],
-          },
-        });
+        // Input B in Col c2, Row D (localX = 0.0, localZ = -0.22)
+        targetHoles.push(makeHoleTarget('pin_in_b', c2, 'd', 'Input B'));
       }
 
-      // Output Y in Col c1, Row G
-      targetHoles.push({
-        pinId: 'pin_out_y',
-        holeId: `row_${c1}_g`,
-        column: c1,
-        rowLabel: `Row ${c1} (G - Output Y)`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (c1 - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z['g'],
-        },
-      });
+      // VCC in Col c3, Row D (localX = +0.25, localZ = -0.22)
+      targetHoles.push(makeHoleTarget('pin_vcc', c3, 'd', 'VCC 5V'));
 
-      // GND in Col c3 (or c2 for NOT), Row G
-      const gndCol = isOneInput ? c2 : c3;
-      targetHoles.push({
-        pinId: 'pin_gnd',
-        holeId: `row_${gndCol}_g`,
-        column: gndCol,
-        rowLabel: `Row ${gndCol} (G - GND 0V)`,
-        worldPos: {
-          x: bx + (BREADBOARD_X_OFFSET + (gndCol - 1) * BREADBOARD_PITCH_X),
-          y: by + BREADBOARD_SURFACE_Y,
-          z: bz + BREADBOARD_ROW_Z['g'],
-        },
-      });
+      // Output Y in Col c1, Row G (localX = -0.25, localZ = +0.22)
+      targetHoles.push(makeHoleTarget('pin_out_y', c1, 'g', 'Output Y'));
 
-      snappedPosX = bx + (BREADBOARD_X_OFFSET + (c2 - 1) * BREADBOARD_PITCH_X);
+      // GND in Col c3, Row G (localX = +0.25, localZ = +0.22)
+      targetHoles.push(makeHoleTarget('pin_gnd', c3, 'g', 'GND 0V'));
+
+      snappedPosX = getBreadboardColumnWorldX(breadboard, c2);
       snappedPosZ = bz; // centered over trough
-      spawnHeightOffset = 0.38;
+      spawnHeightOffset = 0.49; // pin.y = -0.06 -> 0.49 - 0.06 = 0.43 = BREADBOARD_SURFACE_Y
       const gateNames: Record<string, string> = {
         'gate-and': 'AND Gate (74HC08)',
         'gate-or': 'OR Gate (74HC32)',
@@ -557,12 +563,12 @@ export function calculateComponentBreadboardPlacement(
         'gate-nor': 'NOR Gate (74HC02)',
         'gate-xnor': 'XNOR Gate (74HC266)',
       };
-      label = `Plug ${gateNames[componentType] || 'Logic Gate'}: Across Center Trough (Cols ${c1}-${isOneInput ? c2 : c3})`;
+      label = `Snap ${gateNames[componentType] || 'Logic Gate'}: Holes ${c1}D–${c3}D & ${c1}G–${c3}G`;
       break;
     }
 
     default: {
-      // General single-point or module snap
+      // General single-point or module snap to nearest breadboard hole
       const closest = getClosestBreadboardHole(breadboard, worldX, worldZ);
       if (closest) {
         targetHoles.push({
@@ -571,9 +577,9 @@ export function calculateComponentBreadboardPlacement(
           column: closest.column,
           rowLabel: closest.rowLabel,
           worldPos: {
-            x: closest.worldPos.x,
-            y: closest.worldPos.y,
-            z: closest.worldPos.z,
+            x: Number(closest.worldPos.x.toFixed(3)),
+            y: Number(closest.worldPos.y.toFixed(3)),
+            z: Number(closest.worldPos.z.toFixed(3)),
           },
         });
         snappedPosX = closest.worldPos.x;

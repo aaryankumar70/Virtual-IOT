@@ -81,28 +81,28 @@ export const LEDRGBMesh: React.FC<ComponentMeshProps> = ({ component }) => {
         />
       )}
 
-      {/* 4 Metal Wire Leads */}
+      {/* 4 Metal Wire Leads (0.25 breadboard hole pitch: -0.375, -0.125, 0.125, 0.375) */}
       {/* 1. Red Anode Lead */}
-      <mesh position={[-0.3, 0.42, 0]} castShadow>
-        <cylinderGeometry args={[0.035, 0.035, 0.45, 12]} />
+      <mesh position={[-0.375, 0.35, 0]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.56, 12]} />
         <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
       </mesh>
 
-      {/* 2. Common Cathode (-) Lead (Visibly longer, starts higher in anvil and extends down) */}
-      <mesh position={[-0.1, 0.40, 0]} castShadow>
-        <cylinderGeometry args={[0.035, 0.035, 0.58, 12]} />
+      {/* 2. Common Cathode (-) Lead */}
+      <mesh position={[-0.125, 0.35, 0]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.58, 12]} />
         <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
       </mesh>
 
       {/* 3. Green Anode Lead */}
-      <mesh position={[0.1, 0.42, 0]} castShadow>
-        <cylinderGeometry args={[0.035, 0.035, 0.45, 12]} />
+      <mesh position={[0.125, 0.35, 0]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.56, 12]} />
         <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
       </mesh>
 
       {/* 4. Blue Anode Lead */}
-      <mesh position={[0.3, 0.42, 0]} castShadow>
-        <cylinderGeometry args={[0.035, 0.035, 0.45, 12]} />
+      <mesh position={[0.375, 0.35, 0]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.56, 12]} />
         <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
       </mesh>
 

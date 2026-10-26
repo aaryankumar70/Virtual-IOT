@@ -55,15 +55,15 @@ export const LEDMesh: React.FC<ComponentMeshProps> = ({ component }) => {
       {/* Point light if lit */}
       {isLit && <pointLight color={ledColor} intensity={2} distance={4} position={[0, 1.2, 0]} />}
 
-      {/* Metal Anode (+) Lead (Longer) */}
-      <mesh position={[-0.22, 0.2, 0]} castShadow>
-        <cylinderGeometry args={[0.035, 0.035, 0.45, 12]} />
+      {/* Metal Anode (+) Lead (Longer, aligns with x = -0.125) */}
+      <mesh position={[-0.125, 0.24, 0]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.42, 12]} />
         <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
       </mesh>
 
-      {/* Metal Cathode (-) Lead (Slightly shorter / with flat anvil) */}
-      <mesh position={[0.22, 0.2, 0]} castShadow>
-        <cylinderGeometry args={[0.035, 0.035, 0.4, 12]} />
+      {/* Metal Cathode (-) Lead (Aligns with x = +0.125) */}
+      <mesh position={[0.125, 0.24, 0]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.42, 12]} />
         <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
       </mesh>
 

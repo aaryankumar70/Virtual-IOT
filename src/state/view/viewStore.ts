@@ -128,7 +128,7 @@ let state: ViewState = {
   activeTab: 'components',
   inspectorTab: 'inspector',
   showGrid: true,
-  snapToGrid: false,
+  snapToGrid: true,
   measureMode: false,
   cameraMode: 'perspective',
   theme: 'light',

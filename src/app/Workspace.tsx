@@ -17,7 +17,7 @@ import { useKeyboardShortcuts } from '../editor/shortcuts/KeyboardShortcuts';
 import { createComponent } from '../core/factories/componentFactory';
 import { historyManager, Commands } from '../editor/history/historyManager';
 import { Sparkles, Layers, Cpu } from 'lucide-react';
-import { calculateComponentBreadboardPlacement } from '../utils/breadboardSnap';
+import { findBreadboardPlacementForComponent, snapToSceneGrid } from '../utils/breadboardSnap';
 import { oscilloscopeStore } from '../state/oscilloscope/oscilloscopeStore';
 
 export const Workspace: React.FC = () => {
@@ -28,7 +28,7 @@ export const Workspace: React.FC = () => {
   // Activate global keyboard shortcuts
   useKeyboardShortcuts();
 
-  // Raycast drag over handling for breadboard mode
+  // Raycast drag over handling for breadboard and 2.54mm grid snapping
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
@@ -48,45 +48,38 @@ export const Workspace: React.FC = () => {
     const hit = raycaster.ray.intersectPlane(groundPlane, intersection);
 
     if (hit) {
-      let posX = intersection.x;
-      let posZ = intersection.z;
-      if (viewState.snapToGrid) {
-        posX = Math.round(posX);
-        posZ = Math.round(posZ);
-      } else {
-        posX = Number(posX.toFixed(2));
-        posZ = Number(posZ.toFixed(2));
+      const rawX = intersection.x;
+      const rawZ = intersection.z;
+
+      // Check if hovering over any breadboard in the workspace first using exact coordinates
+      const placement = findBreadboardPlacementForComponent(
+        projectStore.getState().components,
+        activeDraggedType,
+        rawX,
+        rawZ
+      );
+
+      if (placement) {
+        viewStore.setBreadboardSnapTarget({
+          breadboardId: placement.breadboardId,
+          holeId: placement.targetHoles[0]?.holeId || '',
+          position: placement.snappedPosition,
+          targetHoles: placement.targetHoles,
+          label: placement.label,
+          column: placement.column,
+        });
+
+        viewStore.setDragPreview({
+          type: activeDraggedType,
+          worldPos: placement.snappedPosition,
+        });
+        return;
       }
 
-      // Check if hovering over an existing breadboard in the workspace
-      const breadboard = projectStore.getState().components.find((c) => c.type === 'breadboard');
-      if (breadboard && activeDraggedType !== 'breadboard') {
-        const placement = calculateComponentBreadboardPlacement(
-          breadboard,
-          activeDraggedType,
-          posX,
-          posZ
-        );
+      // Not over a breadboard: snap to 2.54mm (0.25 unit) scene grid if enabled
+      const posX = viewState.snapToGrid ? snapToSceneGrid(rawX) : Number(rawX.toFixed(2));
+      const posZ = viewState.snapToGrid ? snapToSceneGrid(rawZ) : Number(rawZ.toFixed(2));
 
-        if (placement) {
-          viewStore.setBreadboardSnapTarget({
-            breadboardId: placement.breadboardId,
-            holeId: placement.targetHoles[0]?.holeId || '',
-            position: placement.snappedPosition,
-            targetHoles: placement.targetHoles,
-            label: placement.label,
-            column: placement.column,
-          });
-
-          viewStore.setDragPreview({
-            type: activeDraggedType,
-            worldPos: placement.snappedPosition,
-          });
-          return;
-        }
-      }
-
-      // Not over breadboard: clear breadboard snap target
       viewStore.setBreadboardSnapTarget(null);
 
       viewStore.setDragPreview({
@@ -135,62 +128,35 @@ export const Workspace: React.FC = () => {
     const intersection = new THREE.Vector3();
     const hit = raycaster.ray.intersectPlane(groundPlane, intersection);
 
-    let spawnX = hit ? intersection.x : 0;
-    let spawnZ = hit ? intersection.z : 0;
+    const rawX = hit ? intersection.x : 0;
+    const rawZ = hit ? intersection.z : 0;
 
-    if (viewState.snapToGrid) {
-      spawnX = Math.round(spawnX);
-      spawnZ = Math.round(spawnZ);
-    } else {
-      spawnX = Number(spawnX.toFixed(2));
-      spawnZ = Number(spawnZ.toFixed(2));
+    // Check if dropping onto any breadboard in the workspace
+    const placement = findBreadboardPlacementForComponent(
+      projectStore.getState().components,
+      componentType,
+      rawX,
+      rawZ
+    );
+
+    if (placement) {
+      const newComp = createComponent(componentType, placement.snappedPosition, initialStateOverrides);
+      historyManager.execute(Commands.addComponent(newComp));
+      projectStore.syncBreadboardConnectionsForComponent(newComp.id, placement);
+
+      viewStore.selectComponent(newComp.id);
+      viewStore.setBreadboardSnapTarget(null);
+      viewStore.setConnectionFeedback({
+        message: `${placement.label} (Inserted)`,
+        severity: 'info',
+      });
+      return;
     }
 
-    const breadboard = projectStore.getState().components.find((c) => c.type === 'breadboard');
+    // Normal workspace ground drop (snapped to 2.54mm / 0.25 unit grid when enabled)
+    const spawnX = viewState.snapToGrid ? snapToSceneGrid(rawX) : Number(rawX.toFixed(2));
+    const spawnZ = viewState.snapToGrid ? snapToSceneGrid(rawZ) : Number(rawZ.toFixed(2));
 
-    // Check if dropping onto breadboard
-    if (breadboard && componentType !== 'breadboard') {
-      const placement = calculateComponentBreadboardPlacement(
-        breadboard,
-        componentType,
-        spawnX,
-        spawnZ
-      );
-
-      if (placement) {
-        const newComp = createComponent(componentType, placement.snappedPosition, initialStateOverrides);
-        historyManager.execute(Commands.addComponent(newComp));
-
-        // Automatically connect leads into the targeted breadboard socket holes!
-        placement.targetHoles.forEach((target) => {
-          projectStore.addConnection(
-            {
-              componentId: newComp.id,
-              interfaceId: target.pinId,
-              type: 'pin',
-              pinId: target.pinId,
-            },
-            {
-              componentId: breadboard.id,
-              interfaceId: target.holeId,
-              type: 'breadboard-hole',
-              pinId: target.holeId,
-            },
-            'breadboard'
-          );
-        });
-
-        viewStore.selectComponent(newComp.id);
-        viewStore.setBreadboardSnapTarget(null);
-        viewStore.setConnectionFeedback({
-          message: `${placement.label} (Inserted)`,
-          severity: 'info',
-        });
-        return;
-      }
-    }
-
-    // Normal workspace ground drop
     viewStore.setBreadboardSnapTarget(null);
     const newComp = createComponent(componentType, { x: spawnX, y: 0, z: spawnZ }, initialStateOverrides);
     historyManager.execute(Commands.addComponent(newComp));

@@ -51,16 +51,16 @@ export const CapacitorMesh: React.FC<ComponentMeshProps> = ({ component }) => {
         </mesh>
       ))}
 
-      {/* 5. Metal Wire Leads (Anode on left is longer, Cathode on right) */}
+      {/* 5. Metal Wire Leads (Anode on left, Cathode on right, 0.25 breadboard pitch) */}
       {/* Anode (+) Lead */}
-      <mesh position={[-0.22, 0.18, 0]} castShadow>
-        <cylinderGeometry args={[0.035, 0.035, 0.44, 12]} />
+      <mesh position={[-0.125, 0.18, 0]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.36, 12]} />
         <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
       </mesh>
 
       {/* Cathode (-) Lead */}
-      <mesh position={[0.22, 0.18, 0]} castShadow>
-        <cylinderGeometry args={[0.035, 0.035, 0.38, 12]} />
+      <mesh position={[0.125, 0.18, 0]} castShadow>
+        <cylinderGeometry args={[0.028, 0.028, 0.36, 12]} />
         <meshStandardMaterial color="#cbd5e0" metalness={0.9} roughness={0.2} />
       </mesh>
 
