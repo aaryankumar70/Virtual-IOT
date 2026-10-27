@@ -416,12 +416,25 @@ export const TopToolbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Right: Project Actions, Theme & Profile */}
-      <div className="flex items-center gap-1.5">
+      {/* Right: File Operations, Project Name, Theme & Profile */}
+      <div className="flex items-center gap-1.5" role="group" aria-label="File Operations">
+        <div className="hidden lg:flex items-center bg-slate-50 border border-slate-200/80 rounded-md px-2 py-1 mr-0.5 focus-within:bg-white focus-within:border-blue-500 transition-colors">
+          <input
+            id="input-project-name"
+            type="text"
+            value={projectState.metadata.name}
+            onChange={(e) => projectStore.setProjectName(e.target.value)}
+            aria-label="Project file name"
+            placeholder="Untitled Circuit"
+            className="w-32 text-xs font-medium text-slate-700 bg-transparent focus:outline-none truncate"
+          />
+          <span className="text-[10px] text-slate-400 font-mono select-none ml-1">.json</span>
+        </div>
+
         <button
           id="btn-reset-lab"
           onClick={handleNewProject}
-          title="New Circuit"
+          title="New Circuit File"
           className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium transition-colors cursor-pointer"
         >
           <Plus size={14} className="text-slate-400" />
@@ -441,7 +454,7 @@ export const TopToolbar: React.FC = () => {
         <button
           id="btn-export-project"
           onClick={handleExportJSON}
-          title="Save Circuit to Disk"
+          title="Save Circuit to Disk (.iotlab.json)"
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-2xs transition-colors cursor-pointer"
         >
           <Save size={14} />

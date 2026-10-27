@@ -16,9 +16,16 @@ import { useProject, projectStore } from '../state/project/projectStore';
 import { useKeyboardShortcuts } from '../editor/shortcuts/KeyboardShortcuts';
 import { createComponent } from '../core/factories/componentFactory';
 import { historyManager, Commands } from '../editor/history/historyManager';
-import { Sparkles, Layers, Cpu } from 'lucide-react';
+import { Layers, Cpu, PanelLeftOpen, PanelRightOpen, GripVertical, CircuitBoard, Zap, Activity } from 'lucide-react';
 import { findBreadboardPlacementForComponent, snapToSceneGrid } from '../utils/breadboardSnap';
 import { oscilloscopeStore } from '../state/oscilloscope/oscilloscopeStore';
+
+const QUICK_DRAG_ITEMS = [
+  { type: 'breadboard', label: 'Breadboard', icon: CircuitBoard },
+  { type: 'arduino-uno', label: 'Arduino Uno', icon: Cpu },
+  { type: 'resistor', label: 'Resistor', icon: Zap },
+  { type: 'led', label: 'LED', icon: Activity },
+];
 
 export const Workspace: React.FC = () => {
   const viewState = useView();
@@ -165,19 +172,104 @@ export const Workspace: React.FC = () => {
 
   const isEmpty = projectState.components.length === 0;
 
+  // Compute CSS Grid column template based on sidebar & inspector visibility
+  const gridColsClass =
+    viewState.libraryOpen && viewState.inspectorOpen
+      ? 'grid-cols-[auto_minmax(0,1fr)_auto]'
+      : viewState.libraryOpen && !viewState.inspectorOpen
+      ? 'grid-cols-[auto_minmax(0,1fr)_auto]'
+      : !viewState.libraryOpen && viewState.inspectorOpen
+      ? 'grid-cols-[auto_minmax(0,1fr)_auto]'
+      : 'grid-cols-[auto_minmax(0,1fr)_auto]';
+
   return (
-    <div id="virtual-iot-lab-root" className="flex flex-col w-screen h-screen overflow-hidden bg-slate-100">
+    <div
+      id="virtual-iot-lab-root"
+      className="grid grid-rows-[auto_minmax(0,1fr)] w-screen h-screen overflow-hidden bg-slate-100"
+    >
+      {/* Row 1: Header for File Operations, Mode Controls, and Lab Instruments */}
       <TopToolbar />
-      <div className="flex-1 flex relative overflow-hidden">
-        {viewState.libraryOpen && <ComponentPalette />}
-        <div
+
+      {/* Row 2: CSS Grid Layout for Component Drag-and-Drop Sidebar, Main 3D Canvas Container, and Inspector */}
+      <div
+        id="workspace-grid-body"
+        className={`grid ${gridColsClass} min-h-0 min-w-0 w-full h-full overflow-hidden relative`}
+      >
+        {/* Left Grid Column: Component Drag-and-Drop Sidebar */}
+        {viewState.libraryOpen ? (
+          <ComponentPalette />
+        ) : (
+          <aside
+            id="component-palette-collapsed"
+            aria-label="Collapsed Component Drag-and-Drop Sidebar"
+            className="w-12 border-r border-slate-200 bg-white flex flex-col items-center py-3 gap-2 z-20 select-none"
+          >
+            <button
+              onClick={() => viewStore.toggleLibrary()}
+              title="Expand Component Drag-and-Drop Sidebar"
+              className="p-2 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+            >
+              <PanelLeftOpen size={16} />
+            </button>
+            <div className="w-6 h-px bg-slate-200 my-1" />
+            {QUICK_DRAG_ITEMS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.type}
+                  draggable
+                  onDragStart={(e) => {
+                    setActiveDraggedType(item.type, null);
+                    e.dataTransfer.setData(
+                      'application/json',
+                      JSON.stringify({ type: item.type })
+                    );
+                    e.dataTransfer.setData('text/plain', item.type);
+                    e.dataTransfer.effectAllowed = 'copy';
+                  }}
+                  onDragEnd={() => {
+                    setActiveDraggedType(null, null);
+                    viewStore.setDragPreview(null);
+                    viewStore.setBreadboardSnapTarget(null);
+                  }}
+                  title={`Drag ${item.label} into 3D Canvas`}
+                  className="p-2 rounded-lg border border-slate-200/80 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 text-slate-600 hover:text-blue-600 cursor-grab active:cursor-grabbing transition-all"
+                >
+                  <Icon size={15} />
+                </div>
+              );
+            })}
+          </aside>
+        )}
+
+        {/* Center Grid Column: Main 3D Canvas Container */}
+        <main
           ref={canvasContainerRef}
           id="canvas-viewport"
-          className="flex-1 h-full relative cursor-default bg-slate-50"
+          aria-label="3D Electronics Laboratory Canvas"
+          className={`min-w-0 min-h-0 w-full h-full relative cursor-default bg-slate-50 overflow-hidden transition-shadow ${
+            viewState.dragPreview ? 'ring-2 ring-inset ring-blue-500/50' : ''
+          }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
+          {/* Active Drag-and-Drop Placement Indicator */}
+          {viewState.dragPreview && (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex items-center gap-2 bg-slate-900/90 text-white px-3 py-1.5 rounded-lg shadow-md text-xs font-medium backdrop-blur-xs">
+              <GripVertical size={13} className="text-blue-400" />
+              <span>
+                Placing <strong className="font-semibold text-blue-300">{viewState.dragPreview.type}</strong>
+              </span>
+              <span className="text-slate-400">·</span>
+              <span className="font-mono text-[11px] text-emerald-300">
+                {viewState.breadboardSnapTarget
+                  ? viewState.breadboardSnapTarget.label
+                  : `Grid (${viewState.dragPreview.worldPos.x.toFixed(2)}, ${viewState.dragPreview.worldPos.z.toFixed(2)})`}
+              </span>
+            </div>
+          )}
+
           <Canvas
             shadows
             dpr={[1, 2]}
@@ -270,9 +362,29 @@ export const Workspace: React.FC = () => {
               </div>
             </div>
           )}
-        </div>
-        {viewState.inspectorOpen && <ComponentInspectorPanel />}
+        </main>
+
+        {/* Right Grid Column: Component Inspector Panel */}
+        {viewState.inspectorOpen ? (
+          <ComponentInspectorPanel />
+        ) : (
+          <aside
+            id="inspector-panel-collapsed"
+            aria-label="Collapsed Inspector Sidebar"
+            className="w-10 border-l border-slate-200 bg-white flex flex-col items-center py-3 z-20 select-none"
+          >
+            <button
+              onClick={() => viewStore.toggleInspector()}
+              title="Expand Inspector Sidebar"
+              className="p-2 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+            >
+              <PanelRightOpen size={16} />
+            </button>
+          </aside>
+        )}
       </div>
+
+      {/* Floating Overlays & Instrumentation Modals */}
       <PinTooltip />
       <LabContextMenu />
       <VirtualOscilloscopePanel />
