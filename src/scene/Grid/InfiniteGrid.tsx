@@ -89,12 +89,26 @@ export const InfiniteGrid: React.FC = () => {
   if (!viewState.showGrid) return null;
 
   return (
-    <mesh
-      rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, -0.001, 0]}
-      material={gridMaterial}
-    >
-      <planeGeometry args={[200, 200]} />
-    </mesh>
+    <group name="engineering-workspace-floor-grid">
+      {/* Three.js GridHelper for primary engineering workspace floor coordinates (50x50 units, 1.25 unit major divisions) */}
+      <gridHelper
+        args={[
+          50,
+          40,
+          isLight ? '#94a3b8' : '#3b4252',
+          isLight ? '#cbd5e1' : '#1e2530',
+        ]}
+        position={[0, 0.001, 0]}
+      />
+
+      {/* High-resolution 0.25-unit (2.54mm breadboard pitch) sub-grid with radial horizon fade */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, -0.001, 0]}
+        material={gridMaterial}
+      >
+        <planeGeometry args={[200, 200]} />
+      </mesh>
+    </group>
   );
 };

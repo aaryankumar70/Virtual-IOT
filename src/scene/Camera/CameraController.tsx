@@ -138,18 +138,29 @@ export const CameraController: React.FC = () => {
       targetLookAt.current.set(centerX, 0, centerZ);
       targetCamPos.current.set(centerX + 11, 11, centerZ + 11);
       isTransitioning.current = true;
+    } else if (action === 'zoomIn' || action === 'zoomOut') {
+      if (controlsRef.current) {
+        const currentTarget = controlsRef.current.target.clone();
+        const offset = camera.position.clone().sub(currentTarget);
+        const factor = action === 'zoomIn' ? 0.78 : 1.28;
+        const newLength = THREE.MathUtils.clamp(offset.length() * factor, 2, 70);
+        offset.setLength(newLength);
+        targetLookAt.current.copy(currentTarget);
+        targetCamPos.current.copy(currentTarget).add(offset);
+        isTransitioning.current = true;
+      }
     }
-  }, [viewState.cameraTrigger, projectState.components, viewState.selectedComponentIds]);
+  }, [viewState.cameraTrigger, projectState.components, viewState.selectedComponentIds, camera]);
 
   useFrame(() => {
     if (isTransitioning.current && controlsRef.current) {
-      camera.position.lerp(targetCamPos.current, 0.08);
-      controlsRef.current.target.lerp(targetLookAt.current, 0.08);
+      camera.position.lerp(targetCamPos.current, 0.12);
+      controlsRef.current.target.lerp(targetLookAt.current, 0.12);
       controlsRef.current.update();
 
       if (
-        camera.position.distanceTo(targetCamPos.current) < 0.05 &&
-        controlsRef.current.target.distanceTo(targetLookAt.current) < 0.05
+        camera.position.distanceTo(targetCamPos.current) < 0.04 &&
+        controlsRef.current.target.distanceTo(targetLookAt.current) < 0.04
       ) {
         isTransitioning.current = false;
       }
@@ -159,12 +170,22 @@ export const CameraController: React.FC = () => {
   return (
     <OrbitControls
       ref={controlsRef}
+      makeDefault
+      enablePan
+      enableZoom
+      enableRotate
+      screenSpacePanning={false}
+      panSpeed={0.95}
+      zoomSpeed={1.1}
+      rotateSpeed={0.85}
       enableDamping
       dampingFactor={0.06}
-      maxPolarAngle={Math.PI / 2 - 0.04}
+      maxPolarAngle={Math.PI / 2 - 0.03}
       minDistance={2}
       maxDistance={70}
-      makeDefault
+      onStart={() => {
+        isTransitioning.current = false;
+      }}
     />
   );
 };

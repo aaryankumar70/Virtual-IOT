@@ -83,7 +83,7 @@ export interface ViewState {
   physicalConnectMode: boolean;
   contextMenu: ContextMenuState | null;
   cameraTrigger: {
-    action: 'reset' | 'frameAll' | 'focusSelected' | 'top' | 'front' | 'isometric';
+    action: 'reset' | 'frameAll' | 'focusSelected' | 'top' | 'front' | 'isometric' | 'zoomIn' | 'zoomOut';
     timestamp: number;
   } | null;
   inspectorOpen: boolean;
@@ -456,7 +456,9 @@ export const viewStore = {
     notify();
   },
 
-  triggerCamera(action: 'reset' | 'frameAll' | 'focusSelected' | 'top' | 'front' | 'isometric') {
+  triggerCamera(
+    action: 'reset' | 'frameAll' | 'focusSelected' | 'top' | 'front' | 'isometric' | 'zoomIn' | 'zoomOut'
+  ) {
     state = {
       ...state,
       cameraTrigger: { action, timestamp: Date.now() },
