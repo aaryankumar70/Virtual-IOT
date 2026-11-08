@@ -87,14 +87,14 @@ export const TransformGizmo: React.FC<Props> = ({ targetObject, componentId }) =
           z: Number(posZ.toFixed(3)),
         },
         rotation: {
-          x: targetObject.rotation.x,
-          y: targetObject.rotation.y,
-          z: targetObject.rotation.z,
+          x: Number(targetObject.rotation.x.toFixed(4)),
+          y: Number(targetObject.rotation.y.toFixed(4)),
+          z: Number(targetObject.rotation.z.toFixed(4)),
         },
         scale: {
-          x: targetObject.scale.x,
-          y: targetObject.scale.y,
-          z: targetObject.scale.z,
+          x: Number(targetObject.scale.x.toFixed(3)),
+          y: Number(targetObject.scale.y.toFixed(3)),
+          z: Number(targetObject.scale.z.toFixed(3)),
         },
       };
 
@@ -168,14 +168,14 @@ export const TransformGizmo: React.FC<Props> = ({ targetObject, componentId }) =
           z: Number(posZ.toFixed(3)),
         },
         rotation: {
-          x: targetObject.rotation.x,
-          y: targetObject.rotation.y,
-          z: targetObject.rotation.z,
+          x: Number(targetObject.rotation.x.toFixed(4)),
+          y: Number(targetObject.rotation.y.toFixed(4)),
+          z: Number(targetObject.rotation.z.toFixed(4)),
         },
         scale: {
-          x: targetObject.scale.x,
-          y: targetObject.scale.y,
-          z: targetObject.scale.z,
+          x: Number(targetObject.scale.x.toFixed(3)),
+          y: Number(targetObject.scale.y.toFixed(3)),
+          z: Number(targetObject.scale.z.toFixed(3)),
         },
       });
     }
@@ -199,7 +199,16 @@ export const TransformGizmo: React.FC<Props> = ({ targetObject, componentId }) =
     };
   }, [targetObject, comp]);
 
-  if (!targetObject || !componentId || !comp) return null;
+  if (
+    !targetObject ||
+    !componentId ||
+    !comp ||
+    viewState.wireModeActive ||
+    !!viewState.activeWiring ||
+    !!viewState.activeConnectorWiring
+  ) {
+    return null;
+  }
 
   return (
     // @ts-ignore
@@ -207,8 +216,13 @@ export const TransformGizmo: React.FC<Props> = ({ targetObject, componentId }) =
       ref={transformRef}
       object={targetObject}
       mode={viewState.transformMode}
-      size={0.7}
-      space="world"
+      size={0.72}
+      space={viewState.transformMode === 'rotate' ? 'local' : 'world'}
+      translationSnap={
+        viewState.snapToGrid && !viewState.breadboardSnapTarget ? 0.25 : undefined
+      }
+      rotationSnap={viewState.snapToGrid ? Math.PI / 12 : undefined}
+      scaleSnap={viewState.snapToGrid ? 0.1 : undefined}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onObjectChange={handleChange}

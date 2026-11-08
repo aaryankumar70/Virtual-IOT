@@ -18,6 +18,9 @@ import {
   CheckCircle2,
   X,
   Crosshair,
+  Move,
+  RotateCw,
+  Maximize2,
 } from 'lucide-react';
 import { useView, viewStore } from '../../state/view/viewStore';
 import { useProject, projectStore } from '../../state/project/projectStore';
@@ -50,6 +53,34 @@ export const ViewportOverlay: React.FC = () => {
     }
     return null;
   }, [viewState.selectedComponentIds, projectState.components]);
+
+  const selectedPrimaryComponent = React.useMemo(() => {
+    if (viewState.selectedComponentIds.length === 0) return null;
+    return (
+      projectState.components.find((c) => c.id === viewState.selectedComponentIds[0]) || null
+    );
+  }, [viewState.selectedComponentIds, projectState.components]);
+
+  const handleQuickRotateY = (deltaRadians: number) => {
+    if (!selectedPrimaryComponent) return;
+    const prevTransform = {
+      position: { ...selectedPrimaryComponent.transform.position },
+      rotation: { ...selectedPrimaryComponent.transform.rotation },
+      scale: { ...selectedPrimaryComponent.transform.scale },
+    };
+    const nextTransform = {
+      position: { ...selectedPrimaryComponent.transform.position },
+      rotation: {
+        ...selectedPrimaryComponent.transform.rotation,
+        y: Number((selectedPrimaryComponent.transform.rotation.y + deltaRadians).toFixed(4)),
+      },
+      scale: { ...selectedPrimaryComponent.transform.scale },
+    };
+    projectStore.updateComponentTransform(selectedPrimaryComponent.id, nextTransform);
+    historyManager.execute(
+      Commands.transformComponent(selectedPrimaryComponent.id, prevTransform, nextTransform)
+    );
+  };
 
   // Connection information for selected connection component
   const connectionDetails = React.useMemo(() => {
@@ -729,6 +760,98 @@ export const ViewportOverlay: React.FC = () => {
 
       {/* Real-time Data Visualization Overlay (Recharts) */}
       <RealtimeSignalOverlay />
+
+      {/* Selected Component TransformControls Floating Bar (Top Left of 3D Canvas) */}
+      {selectedPrimaryComponent &&
+        !viewState.wireModeActive &&
+        !viewState.activeWiring &&
+        !viewState.activeConnectorWiring &&
+        !viewState.dragPreview && (
+          <div
+            id="viewport-transform-controls-bar"
+            className="absolute top-3 left-3 z-10 select-none pointer-events-auto flex items-center gap-1.5 bg-white/95 backdrop-blur-sm border border-slate-200/90 shadow-xs px-2.5 py-1.5 rounded-lg text-xs"
+          >
+            <div className="flex items-center gap-1.5 pr-1.5 border-r border-slate-200">
+              <span className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="font-semibold text-slate-800 max-w-[130px] truncate">
+                {selectedPrimaryComponent.name}
+              </span>
+              <span className="text-[10.5px] font-mono text-slate-400 hidden sm:inline">
+                ({selectedPrimaryComponent.transform.position.x.toFixed(2)},{' '}
+                {selectedPrimaryComponent.transform.position.z.toFixed(2)}) ·{' '}
+                {Math.round((selectedPrimaryComponent.transform.rotation.y * 180) / Math.PI)}°
+              </span>
+            </div>
+
+            {/* Transform Gizmo Mode Switcher */}
+            <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-md">
+              <button
+                onClick={() => viewStore.setTransformMode('translate')}
+                title="Move / Translate Gizmo (G)"
+                className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                  viewState.transformMode === 'translate'
+                    ? 'bg-white text-blue-600 shadow-2xs font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Move size={12} />
+                <span>Move</span>
+              </button>
+              <button
+                onClick={() => viewStore.setTransformMode('rotate')}
+                title="Rotate Gizmo (R)"
+                className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                  viewState.transformMode === 'rotate'
+                    ? 'bg-white text-blue-600 shadow-2xs font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <RotateCw size={12} />
+                <span>Rotate</span>
+              </button>
+              <button
+                onClick={() => viewStore.setTransformMode('scale')}
+                title="Scale Gizmo (S)"
+                className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                  viewState.transformMode === 'scale'
+                    ? 'bg-white text-blue-600 shadow-2xs font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Maximize2 size={12} />
+                <span className="hidden md:inline">Scale</span>
+              </button>
+            </div>
+
+            {/* Quick 90-Degree Step Rotation Controls */}
+            <div className="flex items-center gap-0.5 pl-1 border-l border-slate-200">
+              <button
+                onClick={() => handleQuickRotateY(-Math.PI / 2)}
+                title="Rotate Counter-Clockwise 90° ([)"
+                className="px-1.5 py-1 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 font-mono text-[11px] transition-colors cursor-pointer flex items-center gap-0.5"
+              >
+                <RotateCcw size={12} />
+                <span>90°</span>
+              </button>
+              <button
+                onClick={() => handleQuickRotateY(Math.PI / 2)}
+                title="Rotate Clockwise 90° (])"
+                className="px-1.5 py-1 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 font-mono text-[11px] transition-colors cursor-pointer flex items-center gap-0.5"
+              >
+                <RotateCw size={12} />
+                <span>90°</span>
+              </button>
+            </div>
+
+            <button
+              onClick={() => viewStore.clearSelection()}
+              title="Deselect Component (Esc)"
+              className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer ml-0.5"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        )}
 
       {/* Quick Camera & Floor Grid Controls (Top Right of 3D Canvas) */}
       <div className="absolute top-3 right-3 z-10 select-none pointer-events-auto flex items-center gap-1 bg-white/95 backdrop-blur-sm border border-slate-200/90 shadow-2xs p-1 rounded-lg text-xs">

@@ -121,6 +121,34 @@ export function useKeyboardShortcuts() {
         viewStore.setTransformMode('scale');
       }
 
+      // Quick 90-degree rotation around Y axis: '[' (-90 deg) and ']' (+90 deg)
+      if ((e.key === '[' || e.key === ']') && viewState.selectedComponentIds.length > 0) {
+        e.preventDefault();
+        const selectedId = viewState.selectedComponentIds[0];
+        const comp = projectState.components.find((c) => c.id === selectedId);
+        if (comp) {
+          const prevTransform = {
+            position: { ...comp.transform.position },
+            rotation: { ...comp.transform.rotation },
+            scale: { ...comp.transform.scale },
+          };
+          const deltaAngle = e.key === ']' ? Math.PI / 2 : -Math.PI / 2;
+          const nextTransform = {
+            position: { ...comp.transform.position },
+            rotation: {
+              ...comp.transform.rotation,
+              y: Number((comp.transform.rotation.y + deltaAngle).toFixed(4)),
+            },
+            scale: { ...comp.transform.scale },
+          };
+          projectStore.updateComponentTransform(comp.id, nextTransform);
+          historyManager.execute(
+            Commands.transformComponent(comp.id, prevTransform, nextTransform)
+          );
+        }
+        return;
+      }
+
       // Camera shortcuts
       if (e.key === 'f' || e.key === 'F') {
         viewStore.triggerCamera('focusSelected');
